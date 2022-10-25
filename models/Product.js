@@ -59,6 +59,10 @@ const ProductSchema = new mongoose.Schema(
     location: {
       type: mongoose.Types.ObjectId,
       ref: "Address",
+    },
+    deleted: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -75,12 +79,7 @@ ProductSchema.virtual('reviews', {
   justOne: false,
 });
 
-ProductSchema.virtual('rating', {
-  ref: 'Rating',
-  localField: '_id',
-  foreignField: 'product',
-  justOne: false,
-});
+
 
 ProductSchema.virtual('image', {
   ref: 'Image',
@@ -102,11 +101,5 @@ ProductSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id });
 });
 
-ProductSchema.methods.averageRating(async function () {
-  const allRating = this.rating
-  if (allRating && allRating.length > 0)
-    return (allRating.reduce((a, b) => a + b)) / allRating.length
-  return 0
-})
 
-module.exports = mongoose.model('Product', ProductSchema);
+module.exports = mongoose.model('Product', ProductSchema, { discriminatorKey: "kind" });

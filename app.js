@@ -15,6 +15,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const connectDB = require('./db/connect');
 
 //Routes
+const bookRouter = require("./routes/book-route")
 
 
 
@@ -48,6 +49,9 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(express.static('./public'));
 app.use(fileUpload());
+
+//Register routers
+app.use("/api/v1", bookRouter)
 
 
 //Low-level middlewares 

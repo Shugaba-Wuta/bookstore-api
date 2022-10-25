@@ -33,6 +33,11 @@ const bookStore = [
     'Travel'
 ]
 
+IDGeneratorInfo = {
+    alphabetLabel: "A",
+    maxNumber: 9999,
+    currentNumber: 1,
+}
 
 
 
@@ -43,4 +48,4 @@ const bookStore = [
 
 
 
-module.exports = { bookStore }
+module.exports = { bookStore, IDGeneratorInfo }

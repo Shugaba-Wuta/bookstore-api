@@ -1,15 +1,7 @@
 const mongoose = require("mongoose")
+const Document = require("./Document")
 
 const imageSchema = new mongoose.Schema({
-    uri: {
-        type: String,
-        required: [true, "Please provide image(s)"],
-        trim: true
-    },
-    name: {
-        type: String,
-        trim: true
-    },
     product: {
         type: mongoose.Types.ObjectId,
         ref: "Product",
@@ -18,4 +10,4 @@ const imageSchema = new mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("Image", imageSchema)
+module.exports = Document.discriminator("Image", imageSchema, { discriminatorKey: "kind" })

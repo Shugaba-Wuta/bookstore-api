@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const Product = require("./Product")
 const { validAuthor } = require("../utils/model-utils")
 const validator = require("validator")
 const { bookStore } = require("../app-data")
@@ -6,21 +7,20 @@ const bookCoverType = ["paper", "hard"]
 const bookCondition = ["new", "used", "refurbished"]
 
 const BookSchema = new mongoose.Schema({
-    product: {
-        type: mongoose.Types.ObjectId,
-        ref: "Product",
-        required: [true, "Book must be associated with Product ID"]
-    },
     subTitle: {
         type: String,
         minLength: 5,
         maxLength: 100,
         trim: true
     },
+    abstract: {
+        type: String,
+
+    },
     publisher: {
         type: String,
         trim: true,
-        required: [true, "Please provide a publisher"]
+        required: [true, "Please provide a publisher"],
     },
     author: {
         type: [String],
@@ -32,21 +32,34 @@ const BookSchema = new mongoose.Schema({
 
     ISBN10: {
         type: String,
-        validator: validator.isISBN,
-        message: "Please provide valid ISBN-13 identifier"
+        validate: {
+            validator: validator.isISBN,
+            message: "Please provide valid ISBN identifier"
+        },
+        trim: true,
     },
     ISBN13: {
         type: String,
         validate: {
             validator: validator.isISBN,
-            message: "Please provide valid ISBN-13 identifier"
-        }
+            message: "Please provide valid ISBN identifier"
+        },
+        trim: true
+    },
+    ISSN: {
+        type: String,
+        validate: {
+            validator: validator.isISSN,
+            message: "Please provide a valid ISSN"
+        },
+        trim: true
     },
 
     category: {
         type: String,
         enum: { values: bookStore, message: `Please provide a category from any of the following: ${bookStore}` },
-        required: [true, "Please provide a category for for your book"]
+        required: [true, "Please provide a category for for your book"],
+        trim: true,
     },
     edition: {
         type: Number,
@@ -58,6 +71,7 @@ const BookSchema = new mongoose.Schema({
     },
     yearOfPublication: {
         type: String,
+        trim: true,
         required: [true, "Please provide the year of publication"]
     },
     numberOfPages: {
@@ -78,12 +92,14 @@ const BookSchema = new mongoose.Schema({
     language: {
         type: String,
         minLength: 3,
-        default: "english"
+        default: "english",
+        trim: true
     },
     condition: {
         type: String,
         enum: { values: bookCondition, message: `Please provide book condition of any of the values: ${bookCondition}` },
-        default: "new"
+        default: "new",
+        trim: true
     }
 })
 
@@ -96,3 +112,4 @@ BookSchema.pre("save", async function () {
         throw Error("Please provide valid ISBN-10 or an ISBN-13")
     }
 })
+module.exports = Product.discriminator("Book", BookSchema, { discriminatorKey: "kind" })

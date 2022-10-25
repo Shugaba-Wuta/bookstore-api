@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
-const ROLES = ["admin", "user", "publisher", "seller", "root", "staff", "manager"]
+const ROLES = ["user", "publisher", "seller",]
 const GENDER = ["M", "F"]
 
 const UserSchema = new mongoose.Schema({
@@ -74,7 +74,4 @@ UserSchema.methods.getFullName = async function () {
   return ([this.name.first, this.name.middle, this.name.last]).filter((item) => { return item && item.length > 0 }).join(" ")
 }
 
-
-
-const User = mongoose.model('User', UserSchema);
-module.exports = User 
+module.exports = mongoose.model('User', UserSchema); 
