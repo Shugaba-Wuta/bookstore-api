@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { PRODUCT_DEPARTMENTS } = require("../config-data")
+const { PRODUCT_DEPARTMENTS } = require("../app-data")
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -68,7 +68,8 @@ const ProductSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    discriminatorKey: "kind"
   }
 )
 
@@ -102,4 +103,5 @@ ProductSchema.pre('remove', async function (next) {
 });
 
 
-module.exports = mongoose.model('Product', ProductSchema, { discriminatorKey: "kind" });
+module.exports = mongoose.model('Product', ProductSchema);
+

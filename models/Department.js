@@ -8,10 +8,10 @@ const productDepartmentSchema = new mongoose.Schema({
     timestamps: true
 })
 
-productDepartmentSchema.methods.numberOfDepartment(async function () {
+productDepartmentSchema.methods.numberOfDepartment = async function () {
     const allDepartment = await this.find({}).lean()
     return allDepartment.length
-})
+}
 
 
 

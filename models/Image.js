@@ -8,6 +8,6 @@ const imageSchema = new mongoose.Schema({
         required: [true, "Please provide product ID for this image"]
     }
 
-})
+}, { discriminatorKey: "kind" })
 
-module.exports = Document.discriminator("Image", imageSchema, { discriminatorKey: "kind" })
+module.exports = Document.discriminator("Image", imageSchema)

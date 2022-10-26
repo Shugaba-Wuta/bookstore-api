@@ -14,7 +14,9 @@ const StaffSchema = new mongoose.Schema({
         completed: [ticketSchema],
         escalated: [ticketSchema]
     },
-    department,
+    department: {
+        type: String,
+    }
 
 
 })

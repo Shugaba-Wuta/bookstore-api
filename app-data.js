@@ -1,4 +1,4 @@
-const bookStore = [
+const bookCategory = [
     'Arts & Photography',
     'Biographies & Memoirs',
     'Business & Money',
@@ -48,4 +48,4 @@ IDGeneratorInfo = {
 
 
 
-module.exports = { bookStore, IDGeneratorInfo }
+module.exports = { bookCategory, IDGeneratorInfo }

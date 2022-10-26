@@ -47,15 +47,13 @@ const UserSchema = new mongoose.Schema({
       type: String,
       enum: {
         values: ROLES,
-        message: `Role must be either of the following: ${ROLES}, received ${VALUE}`
+        message: `Role must be either of the following: ${ROLES}`
       },
       default: "user"
     },
   }
 },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 )
 
 
@@ -74,4 +72,5 @@ UserSchema.methods.getFullName = async function () {
   return ([this.name.first, this.name.middle, this.name.last]).filter((item) => { return item && item.length > 0 }).join(" ")
 }
 
-module.exports = mongoose.model('User', UserSchema); 
+module.exports = mongoose.model('User', UserSchema);
+

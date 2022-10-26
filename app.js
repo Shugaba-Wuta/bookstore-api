@@ -60,11 +60,12 @@ app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;
+const MONGO_URL = Boolean(process.env.DEVELOPMENT) === true ? process.env.DEV_MONGO_URL : process.env.MONGO_URL
 const start = async () => {
     try {
-        await connectDB(process.env.MONGO_URL);
+        await connectDB(MONGO_URL);
         app.listen(port, () =>
-            console.log(`Server is listening on port ${port}...`)
+            console.log(`Server is listening on port ${port}.............................`)
         );
     } catch (error) {
         console.log(error);

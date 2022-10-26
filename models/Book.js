@@ -1,8 +1,10 @@
+const validator = require("validator")
 const mongoose = require("mongoose")
+
 const Product = require("./Product")
 const { validAuthor } = require("../utils/model-utils")
-const validator = require("validator")
-const { bookStore } = require("../app-data")
+const { bookCategory } = require("../app-data")
+
 const bookCoverType = ["paper", "hard"]
 const bookCondition = ["new", "used", "refurbished"]
 
@@ -57,7 +59,7 @@ const BookSchema = new mongoose.Schema({
 
     category: {
         type: String,
-        enum: { values: bookStore, message: `Please provide a category from any of the following: ${bookStore}` },
+        enum: { values: bookCategory, message: `Please provide a category from any of the following: ${bookCategory}` },
         required: [true, "Please provide a category for for your book"],
         trim: true,
     },
@@ -95,13 +97,15 @@ const BookSchema = new mongoose.Schema({
         default: "english",
         trim: true
     },
-    condition: {
-        type: String,
-        enum: { values: bookCondition, message: `Please provide book condition of any of the values: ${bookCondition}` },
-        default: "new",
-        trim: true
-    }
-})
+    // condition: {
+    //     type: String,
+    //     enum: { values: bookCondition, message: `Please provide book condition of any of the values: ${bookCondition}` },
+    //     default: "new",
+    //     trim: true
+    // }
+},
+    { timestamps: true, discriminatorKey: "kind" }
+)
 
 BookSchema.pre("save", async function () {
     const isISBN10 = validator.isISBN(this.ISBN10, 10)
@@ -112,4 +116,5 @@ BookSchema.pre("save", async function () {
         throw Error("Please provide valid ISBN-10 or an ISBN-13")
     }
 })
-module.exports = Product.discriminator("Book", BookSchema, { discriminatorKey: "kind" })
+
+module.exports = Product.discriminator("Book", BookSchema)

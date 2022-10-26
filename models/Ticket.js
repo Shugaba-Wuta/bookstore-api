@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 const ticketStatus = ["pending", "completed", "processing"]
 const ticketPriority = ["low", "moderate", "high", "high-extreme"]
 const ticketType = ["other", "report", "abuse",]
+const { documentSchema } = require("./Document")
 
 
 const ticketSchema = new mongoose.Schema({
@@ -84,6 +85,5 @@ const ticketSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 
-
-
-module.exports = { ticketSchema, Ticket: mongoose.model("Ticket", ticketSchema) }
+const Ticket = mongoose.model("Ticket", ticketSchema)
+module.exports = { ticketSchema, Ticket }

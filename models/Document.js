@@ -12,7 +12,7 @@ const documentSchema = mongoose.Schema({
         type: String,
         trim: true
     }
-})
+}, { discriminatorKey: "kind" })
 
 
-module.exports = mongoose.model("Document", documentSchema, { discriminatorKey: "kind" })
+module.exports = mongoose.model("Document", documentSchema)

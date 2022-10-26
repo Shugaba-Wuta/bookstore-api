@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const { staffIdGenerator } = require("../utils/model-utils")
+const validator = require("validator")
 
 
 const ROLES = ["admin", "staff", "manager"]
@@ -48,7 +49,7 @@ const StaffBaseSchema = mongoose.Schema({
         type: String,
         enum: {
             values: ROLES,
-            message: `Role must be either of the following: ${ROLES}, received ${VALUE}`
+            message: `Role must be either of the following: ${ROLES}`
         },
         default: "staff"
     },
@@ -66,6 +67,7 @@ const StaffBaseSchema = mongoose.Schema({
     },
 }, {
     timestamps: true,
+    discriminatorKey: "kind"
 })
 
 StaffBaseSchema.pre('save', async function () {
@@ -88,4 +90,4 @@ StaffBaseSchema.pre("save", async function () {
 })
 
 
-module.exports = mongoose.model("StaffBase", StaffBaseSchema, { discriminatorKey: "kind" })
+module.exports = mongoose.model("StaffBase", StaffBaseSchema)
