@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const Document = require("./Document")
+const { Document } = require("./Document")
 
 const imageSchema = new mongoose.Schema({
     product: {

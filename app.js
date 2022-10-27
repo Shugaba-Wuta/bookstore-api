@@ -16,6 +16,8 @@ const connectDB = require('./db/connect');
 
 //Routes
 const bookRouter = require("./routes/book-route")
+const userRouter = require("./routes/user-route")
+const authRouter = require("./routes/auth")
 
 
 
@@ -52,7 +54,8 @@ app.use(fileUpload());
 
 //Register routers
 app.use("/api/v1", bookRouter)
-
+app.use("/api/v1", userRouter)
+app.use("/api/v1/auth", authRouter)
 
 //Low-level middlewares 
 
@@ -67,6 +70,7 @@ const start = async () => {
         app.listen(port, () =>
             console.log(`Server is listening on port ${port}.............................`)
         );
+        // console.log(MONGO_URLsss)
     } catch (error) {
         console.log(error);
     }

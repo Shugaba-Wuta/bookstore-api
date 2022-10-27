@@ -15,4 +15,4 @@ const documentSchema = mongoose.Schema({
 }, { discriminatorKey: "kind" })
 
 
-module.exports = mongoose.model("Document", documentSchema)
+module.exports = { Document: mongoose.model("Document", documentSchema), documentSchema }

@@ -1,8 +1,8 @@
 const CustomError = require('../errors');
-const { isTokenValid } = require('../utils');
+const { isTokenValid } = require('../utils/jwt');
 
 const authenticateUser = async (req, res, next) => {
-  const token = req.signedCookies.token;
+  const token = req.signedCookies.refreshToken;
 
   if (!token) {
     throw new CustomError.UnauthenticatedError('Authentication Invalid');

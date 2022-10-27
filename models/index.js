@@ -1,4 +1,4 @@
-const Document = require("./Document")
+const { Document } = require("./Document")
 const Book = require("./Book")
 const Department = require("./Department")
 const Image = require("./Image")
