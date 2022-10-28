@@ -63,7 +63,8 @@ const nigerianCommercialBanks = [
     { id: "20", name: "United Bank for Africa", code: "033" },
     { id: "21", name: "Unity Bank Plc", code: "215" },
     { id: "22", name: "Wema Bank", code: "035" },
-    { id: "23", name: "Zenith Bank", code: "057" }
+    { id: "23", name: "Zenith Bank", code: "057" },
+    { id: null, name: null, code: null }
 ]
 
 

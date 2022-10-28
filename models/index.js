@@ -8,10 +8,12 @@ const Review = require("./Review")
 const Staff = require("./Staff")
 const StaffBase = require("./StaffBase")
 const { Ticket } = require("./Ticket")
-const User = require("./User")
+const { User } = require("./User")
+const Address = require("./Address")
+const Seller = require("./Seller")
 
 
 
 
 
-module.exports = { Document, Book, Department, Image, Order, Product, Review, Staff, StaffBase, Ticket, User }
+module.exports = { Document, Book, Department, Image, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller }

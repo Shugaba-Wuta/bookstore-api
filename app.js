@@ -1,3 +1,4 @@
+"use strict";
 //Global dependencies
 require('dotenv').config();
 require('express-async-errors');
@@ -61,6 +62,10 @@ app.use("/api/v1/auth", authRouter)
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
+
+// const createDummyUser = require("./faker/user")
+// const createDummySeller = require("./faker/seller")
+
 
 const port = process.env.PORT || 5000;
 const MONGO_URL = Boolean(process.env.DEVELOPMENT) === true ? process.env.DEV_MONGO_URL : process.env.MONGO_URL
