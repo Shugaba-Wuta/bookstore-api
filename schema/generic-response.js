@@ -41,7 +41,6 @@ class GenericResponse {
             await genericResponseSchema.validateAsync(this.response)
             return true
         } catch (err) {
-            console.log(err)
             throw new Error("Could not validate response")
         }
     }

@@ -25,6 +25,7 @@ const authRouter = require("./routes/auth")
 // middleware
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
+const { assignSessionID } = require("./middleware/auth middleware")
 
 
 
@@ -46,12 +47,12 @@ app.use(cors());
 app.use(xss());
 app.use(morgan("tiny"))
 app.use(mongoSanitize());
-
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
-
 app.use(express.static('./public'));
 app.use(fileUpload());
+app.use(assignSessionID)
+
 
 //Register routers
 app.use("/api/v1", bookRouter)
@@ -75,7 +76,7 @@ const start = async () => {
         app.listen(port, () =>
             console.log(`Server is listening on port ${port}.............................`)
         );
-        // console.log(MONGO_URLsss)
+        // console.log(MONGO_URL)
     } catch (error) {
         console.log(error);
     }

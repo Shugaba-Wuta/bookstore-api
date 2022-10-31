@@ -65,5 +65,5 @@ const addSellersToDB = async (number = 1000) => {
     }
 
 }
-// addSellersToDB()
+addSellersToDB()
 module.exports = addSellersToDB

@@ -26,6 +26,10 @@ const addressSchema = mongoose.Schema({
     zipCode: {
         type: String,
         trim: true
+    },
+    owner: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     }
 })
 

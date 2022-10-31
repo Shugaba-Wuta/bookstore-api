@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken")
 const ms = require("ms")
 const { BadRequestError, NotFoundError, UnauthenticatedError } = require("../errors")
-const { User } = require("../models")
+const { User, Session } = require("../models")
 const { StatusCodes } = require("http-status-codes")
-const { createToken } = require("../utils/jwt")
-
+const { createToken, isTokenValid } = require("../utils/jwt")
+const mongoose = require("mongoose")
 const login = async (req, res) => {
+    //Check if DB record match provided credentials
     const { email, password } = req.body
     if (!email || !password) {
         throw new BadRequestError("Please provide email and password")
@@ -18,7 +19,38 @@ const login = async (req, res) => {
     if (!isPasswordMatch) {
         throw new NotFoundError("email and password does not match any record")
     }
-    const payload = { user: { name: dbUser.fullName, userID: String(dbUser._id), role: dbUser.role } }
+    const oldPayload = req.user
+    let payload, session
+    //if token exists, update the Session schema of the token to include userID, otherwise create a new session
+    if (oldPayload) {
+
+        session = await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(dbUser._id) })
+        payload = {
+            user: {
+                userID: String(dbUser._id),
+                fullName: dbUser.fullName,
+                role: dbUser.role,
+                sessionID: oldPayload.sessionID
+            }
+        }
+
+    } else {
+        const session = await new Session({
+            IP: req.ip,
+            userAgent: req.get("user-agent")
+
+        }).save()
+        payload = {
+            user: {
+                fullName: dbUser.fullName,
+                userID: String(dbUser._id),
+                role: dbUser.role,
+                sessionID: session._id
+            }
+        }
+    }
+
+    //Recreate access and refresh tokens to be added to response object 
     const token = await createToken(payload)
     const refreshToken = await createToken(payload, "refresh")
     const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
@@ -27,25 +59,32 @@ const login = async (req, res) => {
 }
 
 const newTokenFromRefresh = async (req, res) => {
-    const { refreshToken: cookie } = req.signedCookies
-    if (!cookie) {
+
+    //Look for token (bearer or refresh)
+    // check header
+    let token
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer')) {
+        token = authHeader.split(' ')[1];
+    }
+    // check cookies
+    else if (req.signedCookies.refreshToken) {
+        token = req.signedCookies.refreshToken;
+    }
+    if (!token) {
         throw new UnauthenticatedError("Please log in")
     }
-    const payload = jwt.verify(cookie, process.env.JWT_SECRET_KEY)
-    const user = { user: { name: payload.user.name, userID: payload.user.userID, role: payload.user.role } }
+    const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
+    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role } }
     if (payload) {
         const newToken = await createToken(user)
         return res.json({ token: newToken })
     }
-    throw Error("Token")
+    throw UnauthenticatedError("Please login to refresh access tokens")
 }
 const logout = async (req, res) => {
-    const { refreshToken: cookie } = req.signedCookies
-    if (!cookie) {
-        throw new UnauthenticatedError("Please log in")
-    }
     res.clearCookie("refreshToken")
-    res.status(StatusCodes.OK).json({})
+    res.status(StatusCodes.OK).json({ message: "logged out successful", success: true, })
 }
 
 

@@ -1,4 +1,5 @@
 const express = require("express")
+const { authenticateUser, authorizeRoles, assignSessionID } = require("../middleware/auth middleware")
 const { getAllUsers, registerUser, getSingleUser, updateUser, removeUser } = require("../controllers/user-controller")
 
 
@@ -6,7 +7,7 @@ const { getAllUsers, registerUser, getSingleUser, updateUser, removeUser } = req
 const router = express.Router()
 
 router.route("/users").get(getAllUsers).post(registerUser)
-router.route("/users/:id").get(getSingleUser).patch(updateUser).delete(removeUser)
+router.route("/users/:_id").get(getSingleUser).patch(authorizeRoles("admin", "user", "seller", "staff", "manager"), updateUser).delete(removeUser)
 
 
 

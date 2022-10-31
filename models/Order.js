@@ -12,7 +12,7 @@ const SingleOrderItemSchema = mongoose.Schema({
     ref: 'Product',
     required: true,
   },
-});
+}, { timestamps: true });
 
 const OrderSchema = mongoose.Schema(
   {
@@ -41,7 +41,11 @@ const OrderSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: true,
+    },
+    sessionID: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Session",
+      required: [true, "Please provide a valid SessionID"]
     },
     clientSecret: {
       type: String,

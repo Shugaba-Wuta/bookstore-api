@@ -3,7 +3,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
 
-const ROLES = ["user", "publisher", "seller",]
+const ROLES = ["user", "publisher", "author", "seller",]
 const GENDER = ["M", "F", null]
 
 const userSchema = new mongoose.Schema({
@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema({
     ref: "Document"
   },
 
-
   role: {
     type: String,
     enum: {
@@ -57,10 +56,12 @@ const userSchema = new mongoose.Schema({
     },
     default: "user"
   },
+
   active: {
     type: Boolean,
     default: true
   },
+
   verified: {
     type: Boolean,
     default: false,
@@ -68,23 +69,41 @@ const userSchema = new mongoose.Schema({
   address: {
     type: mongoose.Types.ObjectId,
     ref: "Adress"
+  },
+  order: {
+    type: mongoose.Types.ObjectId,
+    ref: "Order"
+  },
+  previousOrders: {
+    type: [mongoose.Types.ObjectId],
+    ref: "Order"
   }
+
 },
   {
     timestamps: true,
     // versionKey: false,
-    toJSON: { virtuals: true },
+    toJSON: { virtuals: true, password: false },
     toObject: { virtuals: true },
     discriminatorKey: "kind"
   }
 )
-
+// userSchema.virtual("order", {
+//   ref: 'Image',
+//   localField: '_id',
+//   foreignField: 'product',
+//   justOne: false,
+// })
 
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 })
+userSchema.methods.mergeOrders = async function (foreignOrderId) {
+  const foreignOrderItems = (await this.model("Order").findOne({ _id: foreignOrderId })).orderItems
+  await this.model("Order").findOneAndUpdate({ _id: this.order }, { "$push": { "orderItems": { "$each": foreignOrderItems } } })
+}
 
 userSchema.methods.comparePassword = async function (canditatePassword) {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);

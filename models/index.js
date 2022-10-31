@@ -11,9 +11,10 @@ const { Ticket } = require("./Ticket")
 const { User } = require("./User")
 const Address = require("./Address")
 const Seller = require("./Seller")
+const Session = require("./Session")
 
 
 
 
 
-module.exports = { Document, Book, Department, Image, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller }
+module.exports = { Document, Book, Department, Image, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session }
