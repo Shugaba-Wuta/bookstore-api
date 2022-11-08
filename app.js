@@ -19,6 +19,7 @@ const connectDB = require('./db/connect');
 const bookRouter = require("./routes/book-route")
 const userRouter = require("./routes/user-route")
 const authRouter = require("./routes/auth")
+const sellerRouter = require("./routes/seller-route")
 
 
 
@@ -52,12 +53,14 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.static('./public'));
 app.use(fileUpload());
 app.use(assignSessionID)
+app.use(express.static("./public"))
 
 
 //Register routers
 app.use("/api/v1", bookRouter)
 app.use("/api/v1", userRouter)
 app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/sellers", sellerRouter)
 
 //Low-level middlewares 
 

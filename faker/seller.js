@@ -1,18 +1,9 @@
 const { Seller } = require("../models")
-const { Document } = require("../models")
 const { faker } = require("@faker-js/faker")
 const { nigerianCommercialBanks } = require("../app-data")
-const banks = nigerianCommercialBanks.map((item) => {
-    return item.name
-})
+const crypto = require("crypto")
+const banks = nigerianCommercialBanks.map((item) => { return item.name })
 
-const createDocument = async (name) => {
-    docs = new Document({
-        path: faker.system.filePath(),
-        name: name
-    })
-    return await docs.save()
-}
 
 const createSeller = async () => {
     const firstName = faker.name.firstName()
@@ -20,23 +11,22 @@ const createSeller = async () => {
     const _ = [faker.name.firstName(), null, faker.name.lastName(), null]
     const middleName = _[(Math.floor(Math.random() * _.length))]
     const role = ["seller", "publisher", "seller"][Math.floor(Math.random() * 3)]
+    const userPath = faker.system.filePath()
     return new Seller({
         name: {
             first: firstName,
             middle: middleName,
             last: lastName,
         },
-        email: faker.internet.email(middleName || firstName, lastName),
+        email: faker.internet.email(firstName, lastName).toLowerCase(),
         password: "test12345",
-        role: role,
-
-
+        role: "seller",
         phoneNumber: "+23480" + String(faker.datatype.number({ min: 9999999, max: 99999999 })),
         gender: ["M", "F"][Math.floor(Math.random() * 2)],
+        avatar: { path: userPath + "profile-picture.jpeg" },
         documents: {
-            picture: await createDocument("verification-picture"),
-            govtIssuedID: await createDocument("govt-id"),
-            avatar: [null, await createDocument("avatar")][Math.floor(Math.random() * 2)]
+            picture: { path: userPath + crypto.randomBytes(12).toString("hex") },
+            govtIssuedID: { path: userPath + crypto.randomBytes(12).toString("hex") },
         },
         BVN: faker.datatype.number({ min: 9999999999, max: 99999999999 }),
         NIN: faker.datatype.number({ min: 9999999999, max: 99999999999 }),
@@ -52,7 +42,7 @@ const createSeller = async () => {
 
 
 
-const addSellersToDB = async (number = 1000) => {
+const addSellersToDB = async (number = 10000) => {
     try {
         let user
         for (let i = 0; i <= number; i++) {

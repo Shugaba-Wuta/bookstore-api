@@ -11,17 +11,21 @@ const ReviewSchema = mongoose.Schema(
     title: {
       type: String,
       trim: true,
-      required: [true, 'Please provide review title'],
-      maxlength: 100,
+      // required: [true, 'Please provide review title'],
     },
     comment: {
       type: String,
-      required: [true, 'Please provide review text'],
+      // required: [true, 'Please provide review text'],
     },
-    user: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
-      required: true,
+    person: {
+      type: mongoose.Types.ObjectId,
+      ref: "personSchemaType",
+      required: [true, "Please provide the person's ID"]
+    },
+    personSchemaType: {
+      type: String,
+      enum: ["Seller", "User"],
+      required: true
     },
     product: {
       type: mongoose.Schema.ObjectId,
@@ -31,15 +35,31 @@ const ReviewSchema = mongoose.Schema(
     verified: {
       type: Boolean,
       default: false
+    },
+    deleted: {
+      type: Boolean,
+      default: false
+    },
+    deletedOn: {
+      type: Date,
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
 ReviewSchema.statics.calculateAverageRating = async function (productId) {
   const result = await this.aggregate([
-    { $match: { product: productId } },
+    {
+      $match: {
+        product: productId,
+        deleted: false
+      }
+    },
     {
       $group: {
         _id: null,

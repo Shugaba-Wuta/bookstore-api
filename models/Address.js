@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
 
-
 const addressSchema = mongoose.Schema({
     unit: {
         type: String,
@@ -27,9 +26,26 @@ const addressSchema = mongoose.Schema({
         type: String,
         trim: true
     },
-    owner: {
+    person: {
+        type: String,
+        refPath: "personSchemaType",
+        required: [true, "Please provide the person's ID"]
+    },
+    personSchemaType: {
         type: mongoose.Types.ObjectId,
-        ref: "User"
+        required: true,
+        enum: ["User", "Seller"]
+    },
+    default: {
+        type: Boolean,
+        default: false
+    },
+    deleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedOn: {
+        type: Date
     }
 })
 

@@ -30,7 +30,7 @@ const ProductSchema = new mongoose.Schema(
       },
       default: "book"
     },
-    owner: {
+    seller: {
       type: mongoose.Types.ObjectId,
       required: [true, "Please provide owner of this product"],
       ref: "User"
@@ -41,28 +41,28 @@ const ProductSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0
     },
     featured: {
       type: Boolean,
       default: false
     },
-    freeShipping: {
-      type: Boolean,
-      default: false,
-    },
+
     tags: [String],
     commission: {
       type: Number,
       default: 15,
     },
-    location: {
-      type: mongoose.Types.ObjectId,
-      ref: "Address",
-    },
     deleted: {
       type: Boolean,
       default: false
+    },
+    shippingFee: {
+      type: Number,
+      default: 0,
+      min: 0
+
     }
   },
   {

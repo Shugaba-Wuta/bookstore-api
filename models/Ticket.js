@@ -2,7 +2,6 @@ const mongoose = require("mongoose")
 const ticketStatus = ["pending", "completed", "processing"]
 const ticketPriority = ["low", "moderate", "high", "high-extreme"]
 const ticketType = ["other", "report", "abuse",]
-const { documentSchema } = require("./Document")
 
 
 const ticketSchema = new mongoose.Schema({
@@ -16,7 +15,13 @@ const ticketSchema = new mongoose.Schema({
         trim: true,
     },
     document: {
-        type: [documentSchema],
+        type: [{
+            path: String,
+            uploadedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }],
 
     },
     type: {

@@ -1,15 +1,9 @@
 const { User } = require("../models")
-const { Document } = require("../models")
+
 const { faker } = require("@faker-js/faker")
 
 
-const createDocument = async (name) => {
-    docs = new Document({
-        path: faker.system.filePath(),
-        name: name
-    })
-    return await docs.save()
-}
+
 
 const createUser = async () => {
     const firstName = faker.name.firstName()
@@ -22,18 +16,18 @@ const createUser = async () => {
             middle: middleName,
             last: lastName,
         },
-        email: faker.internet.email(middleName || firstName, lastName),
+        email: faker.internet.email(firstName, lastName).toLowerCase(),
         password: "test12345",
         role: "user",
 
         gender: ["M", "F", null][Math.floor(Math.random() * 3)],
-        avatar: [null, await createDocument("avatar")][Math.floor(Math.random() * 2)],
+        avatar: { path: faker.system.filePath() + "profile-picture.png" },
     })
 }
 
 
 
-const addUsersToDB = async (number = 1000) => {
+const addUsersToDB = async (number = 10000) => {
     try {
         let user
         for (let i = 0; i <= number; i++) {

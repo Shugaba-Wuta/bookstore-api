@@ -2,23 +2,13 @@ const mongoose = require('mongoose');
 
 const orderStatus = ['pending', 'failed', 'paid', 'delivered', 'canceled']
 
-const SingleOrderItemSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  image: { type: String, required: true },
-  price: { type: Number, required: true },
-  amount: { type: Number, required: true },
-  product: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Product',
-    required: true,
-  },
-}, { timestamps: true });
 
 const OrderSchema = mongoose.Schema(
   {
     tax: {
       type: Number,
       required: true,
+      default: 10
     },
     shippingFee: {
       type: Number,
@@ -32,15 +22,24 @@ const OrderSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    orderItems: [SingleOrderItemSchema],
+    orderItems: {
+      type: [mongoose.Types.ObjectId],
+      ref: "Product"
+    },
     status: {
       type: String,
       enum: orderStatus,
       default: 'pending',
     },
-    user: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
+    person: {
+      type: mongoose.Types.ObjectId,
+      ref: "personSchemaType",
+      required: [true, "Please provide the person's ID"]
+    },
+    personSchemaType: {
+      type: String,
+      enum: ["Seller", "User"],
+      required: true
     },
     sessionID: {
       type: mongoose.Schema.ObjectId,

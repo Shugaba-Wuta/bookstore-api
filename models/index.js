@@ -1,14 +1,12 @@
-const { Document } = require("./Document")
 const Book = require("./Book")
 const Department = require("./Department")
-const Image = require("./Image")
 const Order = require("./Order")
 const Product = require("./Product")
 const Review = require("./Review")
 const Staff = require("./Staff")
 const StaffBase = require("./StaffBase")
 const { Ticket } = require("./Ticket")
-const { User } = require("./User")
+const User = require("./User")
 const Address = require("./Address")
 const Seller = require("./Seller")
 const Session = require("./Session")
@@ -17,4 +15,4 @@ const Session = require("./Session")
 
 
 
-module.exports = { Document, Book, Department, Image, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session }
+module.exports = { Book, Department, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session }

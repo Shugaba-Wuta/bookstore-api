@@ -4,20 +4,19 @@ const mongoose = require("mongoose")
 const Product = require("./Product")
 const { validAuthor } = require("../utils/model-utils")
 const { bookCategory } = require("../app-data")
+const { BadRequestError } = require("../errors")
 
 const bookCoverType = ["paper", "hard"]
 const bookCondition = ["new", "used", "refurbished"]
+const lengthUnits = ["cm", "inch", "mm"]
 
 const BookSchema = new mongoose.Schema({
     subTitle: {
         type: String,
-        minLength: 5,
-        maxLength: 100,
         trim: true
     },
     abstract: {
-        type: String,
-
+        type: String
     },
     publisher: {
         type: String,
@@ -83,7 +82,14 @@ const BookSchema = new mongoose.Schema({
     dimension: {
         length: { type: Number, min: 0 },
         width: { type: Number, min: 0 },
-        height: { type: Number, min: 0 }
+        height: { type: Number, min: 0 },
+        unit: {
+            type: String,
+            enum: {
+                values: lengthUnits,
+                message: `Please provide unit of measurement from any of the following values: ${lengthUnits}`
+            }
+        }
     },
     bookCoverType: {
         type: String,
@@ -97,23 +103,23 @@ const BookSchema = new mongoose.Schema({
         default: "english",
         trim: true
     },
-    // condition: {
-    //     type: String,
-    //     enum: { values: bookCondition, message: `Please provide book condition of any of the values: ${bookCondition}` },
-    //     default: "new",
-    //     trim: true
-    // }
+
 },
-    { timestamps: true, discriminatorKey: "kind" }
+    {
+        timestamps: true, discriminatorKey: "kind",
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    }
 )
 
 BookSchema.pre("save", async function () {
     const isISBN10 = validator.isISBN(this.ISBN10, 10)
     const isISBN13 = validator.isISBN(this.ISBN10, 13)
+    const isISSN = validator.isISSN(this.ISSN)
 
 
-    if (isISBN10 || isISBN13) {
-        throw Error("Please provide valid ISBN-10 or an ISBN-13")
+    if (isISBN10 || isISBN13 || isISSN) {
+        throw new BadRequestError("Please provide a valid Book/ Journal identifier")
     }
 })
 

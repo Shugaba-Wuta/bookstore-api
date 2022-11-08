@@ -1,7 +1,11 @@
 const CustomError = require('../errors');
 const { Session } = require('../models');
-const { isTokenValid, createToken } = require('../utils/jwt');
 const ms = require("ms")
+
+const { UnauthenticatedError } = require("../errors")
+const { isTokenValid, createToken } = require('../utils/jwt');
+
+const elevatedRoles = ["admin", "manager", "staff"]
 
 const assignSessionID = async (req, res, next) => {
   let token;
@@ -9,6 +13,7 @@ const assignSessionID = async (req, res, next) => {
   // check header
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer')) {
+    console.log("Bearer")
     token = authHeader.split(' ')[1];
   }
   // check cookies
@@ -18,17 +23,16 @@ const assignSessionID = async (req, res, next) => {
   //Check if token is valid and issue another token if token is not valid.
   let payload
   try {
-
     payload = isTokenValid(token)
 
   } catch (err) {
-
+    // console.log(err)
     const newSession = await Session({
       userAgent: req.get('user-agent'),
       IP: req.ip
     }).save()
     payload = { user: { sessionID: String(newSession._id), userID: null, role: null, fullName: null } }
-    const refreshToken = createToken(payload, "refresh")
+    const refreshToken = await createToken(payload, "refresh")
     const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60
     res.cookie("refreshToken", refreshToken, { maxAge: refreshDuration, signed: true, httpOnly: true, secured: true })
 
@@ -88,5 +92,17 @@ const authorizeRoles = (...roles) => {
     next();
   };
 };
+const ensureSameUserOrElevatedUser = async (req, res, next) => {
+  const tokenUserID = req.user.userID
+  const userParamID = req.params._id
+  if (elevatedRoles.includes(req.user.role)) {
+    return next()
+  }
+  if (userParamID && (userParamID !== tokenUserID)) {
+    throw new UnauthenticatedError("Unauthorized, cannot proceed!")
+  }
 
-module.exports = { authenticateUser, authorizeRoles, assignSessionID };
+  return next()
+}
+
+module.exports = { authenticateUser, authorizeRoles, assignSessionID, ensureSameUserOrElevatedUser };

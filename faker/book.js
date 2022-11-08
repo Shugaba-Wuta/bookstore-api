@@ -1,0 +1,1 @@
+db.users.findOneAndUpdate({email:"michael2@test.com"},{ '$set': { 'avatar.path': 'uploads\\user\\63692b12b36d81bf25eb6c04\\avatar-profile.pem', firstName: 'John' } })

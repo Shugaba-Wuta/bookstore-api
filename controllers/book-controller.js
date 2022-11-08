@@ -2,6 +2,7 @@ const validator = require("validator")
 const { Product } = require("../models")
 const { bookCategory } = require("../app-data")
 const { BadRequestError } = require("../errors")
+const { StatusCodes } = require("http-status-codes")
 
 
 
@@ -37,7 +38,11 @@ const getAllBooks = (req, res) => {
 const getSingleBook = () => {
 
 }
-const registerBook = () => {
+const registerBook = async (req, res) => {
+    const { name, description, inventory, department, seller, price, discount, tags, shippingFee, subTitle, abstract, publisher, author, ISBN10, ISBN13, ISSN, category, edition, volume, yearOfPublication, numberOfPages, dimension, bookCoverType, language, dimensionUnits } = req.body
+    registerParam = req.body
+    res.status(StatusCodes.CREATED).json({ message: "successufully registered book", success: true, result: [registerParam] })
+
 
 }
 
