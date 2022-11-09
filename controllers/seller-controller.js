@@ -150,7 +150,7 @@ const upateASeller = async (req, res) => {
             if (err) {
                 throw err
             }
-            await writeRequestFiles(avatar)
+            await writeRequestFiles(avatar, imagePath)
         })
     }
     if (govtIssuedID) {

@@ -6,10 +6,10 @@ const writeRequestFiles = async (fileObject, fullPath, options = { multipleFiles
     if (fileObject instanceof Array) {
         fileObject.forEach(async (file) => {
             console.log(file.path)
-            await file.mv(fullPath)
+            await file.mv(file.path)
         })
     } else {
-        await fileObject.mv(fullPath)
+        await fileObject.mv(fileObject.path)
     }
 
 }
