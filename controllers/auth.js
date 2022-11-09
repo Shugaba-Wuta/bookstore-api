@@ -1,37 +1,46 @@
+"use strict"
 const jwt = require("jsonwebtoken")
 const ms = require("ms")
 const { BadRequestError, NotFoundError, UnauthenticatedError } = require("../errors")
 const { User, Session, Staff, Seller } = require("../models")
 const { StatusCodes } = require("http-status-codes")
-const { createToken, isTokenValid } = require("../utils/jwt")
+const { createToken } = require("../utils/jwt")
 const mongoose = require("mongoose")
 const login = async (req, res) => {
     //
     //Check if DB record match provided credentials
     //
-    const { email, password } = req.body
+    let { email, password, role } = req.body
+    //Get and format role of user
+    if (!role) {
+        throw new BadRequestError("Please provide user's role")
+    }
+    role = role.trim().toLowerCase()
+
     if (!email || !password) {
         throw new BadRequestError("Please provide email and password")
     }
-    let dbUser
-    //Check if credentials belong to user
-    dbUser = await User.findOne({ email, deleted: false }, "_id password email role fullName name")
-    //check if credentials belong to seller
-    if (!dbUser) {
-        dbUser = await Seller.findOne({ email, deleted: false })
+    email = email.trim().toLowerCase()
+    var dbPerson
+    switch (role) {
+        case "user":
+            dbPerson = await User.findOne({ email: email, deleted: false })
+            break
+        case "seller":
+            dbPerson = await Seller.findOne({ email: email, deleted: false })
+            break
+        case "admin":
+            dbPerson = await Staff.findOne({ email: email, deleted: false })
+            break
+        case "staff":
+            dbPerson = await Staff.findOne({ email: email, deleted: false })
+            break
+        default:
+            throw new BadRequestError("Please provide a valid user role")
     }
-    //check if credentials belong to staff
-    else if (!dbUser) {
-        dbUser = await Staff.findOne({ email })
-    }
-    //Still does not match any record 
-    else if (!dbUser | dbUser === null) {
-        throw new NotFoundError("email and password does not match any record")
-    }
-    console.log(dbUser, !dbUser, typeof (dbUser))
 
     //Ensure passwords match
-    const isPasswordMatch = await dbUser.comparePassword(password)
+    const isPasswordMatch = dbPerson ? await dbPerson.comparePassword(password) : false
     if (!isPasswordMatch) {
         throw new NotFoundError("email and password does not match any record")
     }
@@ -41,13 +50,12 @@ const login = async (req, res) => {
     let payload, session
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
     if (oldPayload) {
-
-        session = await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(dbUser._id) })
+        session = await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(dbPerson._id) })
         payload = {
             user: {
-                userID: String(dbUser._id),
-                fullName: dbUser.fullName,
-                role: dbUser.role,
+                userID: String(dbPerson._id),
+                fullName: dbPerson.fullName,
+                role: dbPerson.role,
                 sessionID: oldPayload.sessionID
             }
         }
@@ -60,9 +68,9 @@ const login = async (req, res) => {
         }).save()
         payload = {
             user: {
-                fullName: dbUser.fullName,
-                userID: String(dbUser._id),
-                role: dbUser.role,
+                fullName: dbPerson.fullName,
+                userID: String(dbPerson._id),
+                role: dbPerson.role,
                 sessionID: session._id
             }
         }
