@@ -74,7 +74,10 @@ const nigerianCommercialBanks = [
 ]
 
 const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0 }
+const PRODUCT_FORBIDDEN_FIELDS = { "deleted": 0, "deletedOn": 0, "__v": 0, "commission": 0, "kind": 0 }
+
 const PRODUCT_DEPARTMENTS = ["Books"]
+const RESULT_LIMIT = 50
 
 
 
@@ -83,4 +86,4 @@ const PRODUCT_DEPARTMENTS = ["Books"]
 
 
 
-module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS }
+module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT }

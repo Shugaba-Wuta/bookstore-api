@@ -1,32 +1,147 @@
 "use strict"
 const validator = require("validator")
+const mongoose = require("mongoose")
 const { Product, Book } = require("../models")
 const { bookCategory } = require("../app-data")
 const { BadRequestError } = require("../errors")
 const { StatusCodes } = require("http-status-codes")
+const { PRODUCT_FORBIDDEN_FIELDS } = require("../app-data")
+const { RESULT_LIMIT } = require("../app-data")
 
 
-
-const getAllBooks = (req, res) => {
-    const { featured, verified, publisher, freeShipping, discount, category } = req.query
+const getAllBooks = async (req, res) => {
+    const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, q: query, fields, isbn10, isbn13, issn, sort, descending } = req.query
     const findParams = {}
+    if (typeof (featured) !== "undefined") {
+        findParams.featured = featured
+    }
+    if (typeof (freeShipping) !== "undefined") {
+        findParams.shippingFee = 0
+    }
+    if (minDiscount) {
+        if (!findParams.discount) {
+            findParams.discount = {}
+        }
+        findParams.discount.$gte = Number(minDiscount)
 
+    }
+    if (maxDiscount) {
+        if (!findParams.discount) {
+            findParams.discount = {}
+        }
+        findParams.discount.$lte = Number(maxDiscount)
 
+    }
+    if (currency) {
+        findParams.currency = currency
+    }
+    if (maxPrice) {
+        if (!findParams.price) {
+            findParams.price = {}
+        }
+        findParams.price.$lte = Number(maxPrice)
+
+    }
+    if (minPrice) {
+        if (!findParams.price) {
+            findParams.price = {}
+        }
+        findParams.price.$gte = Number(minPrice)
+
+    }
+    if (language) {
+        findParams.language = language
+    }
+    if (format) {
+        findParams.format = format
+    }
+
+    if (query) {
+        findParams.$text = { $search: query }
+    }
+    if (isbn10) {
+        findParams.ISBN10 = isbn10
+    }
+    if (isbn13) {
+        findParams.ISBN13 = isbn13
+    }
+    if (issn) {
+        findParams.ISSN = issn
+    }
+
+    let findQuery = Book.find(findParams)
+
+    if (fields) {
+        let finalQueryFields = {}
+        fields.split(",").forEach(field => {
+            field = field.trim()
+            if (!(Object.keys(PRODUCT_FORBIDDEN_FIELDS).includes(field))) {
+                finalQueryFields[field] = 1
+            }
+        })
+        findQuery.select(finalQueryFields)
+
+    } else {
+        findQuery.select(PRODUCT_FORBIDDEN_FIELDS)
+    }
+    //default sort is relevance
+    if (sort) {
+        //sort is a string of comma separated fields in order of preference
+        //default sorting order is ascending 
+        let finalSort = sort.replace(/\s/g, "").split(",").filter(field => { return Boolean(field) })
+        if (typeof descending !== "undefined" && descending) {
+            findQuery.sort(finalSort.reduce((a, v) => ({ ...a, [v]: -1 }), {}))
+        } else {
+            findQuery.sort(finalSort.reduce((a, v) => ({ ...a, [v]: 1 }), {}))
+        }
+    } else if (query) {
+        findQuery.sort({ score: { $meta: "textScore" } })
+    } else {
+        findQuery.sort({ createdAt: 1, updatedAt: 1, })
+    }
+
+    const productLimit = Number(req.query.limit)
+    const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1
+    const limit = (productLimit <= RESULT_LIMIT && productLimit > 0) ? productLimit : RESULT_LIMIT
+    const skip = (page - 1) * limit
+    findQuery = findQuery.limit(limit).skip(skip)
+
+    const booksInDB = await findQuery
+
+    return res.status(StatusCodes.OK).json({ message: "Fetched books", success: true, result: booksInDB })
 
 }
-const getSingleBook = () => {
+const getSingleBook = async (req, res) => {
+    const { _id: bookID } = req.params
+    console.log(req.params._id)
+    const { fields } = req.query
+    const findQuery = Book.findOne({ deleted: false, _id: mongoose.Types.ObjectId(bookID) })
 
+    if (fields) {
+        let finalQueryFields = fields.replace(/\s/g, "").split(",")
+            .filter(field => {
+                return !(Object.keys(PRODUCT_FORBIDDEN_FIELDS).includes(field))
+            })
+        if (finalQueryFields.length > 0) {
+            findQuery.select(finalQueryFields.reduce((a, v) => ({ ...a, [v]: 1 }), {}))
+        }
+    } else {
+        findQuery.select(PRODUCT_FORBIDDEN_FIELDS)
+    }
+
+    const bookInDB = await findQuery
+    return res.status(StatusCodes.OK).json({
+        message: "Fetched a single book",
+        success: true,
+        result: bookInDB
+    })
 }
+
 const registerBook = async (req, res) => {
     const newBook = new Book(req.body)
-    if (!await newBook.validate()) {
-        console.log()
-    }
     await newBook.save()
     const registerParam = req.body
-    res.status(StatusCodes.CREATED).json({ message: "successufully registered book", success: true, result: [registerParam] })
-
-
+    res.status(StatusCodes.CREATED).json({ message: "successufully registered book", success: true, result: [newBook] })
 }
 
 const removeBook = () => {

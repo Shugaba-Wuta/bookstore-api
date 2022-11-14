@@ -109,8 +109,6 @@ const BookSchema = new mongoose.Schema({
 )
 
 BookSchema.pre("save", async function () {
-
-
     //Perform a validation on unique book identifiers.
     const isISBN10 = this.ISBN10 ? validator.isISBN(this.ISBN10, 10) : false
     const isISBN13 = this.ISBN13 ? validator.isISBN(this.ISBN13, 13) : false
@@ -120,7 +118,26 @@ BookSchema.pre("save", async function () {
         throw new BadRequestError("Please provide a valid Book/ Journal identifier")
     }
 })
-BookSchema.index({ subtitle: "text", abstract: "text", authors: "text", publisher: "text" })
+BookSchema.index(
+    {
+        subtitle: "text",
+        abstract: "text",
+        authors: "text",
+        name: "text",
+        description: "text",
+        tags: "text"
+    },
+    {
+        weights: {
+            authors: 35,
+            subtitle: 25,
+            tags: 20,
+            description: 10,
+            name: 25
+
+        }
+    }
+)
 BookSchema.index({ seller: 1, ISBN10: 1, ISBN13: 1, ISSN: 1 }, { unique: true })
 
 module.exports = Product.discriminator("Book", BookSchema)

@@ -42,6 +42,7 @@ const getAllSellers = async (req, res) => {
     } else {
         dbQuery.sort(DEFAULT_SORT)
     }
+    //Select fields from user request
     if (fields) {
         let finalQueryFields = {}
         fields.split(",").forEach(field => {
@@ -60,7 +61,6 @@ const getAllSellers = async (req, res) => {
     const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1
     const limit = (userLimit <= RESULT_LIMIT && userLimit > 0) ? userLimit : RESULT_LIMIT
     const skip = (page - 1) * limit
-
     const dbSeller = await dbQuery.limit(limit).skip(skip)
     return res.status(StatusCodes.OK).json({ success: true, message: "fectched sellers", result: dbSeller, page: page })
 

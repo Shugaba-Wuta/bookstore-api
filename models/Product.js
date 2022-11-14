@@ -46,7 +46,7 @@ const ProductSchema = new mongoose.Schema(
     },
     price: {
       type: Object,
-      of: String,
+      of: Number,
       required: [true, "Please provide a price for product"]
     },
     currency: {
@@ -106,8 +106,6 @@ ProductSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id });
 });
 
-ProductSchema.index({ name: "text", description: "text", department: "text", seller: "text", tags: "text" })
 
-// ProductSchema.index({ seller: 1, name: 1, price: 1, currency: 1 }, { unique: true })
 module.exports = mongoose.model('Product', ProductSchema);
 
