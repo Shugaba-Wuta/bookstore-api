@@ -27,8 +27,6 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     success: false,
     error: true,
     message: customError.msg,
-    result: {},
-    resultInfo: {}
   });
 
 };

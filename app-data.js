@@ -6,31 +6,37 @@ const bookCategory = [
     "Children's Books",
     'Christian Books & Bibles',
     'Comics & Graphic Novels',
-    'Computers & Technology',
+    'Computers & IT',
     'Cookbooks, Food & Wine',
-    'Crafts, Hobbies & Home',
+    'Crafts & Hobbies',
+    'Crime & Thriller',
+    'Dictionaries & Languages',
     'Education & Teaching',
-    'Engineering & Transportation',
     'Health, Fitness & Dieting',
-    'History',
+    'History & Archaeology',
+    'Home & Garden',
     'Humor & Entertainment',
+    'LGBTQ Books',
     'Law',
-    'LGBTQ, Books',
     'Literature & Fiction',
     'Medical Books',
-    'Mystery, Thriller & Suspense',
+    'Mind, Body & Spirit',
+    'Mystery & Suspense',
     'Parenting & Relationships',
-    'Politics & Social Sciences',
+    'Personal Development',
+    'Poetry & Drama',
+    'Politics, Society & Social Sciences',
     'Reference',
     'Religion & Spirituality',
     'Romance',
     'Science & Math',
-    'Science Fiction & Fantasy',
-    'Self-Help',
+    'Science Fiction, Fantasy & Horror',
     'Sports & Outdoors',
+    'Technology & Engineering',
     'Teen & Young Adult',
     'Test Preparation',
-    'Travel'
+    'Transport',
+    'Travel & Holiday Guides'
 ]
 
 const IDGeneratorInfo = {
@@ -67,6 +73,8 @@ const nigerianCommercialBanks = [
     { id: null, name: null, code: null }
 ]
 
+const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0 }
+const PRODUCT_DEPARTMENTS = ["Books"]
 
 
 
@@ -75,5 +83,4 @@ const nigerianCommercialBanks = [
 
 
 
-
-module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks }
+module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS }

@@ -37,6 +37,10 @@ const sellerSchema = new mongoose.Schema({
         type: String,
         default: false
     },
+    verifiedEmail: {
+        type: String,
+        default: false
+    },
     password: {
         type: String,
         required: [true, 'Please provide password'],
@@ -51,8 +55,7 @@ const sellerSchema = new mongoose.Schema({
     avatar: {
         path: String,
         uploadedAt: {
-            type: Date,
-            default: Date.now
+            type: Date
         }
     },
 
@@ -97,7 +100,6 @@ const sellerSchema = new mongoose.Schema({
         name: String,
         uploadedAt: {
             type: Date,
-            default: Date.now
         }
     }],
     pictures: [{
@@ -105,7 +107,6 @@ const sellerSchema = new mongoose.Schema({
         name: String,
         uploadedAt: {
             type: Date,
-            default: Date.now
         }
     }],
 
@@ -135,8 +136,5 @@ sellerSchema.virtual("fullName").get(function () {
     return ([this.firstName, this.middleName, this.lastName]).filter((item) => { return item && item.length > 0 }).join(" ")
 })
 sellerSchema.index({ "firstName": "text", "lastName": "text", "middleName": "text" })
-
-
-
 
 module.exports = mongoose.model("Seller", sellerSchema)

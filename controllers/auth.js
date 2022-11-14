@@ -81,7 +81,9 @@ const login = async (req, res) => {
     const refreshToken = await createToken(payload, "refresh")
     const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
     res.cookie("refreshToken", refreshToken, { maxAge: refreshDuration, signed: true, httpOnly: true, secured: true })
-    return res.status(StatusCodes.OK).json({ accessToken: token, refreshToken })
+
+
+    return res.status(StatusCodes.OK).json({ accessToken: token, userID: payload.user.userID })
 }
 
 const newTokenFromRefresh = async (req, res) => {

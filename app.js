@@ -69,6 +69,7 @@ app.use(errorHandlerMiddleware);
 
 // const createDummyUser = require("./faker/user")
 // const createDummySeller = require("./faker/seller")
+// const createDummyBook = require("./faker/book")
 
 
 const port = process.env.PORT || 5000;

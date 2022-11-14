@@ -13,11 +13,11 @@ const createSeller = async () => {
     const role = ["seller", "publisher", "seller"][Math.floor(Math.random() * 3)]
     const userPath = faker.system.filePath()
     return new Seller({
-        name: {
-            first: firstName,
-            middle: middleName,
-            last: lastName,
-        },
+
+        firstName,
+        middleName,
+        lastName,
+
         email: faker.internet.email(firstName, lastName).toLowerCase(),
         password: "test12345",
         role: "seller",

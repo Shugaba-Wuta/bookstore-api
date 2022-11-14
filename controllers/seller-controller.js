@@ -11,7 +11,7 @@ const { writeRequestFiles } = require("../utils/user-utils")
 
 
 const RESULT_LIMIT = 50
-const FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0 }
+const FORBIDDEN_FIELDS = require("../app-data").USER_FORBIDDEN_FIELDS
 
 
 const getAllSellers = async (req, res) => {

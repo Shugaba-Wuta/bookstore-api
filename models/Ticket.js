@@ -19,7 +19,6 @@ const ticketSchema = new mongoose.Schema({
             path: String,
             uploadedAt: {
                 type: Date,
-                default: Date.now
             }
         }],
 

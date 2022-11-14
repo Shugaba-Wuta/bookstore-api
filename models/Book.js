@@ -2,33 +2,29 @@ const validator = require("validator")
 const mongoose = require("mongoose")
 
 const Product = require("./Product")
-const { validAuthor } = require("../utils/model-utils")
 const { bookCategory } = require("../app-data")
 const { BadRequestError } = require("../errors")
 
-const bookCoverType = ["paper", "hard"]
-const bookCondition = ["new", "used", "refurbished"]
-const lengthUnits = ["cm", "inch", "mm"]
+const bookCoverType = ["Paperback", "Hardback", "Others"]
+const lengthUnits = ["cm", "inches", "mm"]
 
 const BookSchema = new mongoose.Schema({
-    subTitle: {
+    subtitle: {
         type: String,
-        trim: true
+        trim: true,
     },
     abstract: {
-        type: String
+        type: String,
+        trim: true
     },
     publisher: {
         type: String,
         trim: true,
         required: [true, "Please provide a publisher"],
     },
-    author: {
+    authors: {
         type: [String],
-        validate: {
-            validator: validAuthor,
-            message: "Please provide atleast one author"
-        }
+        required: [true, "Please provide an author"]
     },
 
     ISBN10: {
@@ -51,7 +47,7 @@ const BookSchema = new mongoose.Schema({
         type: String,
         validate: {
             validator: validator.isISSN,
-            message: "Please provide a valid ISSN"
+            message: "Please provide a valid ISSN number"
         },
         trim: true
     },
@@ -77,11 +73,11 @@ const BookSchema = new mongoose.Schema({
     },
     numberOfPages: {
         type: Number,
-        min: 1
+        min: 0
     },
     dimension: {
         length: { type: Number, min: 0 },
-        width: { type: Number, min: 0 },
+        breadth: { type: Number, min: 0 },
         height: { type: Number, min: 0 },
         unit: {
             type: String,
@@ -91,16 +87,16 @@ const BookSchema = new mongoose.Schema({
             }
         }
     },
-    bookCoverType: {
-        type: String,
+    format: {
+        type: [String],
         enum: { values: bookCoverType, message: `Please provide book cover type from any of the following values: ${bookCoverType}` },
         required: [true, "Please provide a book cover"],
         trim: true
     },
     language: {
         type: String,
-        minLength: 3,
-        default: "english",
+        minLength: 2,
+        default: "en",
         trim: true
     },
 
@@ -113,14 +109,18 @@ const BookSchema = new mongoose.Schema({
 )
 
 BookSchema.pre("save", async function () {
-    const isISBN10 = validator.isISBN(this.ISBN10, 10)
-    const isISBN13 = validator.isISBN(this.ISBN10, 13)
-    const isISSN = validator.isISSN(this.ISSN)
 
 
-    if (isISBN10 || isISBN13 || isISSN) {
+    //Perform a validation on unique book identifiers.
+    const isISBN10 = this.ISBN10 ? validator.isISBN(this.ISBN10, 10) : false
+    const isISBN13 = this.ISBN13 ? validator.isISBN(this.ISBN13, 13) : false
+    const isISSN = this.ISSN ? validator.isISSN(this.ISSN) : false
+
+    if (!isISBN10 && !isISBN13 && !isISSN) {
         throw new BadRequestError("Please provide a valid Book/ Journal identifier")
     }
 })
+BookSchema.index({ subtitle: "text", abstract: "text", authors: "text", publisher: "text" })
+BookSchema.index({ seller: 1, ISBN10: 1, ISBN13: 1, ISSN: 1 }, { unique: true })
 
 module.exports = Product.discriminator("Book", BookSchema)

@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
   firstName: {
     type: String, minLength: 2, maxLength: 64,
     required: [true, "Please provide a first name"],
-    index: true
   },
   middleName: {
     type: String,
@@ -17,7 +16,6 @@ const userSchema = new mongoose.Schema({
   lastName: {
     type: String, minLength: 2, maxLength: 64,
     required: [true, "Please provide a last name"],
-    index: true
   },
   email: {
     type: String,
@@ -47,7 +45,6 @@ const userSchema = new mongoose.Schema({
     path: String,
     uploadedAt: {
       type: Date,
-      default: Date.now
     }
   },
   phoneNumber: {

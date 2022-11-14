@@ -6,16 +6,25 @@ const ProductSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Please provide a product name"],
-      maxLength: [128, "Product name should not exceed 128 characters"],
-      minLength: [4, "Product name should be more than 4 characters"],
+      maxLength: [256, "Product name should not exceed 256 characters"],
+      minLength: [1, "Product name should be more than 4 characters"],
       trim: true
     },
     description: {
-      type: Array,
+      type: String,
       required: [true, "Please provide a product description"],
-      minLength: [10, "Product description should be more than 10 characters"],
+      // minLength: [10, "Product description should be more than 10 characters"],
       trim: true
     },
+    images: [{
+      url: {
+        String
+      },
+      uploadedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     inventory: {
       type: Number,
       min: 0,
@@ -28,21 +37,27 @@ const ProductSchema = new mongoose.Schema(
         values: PRODUCT_DEPARTMENTS,
         message: `Product must belong to any of the following department: ${PRODUCT_DEPARTMENTS}`
       },
-      default: "book"
+      default: "Books"
     },
     seller: {
       type: mongoose.Types.ObjectId,
       required: [true, "Please provide owner of this product"],
-      ref: "User"
+      ref: "Seller"
     },
     price: {
-      type: Number,
+      type: Object,
+      of: String,
       required: [true, "Please provide a price for product"]
+    },
+    currency: {
+      type: String,
+      default: "NGN"
     },
     discount: {
       type: Number,
       default: 0,
-      min: 0
+      min: 0,
+      max: 100
     },
     featured: {
       type: Boolean,
@@ -57,6 +72,9 @@ const ProductSchema = new mongoose.Schema(
     deleted: {
       type: Boolean,
       default: false
+    },
+    deletedOn: {
+      type: Date
     },
     shippingFee: {
       type: Number,
@@ -82,26 +100,14 @@ ProductSchema.virtual('reviews', {
 
 
 
-ProductSchema.virtual('image', {
-  ref: 'Image',
-  localField: '_id',
-  foreignField: 'product',
-  justOne: false,
-});
 
-
-ProductSchema.pre("save", async function (next) {
-  //make all the tags lower case for easy search
-  this.tags = this.tags.map((tag) => {
-    return tag.trim().toLowerCase()
-  })
-
-})
 
 ProductSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id });
 });
 
+ProductSchema.index({ name: "text", description: "text", department: "text", seller: "text", tags: "text" })
 
+// ProductSchema.index({ seller: 1, name: 1, price: 1, currency: 1 }, { unique: true })
 module.exports = mongoose.model('Product', ProductSchema);
 

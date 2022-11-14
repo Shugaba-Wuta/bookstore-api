@@ -1,9 +1,7 @@
 // const nanoid = require("nanoid")
 const User = require("../models/User")
 const { IDGeneratorInfo } = require("../app-data")
-const validAuthor = async (array) => {
-    return array.length > 0 && array.every((record) => { return typeof (record) === typeof (String) })
-}
+
 
 const staffIdGenerator = async () => {
     const maxIDLength = String(IDGeneratorInfo.maxNumber).length
@@ -22,4 +20,4 @@ const staffIdGenerator = async () => {
     }
 
 }
-module.exports = { validAuthor, staffIdGenerator }
+module.exports = { staffIdGenerator }
