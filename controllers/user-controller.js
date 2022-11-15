@@ -66,7 +66,7 @@ const registerUser = async (req, res) => {
     const { firstName, lastName, middleName, email, password } = req.body
     const dbUser = await User.findOne({ email: email.toLowerCase() })
     if (dbUser) {
-        throw new Conflict("email already exists.You may consider loggin in")
+        throw new Conflict("email already exists.You may consider logging in")
     }
     const newUser = new User({ firstName, lastName, middleName, email, password })
     await newUser.save()
@@ -105,6 +105,8 @@ const updateUser = async (req, res) => {
         if (avatar) {
             avatar.path = path.join(imagePath, "avatar-profile" + path.extname(avatar.name))
             updateParams.$set = { "avatar.path": avatar.path }
+            updateParams.$set["avatar.uploadedAt"] = Date.now()
+
         }
     }
     //Fetch and set all updatable text fields from request body  

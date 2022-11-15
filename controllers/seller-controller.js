@@ -7,10 +7,7 @@ const fs = require("fs")
 const { Seller } = require("../models")
 const { Conflict, NotFoundError } = require("../errors")
 const { writeRequestFiles } = require("../utils/user-utils")
-
-
-
-const RESULT_LIMIT = 50
+const { RESULT_LIMIT } = require("../app-data")
 const FORBIDDEN_FIELDS = require("../app-data").USER_FORBIDDEN_FIELDS
 
 
@@ -71,7 +68,7 @@ const registerNewSeller = async (req, res) => {
 
     const dbSeller = await Seller.findOne({ email: email.toLowerCase() })
     if (dbSeller) {
-        throw new Conflict("email already exists.You may consider loggin in")
+        throw new Conflict("email already exists.You may consider logging in")
     }
     const newUser = new Seller({ firstName, lastName, middleName, email, password })
     await newUser.save()
@@ -109,6 +106,7 @@ const upateASeller = async (req, res) => {
     if (avatar) {
         avatar.path = path.join(imagePath, "avatar-profile" + path.extname(avatar.name))
         updateParams.$set["avatar.path"] = avatar.path
+        updateParams.$set["avatar.uploadedAt"] = Date.now()
     }
     if (govtIssuedID) {
         //Process multiple files differently. Array of govtIssuedIDs or just a single upload  

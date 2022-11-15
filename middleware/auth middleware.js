@@ -53,7 +53,7 @@ const assignSessionID = async (req, res, next) => {
 const authenticateUser = async (req, res, next) => {
   // Check if the user has logged in and has token with valid userID
   let token;
-  // check header
+  // check token bearer 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer')) {
     token = authHeader.split(' ')[1];

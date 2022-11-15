@@ -42,6 +42,10 @@ const ReviewSchema = mongoose.Schema(
     },
     deletedOn: {
       type: Date,
+    },
+    verifiedBuyer: {
+      type: Boolean,
+      default: false
     }
   },
   {

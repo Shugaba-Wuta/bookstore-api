@@ -99,6 +99,11 @@ const BookSchema = new mongoose.Schema({
         default: "en",
         trim: true
     },
+    views: {
+        type: Number,
+        min: 0,
+        default: 0
+    }
 
 },
     {

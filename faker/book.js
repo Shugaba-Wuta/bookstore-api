@@ -33,8 +33,12 @@ const createBook = async () => {
                 book.publisher = book.publisher || faker.company.name()
                 book.description = book.description || faker.commerce.productDescription()
                 book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length)]
+                book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
-                book.price = book.price || Math.random() * 100
+                book.price = {}
+                book.format.forEach((format) => {
+                    book.price[`${format}`] = Math.random() * 10000
+                })
                 return book
             }
         })

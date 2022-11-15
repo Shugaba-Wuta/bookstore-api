@@ -8,10 +8,11 @@ const { StatusCodes } = require("http-status-codes")
 const { PRODUCT_FORBIDDEN_FIELDS } = require("../app-data")
 const { RESULT_LIMIT } = require("../app-data")
 
+const NONEDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
 
 const getAllBooks = async (req, res) => {
     const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, q: query, fields, isbn10, isbn13, issn, sort, descending } = req.query
-    const findParams = {}
+    const findParams = { deleted: false }
     if (typeof (featured) !== "undefined") {
         findParams.featured = featured
     }
@@ -84,7 +85,7 @@ const getAllBooks = async (req, res) => {
     } else {
         findQuery.select(PRODUCT_FORBIDDEN_FIELDS)
     }
-    //default sort is relevance
+    //default sort is createdAt
     if (sort) {
         //sort is a string of comma separated fields in order of preference
         //default sorting order is ascending 
@@ -115,7 +116,7 @@ const getSingleBook = async (req, res) => {
     const { _id: bookID } = req.params
     console.log(req.params._id)
     const { fields } = req.query
-    const findQuery = Book.findOne({ deleted: false, _id: mongoose.Types.ObjectId(bookID) })
+    const findQuery = Book.findOne({ deleted: false, _id: bookID })
 
     if (fields) {
         let finalQueryFields = fields.replace(/\s/g, "").split(",")
@@ -133,22 +134,41 @@ const getSingleBook = async (req, res) => {
     return res.status(StatusCodes.OK).json({
         message: "Fetched a single book",
         success: true,
-        result: bookInDB
+        result: [bookInDB]
     })
 }
 
 const registerBook = async (req, res) => {
+    Object.keys(NONEDITABLE_FIELDS).forEach(field => {
+        delete req.body[field]
+    })
     const newBook = new Book(req.body)
     await newBook.save()
-    const registerParam = req.body
     res.status(StatusCodes.CREATED).json({ message: "successufully registered book", success: true, result: [newBook] })
 }
 
-const removeBook = () => {
+const updateBook = async (req, res) => {
+    Object.keys(NONEDITABLE_FIELDS).forEach((field) => {
+        delete req.body[field]
+    })
+    const bookID = req.params._id
+    const updatedBook = await Book.findOneAndUpdate({ _id: bookID, deleted: false }, req.body).select(PRODUCT_FORBIDDEN_FIELDS)
+
+    res.status(StatusCodes.OK).json({ message: "Update was successful", success: true, result: [updatedBook] })
 
 }
-const updateBook = () => {
+const removeBook = async (req, res) => {
+    const bookID = req.params._id
+    const deletedBook = await Book.findOneAndUpdate({ deleted: false, _id: bookID }, { $set: { deleted: true, deletedOn: Date.now() } })
 
+    if (!deletedBook) {
+        throw new BadRequestError(`No book record was found`)
+    }
+    return res.status(StatusCodes.OK).json({
+        message: "Book was successfully deleted",
+        success: true,
+        result: deletedBook
+    })
 }
 
 
@@ -156,7 +176,32 @@ const updateBook = () => {
 
 
 
+/*  
+CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOKID
+*/
+
+const getAllReviewsOnBook = async (req, res) => {
+    const { _id: bookID } = req.params 
+    
+
+
+}
+
+const getAReviewOnBook = async (req, res) => {
+
+}
+
+const createAReviewOnBook = async (req, res) => {
+
+}
+const updateReviewOnBook = async (req, res) => {
+
+}
+const deleteReviewOnBook = async (req, res) => {
+
+}
 
 
 
-module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook }
+
+module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook, getAReviewOnBook, getAllReviewsOnBook, createAReviewOnBook, updateReviewOnBook, deleteReviewOnBook }
