@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
+const swaggerUI = require("swagger-ui-express")
 
 
 //Database
@@ -20,6 +21,7 @@ const bookRouter = require("./routes/book-route")
 const userRouter = require("./routes/user-route")
 const authRouter = require("./routes/auth")
 const sellerRouter = require("./routes/seller-route")
+const swaggerSpec = require("./utils/swagger-docs")
 
 
 
@@ -57,13 +59,16 @@ app.use(express.static("./public"))
 
 
 //Register routers
-app.use("/api/v1", bookRouter)
-app.use("/api/v1", userRouter)
+app.use("/api/v1/products/books", bookRouter)
+app.use("/api/v1/users", userRouter)
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/sellers", sellerRouter)
 
-//Low-level middlewares 
+//Low-level middlewares
 
+if (process.env.SHOW_DOCS) {
+    app.use("/api/v1/docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec, { customSiteTitle: "Catalogue Smart", "deepLinking": true }))
+}
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
@@ -74,14 +79,12 @@ app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;
 const MONGO_URL = process.env.NODE_ENV === "development" ? process.env.DEV_MONGO_URL : process.env.MONGO_URL
-console.log(MONGO_URL, process.env.DEVELOPMENT)
 const start = async () => {
     try {
         await connectDB(MONGO_URL);
         app.listen(port, () =>
-            console.log(`Server is listening on port ${port}.............................`)
+            console.log(`Server is listening on port ${port}..........................................................`)
         );
-        // console.log(MONGO_URL)
     } catch (error) {
         console.log(error);
     }

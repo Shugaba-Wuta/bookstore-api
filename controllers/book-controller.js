@@ -3,7 +3,7 @@ const validator = require("validator")
 const mongoose = require("mongoose")
 const { Product, Book } = require("../models")
 const { bookCategory } = require("../app-data")
-const { BadRequestError } = require("../errors")
+const { BadRequestError, NotFoundError } = require("../errors")
 const { StatusCodes } = require("http-status-codes")
 const { PRODUCT_FORBIDDEN_FIELDS } = require("../app-data")
 const { RESULT_LIMIT } = require("../app-data")
@@ -11,7 +11,7 @@ const { RESULT_LIMIT } = require("../app-data")
 const NONEDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
 
 const getAllBooks = async (req, res) => {
-    const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, q: query, fields, isbn10, isbn13, issn, sort, descending } = req.query
+    const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, q: query, fields, isbn10, isbn13, issn, sortBy: sort, descending } = req.query
     const findParams = { deleted: false }
     if (typeof (featured) !== "undefined") {
         findParams.featured = featured
@@ -20,6 +20,9 @@ const getAllBooks = async (req, res) => {
         findParams.shippingFee = 0
     }
     if (minDiscount) {
+        if (0 <= Number(minDiscount) <= 100) {
+            throw new BadRequestError(`minDiscount must be between the range [0, 100]`)
+        }
         if (!findParams.discount) {
             findParams.discount = {}
         }
@@ -108,6 +111,9 @@ const getAllBooks = async (req, res) => {
     findQuery = findQuery.limit(limit).skip(skip)
 
     const booksInDB = await findQuery
+    if (booksInDB.length < 1) {
+        throw new NotFoundError("No book found")
+    }
 
     return res.status(StatusCodes.OK).json({ message: "Fetched books", success: true, result: booksInDB })
 
@@ -181,8 +187,8 @@ CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOKID
 */
 
 const getAllReviewsOnBook = async (req, res) => {
-    const { _id: bookID } = req.params 
-    
+    const { _id: bookID } = req.params
+
 
 
 }
@@ -194,14 +200,8 @@ const getAReviewOnBook = async (req, res) => {
 const createAReviewOnBook = async (req, res) => {
 
 }
-const updateReviewOnBook = async (req, res) => {
-
-}
-const deleteReviewOnBook = async (req, res) => {
-
-}
 
 
 
 
-module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook, getAReviewOnBook, getAllReviewsOnBook, createAReviewOnBook, updateReviewOnBook, deleteReviewOnBook }
+module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook, getAReviewOnBook, getAllReviewsOnBook, createAReviewOnBook }

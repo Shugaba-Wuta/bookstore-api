@@ -1,0 +1,234 @@
+paths:
+    "/api/v1/auth/login":
+        post:
+            tags: [Authentication and Authorization]
+            summary: Login user with email and password
+            description: Returns access tokens as request body and creates refresh token in cookies
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schema/loginCredentials"
+
+            responses:
+                200:
+                    description: Returns access tokens for Bearer scheme
+                400:
+                    description: Bad Request
+                404:
+                    description: Not Found
+                500:
+                    description: Server error
+    "/api/v1/auth/refresh-token":
+        get:
+            tags:
+                - Authentication and Authorization
+            summary: Obtains new access token before present token expires
+            description: Returns a new access token for Token Bearer authentication
+            responses:
+                200:
+                    description: Returns new access tokens for Bearer scheme
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden/ Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+    "/api/v1/auth/logout":
+        get:
+            tags:
+                - Authentication and Authorization
+            summary: Logout any user
+            description: Logs out user and revokes all tokens issued
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden/ Unauthorized
+                500:
+                    description: Server error
+    "/api/v1/auth/reset-password":
+        post:
+            tags:
+                - Authentication and Authorization
+            summary: Change user password
+            description: Allows authorized user to modify password
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    schema:
+                                        type: string
+                                    required: true
+                                newPassword:
+                                    default: test12345
+                                    type: string
+                                    required: true
+                                role:
+                                    schema:
+                                        type: string
+                                    required: true
+                                    enum: [user, seller, staff, admin]
+                                otp:
+                                    type: number
+                                    required: true
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden/ Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+    "/api/v1/auth/start-password-reset":
+        post:
+            tags:
+                - Authentication and Authorization
+            summary: Start the password reset flow
+            description: Initiates password reset flow to recieve email
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [email, role]
+                            properties:
+                                email:
+                                    schema:
+                                        type: string
+                                role:
+                                    schema:
+                                        type: string
+                                    enum: [user, seller, staff, admin]
+
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+    "/api/v1/auth/change-email":
+        post:
+            tags:
+                - Authentication and Authorization
+            summary: Update email for users
+            description: Update email for users who have previously verified their email
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                schema:
+                    type: object
+                    properties:
+                        email:
+                            schema:
+                                type: string
+                        role:
+                            schema:
+                                type: string
+                            enum: [user, seller, staff, admin]
+            responses:
+                200:
+                    description: Ok
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden / Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+    "/api/v1/auth/verify-email":
+        post:
+            tags:
+                - Authentication and Authorization
+            summary: Verify email address
+            description: Verify email with OTP code
+            requestBody:
+            required: true
+            content:
+            application/json:
+                schema:
+                    type: object
+                    required: [email, role, otp]
+                    properties:
+                        email:
+                            schema:
+                                type: string
+                        role:
+                            schema:
+                                type: string
+                            enum: [user, seller, staff, admin]
+                        otp:
+                            schema:
+                                type: number
+        responses:
+            200:
+                description: Ok
+            201:
+                description: Creates a new record
+            400:
+                description: Bad Request
+            401:
+                description: Unauthorized
+            403:
+                description: Forbidden / Unauthorized
+            404:
+                description: Not Found
+            409:
+                description: Conflict
+            500:
+                description: Server error
+components:
+    schema:
+        loginCredentials:
+            type: object
+            properties:
+                email:
+                    schema:
+                        type: string
+                    required: true
+                password:
+                    default: test12345
+                    schema:
+                        type: string
+                    required: true
+                role:
+                    schema:
+                        type: string
+                    required: true
+                    enum: [user, seller, staff, admin]

@@ -3,7 +3,7 @@ const { Session } = require('../models');
 const ms = require("ms")
 
 const { UnauthenticatedError } = require("../errors")
-const { isTokenValid, createToken } = require('../utils/jwt');
+const { isTokenValid, createToken } = require('../utils/auth');
 
 const elevatedRoles = ["admin", "manager", "staff"]
 
@@ -92,12 +92,10 @@ const authorizeRoles = (...roles) => {
     next();
   };
 };
-const ensureSameUserOrElevatedUser = async (req, res, next) => {
+const ensureSamePerson = async (req, res, next) => {
   const tokenUserID = req.user.userID
   const userParamID = req.params._id
-  if (elevatedRoles.includes(req.user.role)) {
-    return next()
-  }
+
   if (userParamID && (userParamID !== tokenUserID)) {
     throw new UnauthenticatedError("Unauthorized, cannot proceed!")
   }
@@ -105,4 +103,4 @@ const ensureSameUserOrElevatedUser = async (req, res, next) => {
   return next()
 }
 
-module.exports = { authenticateUser, authorizeRoles, assignSessionID, ensureSameUserOrElevatedUser };
+module.exports = { authenticateUser, authorizeRoles, assignSessionID, ensureSamePerson };

@@ -1,0 +1,440 @@
+paths:
+    "/api/v1/products/books":
+        get:
+            tags: [Books]
+            summary: Get multiple books
+            description: Returns a list of books that match query params
+            parameters:
+                - $ref: "#/components/parameters/featuredParam"
+                - $ref: "#/components/parameters/freeShippingParam"
+                - $ref: "#/components/parameters/minDiscountParam"
+                - $ref: "#/components/parameters/maxDiscountParam"
+                - $ref: "#/components/parameters/maxPriceParam"
+                - $ref: "#/components/parameters/minPriceParam"
+                - $ref: "#/components/parameters/currencyParam"
+                - $ref: "#/components/parameters/languageParam"
+                - $ref: "#/components/parameters/formatParam"
+                - $ref: "#/components/parameters/queryParam"
+                - $ref: "#/components/parameters/fieldsParam"
+                - $ref: "#/components/parameters/isbn10Param"
+                - $ref: "#/components/parameters/isbn13Param"
+                - $ref: "#/components/parameters/issnParam"
+                - $ref: "#/components/parameters/sortByParam"
+                - $ref: "#/components/parameters/descendingParam"
+                - $ref: "#/components/parameters/limitParam"
+                - $ref: "#/components/parameters/pageParam"
+
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        post:
+            tags: [Books]
+            summary: Create a book
+            description: Create a new book record for a particular seller
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/Book"
+            responses:
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/products/books/{_id}":
+        get:
+            tags: [Books]
+            summary: Get a single book
+            description: Returns a book that match provided ID _id in path parameter
+            parameters:
+                - in: path
+                  name: _id
+                  schema:
+                      type: string
+                  required: true
+                - $ref: "#/components/parameters/fieldsParam"
+            responses:
+                200:
+                    description: Detailed book resource
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        patch:
+            tags: [Books]
+            summary: Get a single book
+            description: Returns a book that match provided ID _id in path parameter
+            parameters:
+                - in: path
+                  name: _id
+                  schema:
+                      type: string
+                  required: true
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/Book"
+
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        delete:
+            tags: [Books]
+            summary: Delete a single book
+            description: Deletes a book that match provided ID _id in path parameter
+            parameters:
+                - in: path
+                  name: _id
+                  schema:
+                      type: string
+                  required: true
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+components:
+    schemas:
+        Book:
+            type: object
+            required:
+                [
+                    name,
+                    inventory,
+                    department,
+                    seller,
+                    price,
+                    shippingFee,
+                    publisher,
+                    authors,
+                    category,
+                    publicationDate,
+                    numberOfPages,
+                    format,
+                    images,
+                ]
+            properties:
+                name:
+                    type: string
+                    description: Title of book
+                inventory:
+                    type: number
+                department:
+                    type: string
+                    enum: [Books]
+                    default: Books
+                seller:
+                    type: string
+                price:
+                    type: object
+                    properties:
+                        Hardcover:
+                            type: number
+                            minimum: 0
+                        Papercover:
+                            type: number
+                            minimum: 0
+                        Others:
+                            type: number
+                            minimum: 0
+                discount:
+                    type: number
+                    minimum: 0
+                    default: 0
+                tags:
+                    type: array
+                    items:
+                        type: string
+                shippingFee:
+                    type: number
+                    minimum: 0
+                subtitle:
+                    type: string
+                abstract:
+                    type: string
+                publisher:
+                    type: string
+                authors:
+                    type: array
+                    items:
+                        type: string
+                ISBN10:
+                    type: string
+                ISBN13:
+                    type: string
+                ISSN:
+                    type: string
+                category:
+                    type: string
+                edition:
+                    type: number
+                volume:
+                    type: number
+                publicationDate:
+                    type: string
+                numberOfPages:
+                    type: number
+                dimension:
+                    type: object
+                    properties:
+                        length:
+                            type: number
+                        breadth:
+                            type: number
+                        height:
+                            type: number
+                        unit:
+                            type: string
+                            enum: [inches, cm]
+                format:
+                    type: array
+                    items:
+                        type: string
+                        enum: [Hardback, Paperback, Others]
+                language:
+                    type: string
+                    default: en
+                images:
+                    type: array
+                    items:
+                        type: string
+                    format: binary
+    parameters:
+        featuredParam:
+            in: query
+            name: featured
+            schema:
+                type: boolean
+        freeShippingParam:
+            in: query
+            name: freeShipping
+            schema:
+                type: boolean
+        minDiscountParam:
+            in: query
+            name: minDiscount
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        maxDiscountParam:
+            in: query
+            name: maxDiscount
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        currencyParam:
+            in: query
+            name: currency
+            schema:
+                type: string
+                default: NGN
+        minPriceParam:
+            in: query
+            name: minPrice
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        maxPriceParam:
+            in: query
+            name: maxPrice
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        languageParam:
+            in: query
+            name: language
+            schema:
+                type: string
+            default: en
+        formatParam:
+            in: query
+            name: format
+            schema:
+                type: string
+                enum: [Paperback, Hardcover, Others]
+        queryParam:
+            in: query
+            name: query
+            schema:
+                type: string
+            description: Query all books
+        fieldsParam:
+            in: query
+            name: fields
+            schema:
+                type: string
+            description: comma separated string of book field(s) to be returned
+        isbn10Param:
+            in: query
+            name: isbn10
+            schema:
+                type: string
+        isbn13Param:
+            in: query
+            name: isbn13
+            schema:
+                type: string
+        issnParam:
+            in: query
+            name: issn
+            schema:
+                type: string
+        sortByParam:
+            in: query
+            name: sortBy
+            schema:
+                type: string
+            description: Comma separated string of fields to sort results by
+        descendingParam:
+            in: query
+            name: descending
+            schema:
+                type: boolean
+        pageParam:
+            in: query
+            name: page
+            schema:
+                type: number
+        limitParam:
+            in: query
+            name: limit
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 50
+    responses:
+        error:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                default: false
+                            messag:
+                                type: string
+                            error:
+                                type: boolean
+                                default: true
+        success:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                            success:
+                                default: true
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Book"
+                            error:
+                                type: boolean
+                                default: false

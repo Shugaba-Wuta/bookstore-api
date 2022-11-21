@@ -55,7 +55,7 @@ const getBookInfoAndSave = async function (book, index) {
                 book.ISSN = identifier.identifier
             }
         })
-        book.yearOfPublication = response.volumeInfo.publishedDate
+        book.publicationDate = response.volumeInfo.publishedDate
         book.numberOfPages = response.volumeInfo.pageCount
         book.language = response.volumeInfo.language
         book.tags = response.volumeInfo.categories

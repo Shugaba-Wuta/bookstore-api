@@ -2,14 +2,29 @@
 
 const express = require("express")
 
-const { getAllBooks, getSingleBook, removeBook, registerBook, updateBook } = require("../controllers/book-controller")
-const { authenticateUser, authorizeRoles, assignSessionID, ensureSameUserOrElevatedUser } = require("../middleware/auth middleware")
+const { getAllBooks, getSingleBook, removeBook, registerBook, updateBook, getAllReviewsOnBook } = require("../controllers/book-controller")
+const { authorizeRoles, ensureSamePerson } = require("../middleware/auth middleware")
 
 
 
 const router = express.Router()
-router.route("/products/books").get(getAllBooks).post([authorizeRoles("seller"), ensureSameUserOrElevatedUser], registerBook)
-router.route("/products/books/:_id").get(getSingleBook).patch([authorizeRoles("seller"), ensureSameUserOrElevatedUser], updateBook).delete([authorizeRoles("seller"), ensureSameUserOrElevatedUser], removeBook)
 
+
+
+router.get("/", getAllBooks)
+
+
+router.post("/", [authorizeRoles("seller"), ensureSamePerson], registerBook)
+
+router.get("/:_id", getSingleBook)
+
+
+
+router.patch("/:_id", [authorizeRoles("seller"), ensureSamePerson], updateBook)
+
+
+router.delete("/:_id", [authorizeRoles("seller"), ensureSamePerson], removeBook)
+
+router.get("/:_id/reviews", getAllReviewsOnBook)
 
 module.exports = router

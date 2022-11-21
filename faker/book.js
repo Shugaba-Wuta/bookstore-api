@@ -29,10 +29,11 @@ const createBook = async () => {
                 book.seller = sellerList[Math.floor(Math.random() * sellerList.length)]._id
                 book.discount = Math.floor(Math.random() * 100)
                 book.inventory = Math.floor(Math.random() * 1000)
-                book.images = { url: book.images }
+                const newImages = book.images
+                book.images = [{ url: newImages }]
                 book.publisher = book.publisher || faker.company.name()
                 book.description = book.description || faker.commerce.productDescription()
-                book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length)]
+                book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 1)]
                 book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
                 book.price = {}

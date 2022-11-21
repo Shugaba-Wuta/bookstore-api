@@ -66,7 +66,7 @@ const BookSchema = new mongoose.Schema({
         type: Number,
         min: 1
     },
-    yearOfPublication: {
+    publicationDate: {
         type: String,
         trim: true,
         required: [true, "Please provide the year of publication"]

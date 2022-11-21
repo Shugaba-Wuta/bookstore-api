@@ -5,7 +5,7 @@ const path = require("path")
 const mongoose = require("mongoose")
 const fs = require("fs")
 const { Seller } = require("../models")
-const { Conflict, NotFoundError } = require("../errors")
+const { Conflict, NotFoundError, BadRequestError } = require("../errors")
 const { writeRequestFiles } = require("../utils/user-utils")
 const { RESULT_LIMIT } = require("../app-data")
 const FORBIDDEN_FIELDS = require("../app-data").USER_FORBIDDEN_FIELDS
@@ -14,7 +14,7 @@ const FORBIDDEN_FIELDS = require("../app-data").USER_FORBIDDEN_FIELDS
 const getAllSellers = async (req, res) => {
     const DEFAULT_SORT = { firstName: 1, lastName: 1, createdAt: 1, }
     const SORT_OPTIONS = ["createdAt", "firstName", "lastName", "relevance"]
-    const { q: queryString, verified, sort, fields } = req.query
+    const { query: queryString, verified, sortBy: sort, fields } = req.query
     const queryParams = { deleted: false }
 
     if (String(verified) !== "undefined") {
@@ -82,8 +82,11 @@ const registerNewSeller = async (req, res) => {
 }
 const getASingleSeller = async (req, res) => {
     const { _id: sellerID } = req.params
-    // Ensure sensitive fields (password, createdAt...) are not returned from DB
-    const dbSeller = await Seller.findOne({ _id: mongoose.Types.ObjectId(sellerID), deleted: false })
+    // Ensure sensitive fields (password, createdAt...) are not returned from DB 
+    if (!sellerID) {
+        throw new BadRequestError(`Please provide a seller id`)
+    }
+    const dbSeller = await Seller.findOne({ _id: sellerID, deleted: false })
         .select(FORBIDDEN_FIELDS)
     if (!dbSeller) {
         throw new NotFoundError(`No user with ID: ${sellerID}`)

@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: false
   },
+  verifiedEmail: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
     required: [true, 'Please provide password'],

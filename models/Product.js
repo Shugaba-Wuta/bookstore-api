@@ -17,9 +17,7 @@ const ProductSchema = new mongoose.Schema(
       trim: true
     },
     images: [{
-      url: {
-        String
-      },
+      url: String,
       uploadedAt: {
         type: Date,
         default: Date.now
