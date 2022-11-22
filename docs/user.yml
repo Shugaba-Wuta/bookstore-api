@@ -1,0 +1,361 @@
+paths:
+    "/api/v1/users":
+        get:
+            tags: [Users]
+            summary: Get multiple users
+            description: Returns a list of users that match query
+            parameters:
+                - $ref: "#/components/parameters/queryParam"
+                - $ref: "#/components/parameters/verifiedParam"
+                - $ref: "#/components/parameters/sortByParam"
+                - $ref: "#/components/parameters/fieldsParam"
+                - $ref: "#/components/parameters/limitParam"
+                - $ref: "#/components/parameters/pageParam"
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        post:
+            tags: [Users]
+            summary: Create a new user record
+            description: Create user
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/User"
+            responses:
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+    "/api/v1/users/{_id}":
+        get:
+            tags: [Users]
+            summary: Get a single user
+            description: Get complete info about a single user
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+                - $ref: "#/components/parameters/fieldsParam"
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        patch:
+            summary: Update a user record
+            description: Modify a user record
+            tags: [Users]
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/User"
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        delete:
+            tags: [Users]
+            summary: Deletes user
+            description: Delete a user
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/user/{_id}/documents":
+        delete:
+        patch:
+components:
+    schemas:
+        User:
+            type: object
+            required: [firstName, lastName, email, password, role]
+            properties:
+                firstName:
+                    type: string
+                middleName:
+                    type: string
+                lastName:
+                    type: string
+                email:
+                    type: string
+                password:
+                    type: password
+                gender:
+                    type: string
+                avatar:
+                    format: binary
+                    type: string
+                role:
+                    type: string
+                phoneNumber:
+                    type: string
+
+    parameters:
+        idParam:
+            in: path
+            name: _id
+            schema:
+                type: string
+            required: true
+        featuredParam:
+            in: query
+            name: featured
+            schema:
+                type: boolean
+        freeShippingParam:
+            in: query
+            name: freeShipping
+            schema:
+                type: boolean
+        minDiscountParam:
+            in: query
+            name: minDiscount
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        maxDiscountParam:
+            in: query
+            name: maxDiscount
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        currencyParam:
+            in: query
+            name: currency
+            schema:
+                type: string
+                default: NGN
+        minPriceParam:
+            in: query
+            name: minPrice
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        maxPriceParam:
+            in: query
+            name: maxPrice
+            schema:
+                type: number
+            mininmum: 0
+            maximum: 100
+        languageParam:
+            in: query
+            name: language
+            schema:
+                type: string
+            default: en
+        formatParam:
+            in: query
+            name: format
+            schema:
+                type: string
+                enum: [Paperback, Hardcover, Others]
+        queryParam:
+            in: query
+            name: query
+            schema:
+                type: string
+            description: Query all books
+        fieldsParam:
+            in: query
+            name: fields
+            schema:
+                type: string
+            description: comma separated string of book field(s) to be returned
+        isbn10Param:
+            in: query
+            name: isbn10
+            schema:
+                type: string
+        isbn13Param:
+            in: query
+            name: isbn13
+            schema:
+                type: string
+        issnParam:
+            in: query
+            name: issn
+            schema:
+                type: string
+        sortByParam:
+            in: query
+            name: sortBy
+            schema:
+                type: string
+            description: Comma separated string of fields to sort results by
+        descendingParam:
+            in: query
+            name: descending
+            schema:
+                type: boolean
+        pageParam:
+            in: query
+            name: page
+            schema:
+                type: number
+        limitParam:
+            in: query
+            name: limit
+            schema:
+                type: number
+        verifiedParam:
+            in: query
+            name: verified
+            schema:
+                type: boolean
+    responses:
+        success:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                            success:
+                                default: true
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/User"
+                            error:
+                                type: boolean
+                                default: false
+
+        error:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                default: false
+                            messag:
+                                type: string
+                            error:
+                                type: boolean
+                                default: true
