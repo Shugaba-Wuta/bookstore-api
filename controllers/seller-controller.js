@@ -4,7 +4,7 @@ const crypto = require("crypto")
 const path = require("path")
 const mongoose = require("mongoose")
 const fs = require("fs")
-const { Seller } = require("../models")
+const { Seller, Document } = require("../models")
 const { Conflict, NotFoundError, BadRequestError } = require("../errors")
 const { writeRequestFiles } = require("../utils/user-utils")
 const { RESULT_LIMIT } = require("../app-data")
@@ -20,7 +20,7 @@ const getAllSellers = async (req, res) => {
     if (String(verified) !== "undefined") {
         queryParams.verified = verified
     }
-    if (queryString && sort === "relevance") {
+    if (queryString) {
         queryParams.$text = { $search: queryString }
     }
     const dbQuery = Seller.find(queryParams)
@@ -82,9 +82,8 @@ const registerNewSeller = async (req, res) => {
 }
 const getASingleSeller = async (req, res) => {
     const { _id: sellerID } = req.params
-    // Ensure sensitive fields (password, createdAt...) are not returned from DB 
     if (!sellerID) {
-        throw new BadRequestError(`Please provide a seller id`)
+        throw new BadRequestError(`Please provide a valid sellerID `)
     }
     const dbSeller = await Seller.findOne({ _id: sellerID, deleted: false })
         .select(FORBIDDEN_FIELDS)
@@ -96,6 +95,9 @@ const getASingleSeller = async (req, res) => {
 const upateASeller = async (req, res) => {
     //get sellerID from request parameter aka url
     const { _id: sellerID } = req.params
+    if (!sellerID) {
+        throw new BadRequestError(`Please provide a valid sellerID `)
+    }
     const updatableTextFields = ["firstName", "lastName", "middleName", "gender", "NIN", "accountName", "accountNumber", "phoneNumber", "BVN", "bankName"]
     const { avatar, govtIssuedID, pictures } = req.files || {}
     let imagePath = path.join("uploads", "sellers", req.user.userID)
@@ -176,6 +178,9 @@ const upateASeller = async (req, res) => {
 }
 const deleteASeller = async (req, res) => {
     const { _id: sellerID } = req.params
+    if (!sellerID) {
+        throw new BadRequestError(`Please provide a valid sellerID `)
+    }
     const dbSeller = await Seller.findOneAndUpdate({ _id: sellerID, deleted: false }, { deleted: true, deletedOn: Date.now() }, { new: true })
 
     if (!dbSeller) {
@@ -183,8 +188,61 @@ const deleteASeller = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({ message: "seller was deleted successfully", success: true })
 }
+const deleteUploadedFiles = async (req, res) => {
+    const { _id: sellerID } = req.params
+    if (!sellerID) {
+        throw new BadRequestError(`Please provide a valid sellerID `)
+    }
+
+    const { avatar, pictures, documents, govtIssuedID } = req.files || {}
+    const sellerInDB = await Seller.findOne({ deleted: false, _id: sellerID })
+    if (!sellerInDB) {
+        throw new NotFoundError("No seller was found")
+    }
+
+    if (avatar) {
+        sellerInDB.avatar = { path: null, uploadedAt: null }
+    }
+    if (pictures) {
+        let pictureArray = pictures instanceof Array ? pictures : [pictures]
+
+        sellerInDB.pictures.forEach((pics, index) => {
+            if (pictureArray.includes(pics._id)) {
+                sellerInDB.pictures[index].deleted = true
+                sellerInDB.pictures[index].deletedOn = Date.now()
+            }
+        })
+
+    }
+    if (govtIssuedID) {
+        let govtIssuedIDArray = govtIssuedID instanceof Array ? govtIssuedID : [govtIssuedID]
+
+        sellerInDB.govtIssuedID.forEach((id, index) => {
+            if (govtIssuedIDArray.includes(id._id)) {
+                sellerInDB.govtIssuedID[index].deleted = true
+                sellerInDB.govtIssuedID[index].deletedOn = Date.now()
+            }
+        })
+    }
+    if (documents) {
+        let documentsArray = documents instanceof Array ? documents : [documents]
+
+        await Document.updateMany({
+            _id: {
+                $in: documentsArray
+            },
+            user: sellerID
+        }, {
+            deleted: true, deletedOn: Date.now()
+        })
+    }
+    // Save the seller instance
+    await sellerInDB.save()
+    return res.status(StatusCodes.OK).json({ message: "Delete was successful", success: true })
+
+}
 
 
 
 
-module.exports = { getASingleSeller, getAllSellers, registerNewSeller, upateASeller, deleteASeller }
+module.exports = { getASingleSeller, getAllSellers, registerNewSeller, upateASeller, deleteASeller, deleteUploadedFiles }

@@ -13,7 +13,7 @@ const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "
 
 
 const getAllUsers = async (req, res) => {
-    const { sort, fields, q: queryString } = req.query
+    const { sort, fields, query: queryString } = req.query
     //Users can only access undeleted users
     const queryObject = { deleted: false }
     let query = User.find(queryObject)
@@ -111,7 +111,7 @@ const updateUser = async (req, res) => {
     }
     //Fetch and set all updatable text fields from request body  
     Object.keys(req.body).forEach((reqBody) => {
-        if (updatableUserTextFields.includes(reqBody)) {
+        if (updatableUserTextFields.includes(reqBody) && req.body[reqBody]) {
             updateParams.$set[reqBody] = req.body[reqBody]
         } else {
             console.log(reqBody, req.body[reqBody])

@@ -9,6 +9,8 @@ paths:
                 - $ref: "#/components/parameters/verifiedParam"
                 - $ref: "#/components/parameters/sortByParam"
                 - $ref: "#/components/parameters/fieldsParam"
+                - $ref: "#/components/parameters/limitParam"
+                - $ref: "#/components/parameters/pageParam"
             responses:
                 200:
                     description: Ok
@@ -103,9 +105,129 @@ paths:
                     content:
                         $ref: "#/components/responses/error/content"
 
-        patch: 
-            
+        patch:
+            summary: Update a seller record
+            description: Modify a seller record
+            tags: [Sellers]
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/Seller"
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
         delete:
+            tags: [Sellers]
+            summary: Deletes seller
+            description: Delete a seller
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/seller/{_id}/documents":
+        delete:
+            tags: [Sellers]
+            summary: Delete document, pictures, avatar
+            description: Delete any uploaded file on a seller account
+            parameters:
+                - $ref: "#/components/parameters/idParam"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                pictures:
+                                    $ref: "#/components/resources/fileRequestBody"
+                                documents:
+                                    $ref: "#/components/resources/fileRequestBody"
+                                avatar:
+                                    $ref: "#/components/resources/fileRequestBody/items"
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
 components:
     schemas:
         Seller:
@@ -121,8 +243,6 @@ components:
                 email:
                     type: string
                 verified:
-                    type: boolean
-                verifiedEmail:
                     type: boolean
                 password:
                     type: password
@@ -303,3 +423,10 @@ components:
                             error:
                                 type: boolean
                                 default: true
+    resources:
+        fileRequestBody:
+            type: array
+            items:
+                schema:
+                    type: string
+                description: ID of image, obtained from response

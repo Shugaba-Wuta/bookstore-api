@@ -11,9 +11,10 @@ const Address = require("./Address")
 const Seller = require("./Seller")
 const Session = require("./Session")
 const TOTP = require("./TOTP")
+const Document = require("./Document")
 
 
 
 
 
-module.exports = { Book, Department, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session, TOTP }
+module.exports = { Book, Department, Order, Product, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session, TOTP, Document }

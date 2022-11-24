@@ -100,6 +100,13 @@ const sellerSchema = new mongoose.Schema({
         name: String,
         uploadedAt: {
             type: Date,
+        },
+        deleted: {
+            type: Boolean,
+            default: false
+        },
+        deletedOn: {
+            type: Date
         }
     }],
     pictures: [{
@@ -107,6 +114,13 @@ const sellerSchema = new mongoose.Schema({
         name: String,
         uploadedAt: {
             type: Date,
+        },
+        deleted: {
+            type: Boolean,
+            default: false
+        },
+        deletedOn: {
+            type: Date
         }
     }],
 
