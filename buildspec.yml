@@ -1,0 +1,17 @@
+version: 0.1
+phase:
+    pre-build:
+        commands:
+            - echo "Entered the pre-build phase"
+            - npm install
+    build:
+        commands:
+            - echo "Entered the build phase"
+            - npm start
+
+    post-build:
+        commands:
+            - echo "Entered the post-build phase"
+artifacts:
+    files:
+        - deploy/**/*
