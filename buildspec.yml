@@ -1,5 +1,5 @@
 version: 0.1
-phase:
+phases:
     pre-build:
         commands:
             - echo "Entered the pre-build phase"
