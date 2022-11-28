@@ -106,4 +106,4 @@ dist
 
 .request-sample
 *uploads/ 
-package-lock.json
+.package-lock.json
