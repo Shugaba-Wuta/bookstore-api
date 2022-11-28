@@ -104,6 +104,6 @@ dist
 .tern-port
 
 
-.request-sample
+./request-sample
 *uploads/ 
-.package-lock.json
+./package-lock.json
