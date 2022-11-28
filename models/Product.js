@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { PRODUCT_DEPARTMENTS } = require("../app-data")
+const { PRODUCT_DEPARTMENTS } = require("../config/app-data")
 
 const ProductSchema = new mongoose.Schema(
   {

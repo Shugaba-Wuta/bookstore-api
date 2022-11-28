@@ -2,7 +2,7 @@ const validator = require("validator")
 const mongoose = require("mongoose")
 
 const Product = require("./Product")
-const { bookCategory } = require("../app-data")
+const { bookCategory } = require("../config/app-data")
 const { BadRequestError } = require("../errors")
 
 const bookCoverType = ["Paperback", "Hardback", "Others"]

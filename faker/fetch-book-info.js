@@ -1,4 +1,4 @@
-// const books = require("../books-data.json")
+// const books = require("./books-data.json")
 const axios = require("axios")
 const { randomBytes } = require("crypto")
 const util = require("util")
@@ -11,7 +11,7 @@ const writer = function (book) {
     if (!book) {
         return null
     }
-    fs.open("modified-books-data2.json", "r+", function (err, fd) {
+    fs.open("modified-books-data.json", "r+", function (err, fd) {
         if (err) {
             throw err
         }
