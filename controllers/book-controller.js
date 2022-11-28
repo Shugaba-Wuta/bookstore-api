@@ -2,11 +2,11 @@
 const validator = require("validator")
 const mongoose = require("mongoose")
 const { Product, Book } = require("../models")
-const { bookCategory } = require("../app-data")
+const { bookCategory } = require("../config/app-data")
 const { BadRequestError, NotFoundError } = require("../errors")
 const { StatusCodes } = require("http-status-codes")
-const { PRODUCT_FORBIDDEN_FIELDS } = require("../app-data")
-const { RESULT_LIMIT } = require("../app-data")
+const { PRODUCT_FORBIDDEN_FIELDS } = require("../config/app-data")
+const { RESULT_LIMIT } = require("../config/app-data")
 
 const NONEDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
 

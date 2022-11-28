@@ -7,8 +7,8 @@ const fs = require("fs")
 const { Seller, Document } = require("../models")
 const { Conflict, NotFoundError, BadRequestError } = require("../errors")
 const { writeRequestFiles } = require("../utils/user-utils")
-const { RESULT_LIMIT } = require("../app-data")
-const FORBIDDEN_FIELDS = require("../app-data").USER_FORBIDDEN_FIELDS
+const { RESULT_LIMIT } = require("../config/app-data")
+const FORBIDDEN_FIELDS = require("../config/app-data").USER_FORBIDDEN_FIELDS
 
 
 const getAllSellers = async (req, res) => {

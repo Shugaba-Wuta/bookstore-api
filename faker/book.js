@@ -11,7 +11,7 @@ const fs = require("fs")
 const getSellerIDList = async function () {
     return (await Seller.find({}, { _id: 1 }).lean())
 }
-const allBooks = require("../complete-books-detail.json")
+const allBooks = require("./complete-books-detail.json")
 
 const createBook = async () => {
 
