@@ -6,7 +6,7 @@ const { User, Session, Staff, Seller, TOTP } = require("../models")
 const { StatusCodes } = require("http-status-codes")
 const { createToken, generateOtpCode, isOTPValid } = require("../utils/auth")
 const mongoose = require("mongoose")
-const { OTP_CODE_LENGTH } = require("../app-data")
+const { OTP_CODE_LENGTH } = require("../config/app-data")
 
 
 
