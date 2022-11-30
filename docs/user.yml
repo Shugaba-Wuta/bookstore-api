@@ -410,5 +410,4 @@ components:
             items:
                 schema:
                     type: string
-                description: ID of image, obtained from response 
-                
+                description: ID of image, obtained from response
