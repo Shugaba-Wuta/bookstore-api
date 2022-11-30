@@ -297,7 +297,7 @@ components:
                     type: array
                     items:
                         type: string
-                    format: binary
+                        format: binary
     parameters:
         featuredParam:
             in: query
