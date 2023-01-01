@@ -33,7 +33,9 @@ const { assignSessionID } = require("../middleware/auth middleware")
 
 
 
+
 //Express app
+
 const express = require('express');
 const app = express();
 
@@ -46,6 +48,7 @@ app.set('trust proxy', 1);
 //         max: 60,
 //     })
 // );
+
 app.use(helmet());
 app.use(cors());
 app.use(xss());
