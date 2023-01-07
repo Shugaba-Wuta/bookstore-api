@@ -109,3 +109,4 @@ request-sample/
 package-lock.json
 *.csv
 secret*.json
+.vscode
