@@ -91,7 +91,7 @@ const getAllBooks = async (req, res) => {
     //default sort is createdAt
     if (sort) {
         //sort is a string of comma separated fields in order of preference
-        //default sorting order is ascending 
+        //default sorting order is ascending
         let finalSort = sort.replace(/\s/g, "").split(",").filter(field => { return Boolean(field) })
         if (typeof descending !== "undefined" && descending) {
             findQuery.sort(finalSort.reduce((a, v) => ({ ...a, [v]: -1 }), {}))
@@ -182,7 +182,7 @@ const removeBook = async (req, res) => {
 
 
 
-/*  
+/*
 CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOKID
 */
 
