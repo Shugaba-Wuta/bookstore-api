@@ -1,6 +1,6 @@
 version: 0.1
 phases:
-    pre-build:
+    pre_build:
         commands:
             - echo "Entered the pre-build phase"
             - npm install
@@ -9,7 +9,7 @@ phases:
             - echo "Entered the build phase"
             - npm start
 
-    post-build:
+    post_build:
         commands:
             - echo "Entered the post-build phase"
 artifacts:
