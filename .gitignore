@@ -105,5 +105,7 @@ dist
 
 
 request-sample/
-*uploads/ 
+*uploads/
 package-lock.json
+*.csv
+secret*.json
