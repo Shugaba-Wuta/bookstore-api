@@ -5,7 +5,7 @@ const ms = require("ms")
 const { UnauthenticatedError } = require("../errors")
 const { isTokenValid, createToken } = require('../utils/auth');
 
-const elevatedRoles = ["admin", "manager", "staff"]
+// const elevatedRoles = ["admin", "manager", "staff"]
 
 const assignSessionID = async (req, res, next) => {
   let token;
@@ -26,7 +26,6 @@ const assignSessionID = async (req, res, next) => {
     payload = isTokenValid(token)
 
   } catch (err) {
-    // console.log(err)
     const newSession = await Session({
       userAgent: req.get('user-agent'),
       IP: req.ip
@@ -53,7 +52,7 @@ const assignSessionID = async (req, res, next) => {
 const authenticateUser = async (req, res, next) => {
   // Check if the user has logged in and has token with valid userID
   let token;
-  // check token bearer 
+  // check token bearer
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer')) {
     token = authHeader.split(' ')[1];
@@ -63,7 +62,7 @@ const authenticateUser = async (req, res, next) => {
     token = req.signedCookies.refreshToken;
   }
   try {
-    const payload = isTokenValid(token);
+    var payload = isTokenValid(token);
 
     // Attach the user and his permissions to the req object
     req.user = {

@@ -2,13 +2,11 @@
 const { StatusCodes } = require("http-status-codes")
 const crypto = require("crypto")
 const path = require("path")
-const mongoose = require("mongoose")
-const fs = require("fs")
 const { Seller, Document } = require("../models")
 const { Conflict, NotFoundError, BadRequestError } = require("../errors")
-const { writeRequestFiles } = require("../utils/user-utils")
 const { RESULT_LIMIT } = require("../config/app-data")
-const FORBIDDEN_FIELDS = require("../config/app-data").USER_FORBIDDEN_FIELDS
+const { USER_FORBIDDEN_FIELDS: FORBIDDEN_FIELDS } = require("../config/app-data")
+const { uploadFileToS3 } = require("../utils/generic-utils")
 
 
 const getAllSellers = async (req, res) => {
@@ -59,7 +57,7 @@ const getAllSellers = async (req, res) => {
     const limit = (userLimit <= RESULT_LIMIT && userLimit > 0) ? userLimit : RESULT_LIMIT
     const skip = (page - 1) * limit
     const dbSeller = await dbQuery.limit(limit).skip(skip)
-    return res.status(StatusCodes.OK).json({ success: true, message: "fectched sellers", result: dbSeller, page: page })
+    return res.status(StatusCodes.OK).json({ success: true, message: "fetched sellers", result: dbSeller, page: page })
 
 
 }
@@ -92,7 +90,7 @@ const getASingleSeller = async (req, res) => {
     }
     return res.status(StatusCodes.OK).json({ message: "fetched Seller", status: true, result: [dbSeller] })
 }
-const upateASeller = async (req, res) => {
+const updateASeller = async (req, res) => {
     //get sellerID from request parameter aka url
     const { _id: sellerID } = req.params
     if (!sellerID) {
@@ -100,7 +98,7 @@ const upateASeller = async (req, res) => {
     }
     const updatableTextFields = ["firstName", "lastName", "middleName", "gender", "NIN", "accountName", "accountNumber", "phoneNumber", "BVN", "bankName"]
     const { avatar, govtIssuedID, pictures } = req.files || {}
-    let imagePath = path.join("uploads", "sellers", req.user.userID)
+    const imagePath = ["uploads", req.user.role, req.user.userID].join("-")
 
     const updateParams = { $set: {}, $push: {} }
     Object.keys(req.body).forEach(param => {
@@ -109,69 +107,45 @@ const upateASeller = async (req, res) => {
         }
     })
     if (avatar) {
-        avatar.path = path.join(imagePath, "avatar-profile" + path.extname(avatar.name))
-        updateParams.$set["avatar.path"] = avatar.path
-        updateParams.$set["avatar.uploadedAt"] = Date.now()
+        const avatarArray = (avatar instanceof Array) ? avatar : [avatar]
+        if (avatarArray.length > 1) {
+            throw new BadRequestError("Avatar must be a single file")
+        }
+        const docs = avatarArray.map(doc => {
+            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+        })
+        let publicUrl = await uploadFileToS3(docs)
+        if (publicUrl.length > 0) {
+            updateParams.$set.avatar = { ...publicUrl[0] }
+        }
     }
     if (govtIssuedID) {
-        //Process multiple files differently. Array of govtIssuedIDs or just a single upload  
-        if (govtIssuedID instanceof Array) {
-            const multipleGovtIssuedID = govtIssuedID.map((doc) => {
-                doc.path = path.join(imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name))
-                return { path: doc.path, uploadedAt: Date.now() }
-            })
-            updateParams.$push["govtIssuedID"] = { $each: multipleGovtIssuedID }
-        } else {
-            govtIssuedID.path = path.join(imagePath, crypto.randomBytes(12).toString("hex") + path.extname(govtIssuedID.name))
-            updateParams.$push["govtIssuedID"] = {
-                path: govtIssuedID.path, uploadedAt: Date.now()
-            }
-        }
+        const govtIssuedIDArray = (govtIssuedID instanceof Array) ? govtIssuedID : [govtIssuedID]
+        const docs = govtIssuedIDArray.map(doc => {
+            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+        })
+        let publicUrls = await uploadFileToS3(docs)
+        // console.log("GovtIssued ID: ", publicUrls)
+        updateParams.$push["govtIssuedID"] = { $each: publicUrls }
+
     }
     if (pictures) {
-        //Process multiple files differently. Array of pictures or just a single upload  
-        if (pictures instanceof Array) {
-            const multiplePictures = pictures.map((doc) => {
-                doc.path = path.join(imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name))
-                return { path: doc.path }
-            })
-            updateParams.$push["pictures"] = { $each: multiplePictures }
-        } else {
-            pictures.path = path.join(imagePath, crypto.randomBytes(12).toString("hex") + path.extname(pictures.name))
-            updateParams.$push["pictures"] = {
-                path: pictures.path, uploadedAt: Date.now()
-            }
-        }
+        const picturesArray = (pictures instanceof Array) ? pictures : [pictures]
+        let docs = picturesArray.map(doc => {
+            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+        })
+        let publicUrls = await uploadFileToS3(docs)
+        updateParams.$push["pictures"] = { $each: publicUrls }
+
     }
     const dbSeller = await Seller.findOneAndUpdate({ _id: sellerID, deleted: false }, updateParams, { new: true }).select(FORBIDDEN_FIELDS)
     if (!dbSeller) {
         throw new NotFoundError(`No seller with id: ${sellerID}`)
     }
-    //Write files on file system
-    if (avatar) {
-        fs.mkdir(imagePath, { recursive: true }, async (err) => {
-            if (err) {
-                throw err
-            }
-            await writeRequestFiles(avatar, imagePath)
-        })
-    }
-    if (govtIssuedID) {
-        fs.mkdir(imagePath, { recursive: true }, async (err) => {
-            if (err) {
-                throw err
-            }
-            await writeRequestFiles(govtIssuedID)
-        })
-    }
-    if (pictures) {
-        fs.mkdir(imagePath, { recursive: true }, async (err) => {
-            if (err) {
-                throw err
-            }
-            await writeRequestFiles(pictures)
-        })
-    }
+
     res.status(StatusCodes.OK).json({ message: "Seller was updated successfully", success: true, result: dbSeller })
 
 
@@ -245,4 +219,4 @@ const deleteUploadedFiles = async (req, res) => {
 
 
 
-module.exports = { getASingleSeller, getAllSellers, registerNewSeller, upateASeller, deleteASeller, deleteUploadedFiles }
+module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, deleteUploadedFiles }

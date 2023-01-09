@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
   },
 
   avatar: {
-    path: String,
+    url: String,
     uploadedAt: {
       type: Date,
     }
@@ -81,12 +81,12 @@ userSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt);
 
 
-  //Ensure email is small caps 
+  //Ensure email is small caps
   this.email = this.email.toLowerCase()
 })
 
-userSchema.methods.comparePassword = async function (canditatePassword) {
-  const isMatch = await bcrypt.compare(canditatePassword, this.password);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
   return isMatch;
 };
 

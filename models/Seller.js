@@ -53,7 +53,7 @@ const sellerSchema = new mongoose.Schema({
     },
 
     avatar: {
-        path: String,
+        url: String,
         uploadedAt: {
             type: Date
         }
@@ -96,7 +96,7 @@ const sellerSchema = new mongoose.Schema({
         min: 9999999999
     },
     govtIssuedID: [{
-        path: String,
+        url: String,
         name: String,
         uploadedAt: {
             type: Date,
@@ -110,7 +110,7 @@ const sellerSchema = new mongoose.Schema({
         }
     }],
     pictures: [{
-        path: String,
+        url: String,
         name: String,
         uploadedAt: {
             type: Date,
@@ -137,12 +137,12 @@ sellerSchema.pre('save', async function () {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 
-    //Ensure email is small caps 
+    //Ensure email is small caps
     this.email = this.email.toLowerCase()
 })
 
-sellerSchema.methods.comparePassword = async function (canditatePassword) {
-    const isMatch = await bcrypt.compare(canditatePassword, this.password);
+sellerSchema.methods.comparePassword = async function (candidatePassword) {
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
     return isMatch;
 };
 

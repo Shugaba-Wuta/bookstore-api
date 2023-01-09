@@ -1,9 +1,6 @@
 // const books = require("./books-data.json")
 const axios = require("axios")
-const { randomBytes } = require("crypto")
-const util = require("util")
 const fs = require("fs")
-const { response } = require("express")
 
 const URL = "https://www.googleapis.com/books/v1/volumes?q=isbn:"
 
@@ -36,14 +33,12 @@ const writer = function (book) {
 
 const getBookInfoAndSave = async function (book, index) {
     try {
-        //retreive book info
+        //retrieve book info
         const config = { headers: { keepAlive: true } }
         var response = (await axios.get(URL + book.ISBN13, config))
         if (!response.data.items) {
             console.log(index, " Empty items response")
             return null
-            // console.log(response.data)
-            // throw new Error("response.data is empty")
         }
         response = response.data.items[0]
         book.publisher = response.volumeInfo.publisher
@@ -60,7 +55,7 @@ const getBookInfoAndSave = async function (book, index) {
         book.language = response.volumeInfo.language
         book.tags = response.volumeInfo.categories
         book.subtitle = response.volumeInfo.subtitle
-        //write into file 
+        //write into file
         writer(JSON.stringify(book))
         return book
 

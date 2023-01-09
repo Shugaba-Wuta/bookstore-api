@@ -5,12 +5,13 @@ require('express-async-errors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
-const rateLimiter = require('express-rate-limit');
+// const rateLimiter = require('express-rate-limit');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 const swaggerUI = require("swagger-ui-express")
+const { limitHandler } = require("../utils/generic-utils")
 
 
 //Database
@@ -57,7 +58,7 @@ app.use(mongoSanitize());
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.static('../public'));
-app.use(fileUpload());
+app.use(fileUpload({ limits: { fileSize: Number(process.env.MAX_FILE_SIZE_IN_KB) * 1024 }, limitHandler }));
 app.use(assignSessionID)
 app.use(express.static("../public"))
 

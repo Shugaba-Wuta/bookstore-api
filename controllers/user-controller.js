@@ -1,14 +1,15 @@
 "use strict"
 const { StatusCodes } = require("http-status-codes")
-const { User, Address, Review, } = require("../models")
+const { User, Review, } = require("../models")
+const crypto = require("crypto")
 const path = require("path")
 const fs = require("fs")
-const { BadRequestError, CustomAPIError, NotFoundError, UnauthorizedError, Conflict } = require("../errors")
+const { BadRequestError, NotFoundError, UnauthorizedError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
 const { writeRequestFiles } = require("../utils/user-utils")
 const RESULT_LIMIT = 50
 const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "deletedOn", "deleted"]
-
+const { uploadFileToS3 } = require("../utils/generic-utils")
 
 
 
@@ -51,18 +52,15 @@ const getAllUsers = async (req, res) => {
     const skip = (page - 1) * limit
 
     query = query.limit(limit).skip(skip)
-    try {
-        const dbUser = await query
-        return res.status(StatusCodes.OK).json({ success: true, message: "fectched users", result: dbUser, page: page })
-    } catch (err) {
-        throw err
-    }
+    const dbUser = await query
+    return res.status(StatusCodes.OK).json({ success: true, message: "fetched users", result: dbUser, page: page })
+
 
 
 }
 
 const registerUser = async (req, res) => {
-    // User sign up endpoint. 
+    // User sign up endpoint.
     const { firstName, lastName, middleName, email, password } = req.body
     const dbUser = await User.findOne({ email: email.toLowerCase() })
     if (dbUser) {
@@ -97,24 +95,29 @@ const updateUser = async (req, res) => {
     // Only user can update their account. Elevated updates are done via the staff the interface
     const { _id: userID } = req.params
     const updateParams = {}
-    const imagePath = path.join("uploads", req.user.role, req.user.userID)
+    const imagePath = ["uploads", req.user.role, req.user.userID].join("-")
     const updatableUserTextFields = ["firstName", "lastName", "middleName", "gender"]
-    let avatar
-    if (req.files) {
-        avatar = req.files.avatar
-        if (avatar) {
-            avatar.path = path.join(imagePath, "avatar-profile" + path.extname(avatar.name))
-            updateParams.$set = { "avatar.path": avatar.path }
-            updateParams.$set["avatar.uploadedAt"] = Date.now()
+    const { avatar } = req.files || {}
 
+    if (avatar) {
+        const avatarArray = (avatar instanceof Array) ? avatar : [avatar]
+        if (avatarArray.length > 1) {
+            throw new BadRequestError("Avatar must be a single file")
+        }
+        const docs = avatarArray.map(doc => {
+            var name = [imagePath, crypto.randomBytes(12).toString("hex"), path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+        })
+        let publicUrl = await uploadFileToS3(docs)
+        if (publicUrl.length > 0) {
+            updateParams.$set.avatar = { ...publicUrl[0] }
         }
     }
-    //Fetch and set all updatable text fields from request body  
+
+    //Fetch and set all updatable text fields from request body
     Object.keys(req.body).forEach((reqBody) => {
         if (updatableUserTextFields.includes(reqBody) && req.body[reqBody]) {
             updateParams.$set[reqBody] = req.body[reqBody]
-        } else {
-            console.log(reqBody, req.body[reqBody])
         }
     })
     const dbUser = await User.findOneAndUpdate({ _id: userID, deleted: false }, updateParams, { new: true })
@@ -142,7 +145,7 @@ const removeUser = async (req, res) => {
 }
 
 
-/* 
+/*
 The following section contains the CRUD operation for reviews made by the user.
 */
 
@@ -163,7 +166,7 @@ const updateASingleReviewBySingleUser = async (req, res) => {
     if (!reviewID) {
         throw new BadRequestError("Please provide a user ID ")
     }
-    const { rating, title, comment, verified } = req.body
+    const { rating, title, comment } = req.body
     const updateParam = {}
     if (rating) {
         updateParam.rating = Number(rating)
@@ -210,7 +213,6 @@ const reviewProduct = async (res, req) => {
 }
 const getASingleReviewByUser = async (req, res) => {
     const { reviewID, _id: userID } = req.params
-    const { deleted } = req.params
     const queryObject = {}
     queryObject._id = reviewID
     queryObject.user = userID

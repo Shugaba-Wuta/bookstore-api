@@ -1,14 +1,13 @@
 "use strict"
-const validator = require("validator")
-const mongoose = require("mongoose")
-const { Product, Book } = require("../models")
-const { bookCategory } = require("../config/app-data")
+const { Book } = require("../models")
 const { BadRequestError, NotFoundError } = require("../errors")
 const { StatusCodes } = require("http-status-codes")
 const { PRODUCT_FORBIDDEN_FIELDS } = require("../config/app-data")
 const { RESULT_LIMIT } = require("../config/app-data")
-
-const NONEDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
+const { uploadFileToS3 } = require("../utils/generic-utils")
+const crypto = require("crypto")
+const path = require("path")
+const NON_EDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
 
 const getAllBooks = async (req, res) => {
     const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, query, fields, isbn10, isbn13, issn, sortBy: sort, descending } = req.query
@@ -145,26 +144,58 @@ const getSingleBook = async (req, res) => {
 }
 
 const registerBook = async (req, res) => {
-    Object.keys(NONEDITABLE_FIELDS).forEach(field => {
+    const { images } = req.files || {}
+    let bookPath = ["uploads", req.user.userID].join("-")
+    const imagesArray = (images instanceof Array) ? images : [images]
+    const docs = imagesArray.map(doc => {
+        var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+        return { name, data: doc.data }
+    });
+    const publicUrls = await uploadFileToS3(docs)
+    Object.keys(NON_EDITABLE_FIELDS).forEach(field => {
         delete req.body[field]
     })
     const newBook = new Book(req.body)
+    newBook.images = publicUrls
     await newBook.save()
-    res.status(StatusCodes.CREATED).json({ message: "successufully registered book", success: true, result: [newBook] })
+    res.status(StatusCodes.CREATED).json({ message: "successfully registered book", success: true, result: [newBook] })
 }
 
 const updateBook = async (req, res) => {
-    Object.keys(NONEDITABLE_FIELDS).forEach((field) => {
+    const bookID = req.params._id
+    if (!bookID) {
+        throw new BadRequestError("Please provide a Book ID: _id")
+    }
+    const { images } = req.files || {}
+
+    Object.keys(NON_EDITABLE_FIELDS).forEach((field) => {
         delete req.body[field]
     })
-    const bookID = req.params._id
-    const updatedBook = await Book.findOneAndUpdate({ _id: bookID, deleted: false }, req.body).select(PRODUCT_FORBIDDEN_FIELDS)
+    const updateParams = { $set: req.body }
+    if (images) {
+        let bookPath = ["uploads", "sellers", req.user.userID].join("-")
+        const imagesArray = (images instanceof Array) ? images : [images]
+        const docs = imagesArray.map(doc => {
+            var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+
+        });
+        let publicUrls = await uploadFileToS3(docs)
+        updateParams.$push = { images: { $each: publicUrls } }
+
+    }
+
+    const updatedBook = await Book.findOneAndUpdate({ _id: bookID, deleted: false }, updateParams, { new: true }).select(PRODUCT_FORBIDDEN_FIELDS)
+    if (!updatedBook) {
+        throw new BadRequestError("Please provide a valid Book ID: _id")
+    }
 
     res.status(StatusCodes.OK).json({ message: "Update was successful", success: true, result: [updatedBook] })
 
 }
 const removeBook = async (req, res) => {
     const bookID = req.params._id
+
     const deletedBook = await Book.findOneAndUpdate({ deleted: false, _id: bookID }, { $set: { deleted: true, deletedOn: Date.now() } })
 
     if (!deletedBook) {
@@ -183,7 +214,7 @@ const removeBook = async (req, res) => {
 
 
 /*
-CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOKID
+CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOK_ID
 */
 
 const getAllReviewsOnBook = async (req, res) => {
