@@ -1,27 +1,56 @@
 const mongoose = require("mongoose")
-const { bookCoverType } = require("./Book")
 
-
-
-const cartSchema = new mongoose.Schema({
+const cartItem = new mongoose.Schema({
     productID: {
         type: mongoose.Types.ObjectId,
         ref: "Product",
         required: [true, "Please provide productID"]
     },
-    bookCoverType: {
-        type: String,
-        required: [true, "Please provide the bookCoverType to add product to cart"],
-        enum: {
-            values: bookCoverType,
-            message: `Please provide a book cover type from any of the following values ${bookCoverType}`
-        }
+    quantity: {
+        type: Number,
+        min: 1,
+        default: 1
     },
     sessionID: {
         type: mongoose.Types.ObjectId,
         ref: "Session",
-        required: [true, "Please provide sessionID"]
+        required: [true, "Please provide sessionID for cart Item"]
     },
+    coupon: {
+        type: mongoose.Types.ObjectId,
+        ref: "Coupon"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+})
+cartItem.index({ productID: 1, sessionID: 1 }, { unique: true })
+
+const cartSchema = new mongoose.Schema({
+    products: {
+        type: [cartItem],
+    },
+    person: {
+        type: mongoose.Types.ObjectId,
+        refPath: "personSchemaType"
+    },
+    personSchema: {
+        type: String,
+        default: "User",
+        enum: {
+            values: ["User", "Seller"],
+            message: `Values must be any of the following: ['User', 'Seller']`
+        }
+    },
+    active: {
+        type: Boolean,
+        default: true
+    },
+    sessionID: {
+        type: mongoose.Types.ObjectId,
+        ref: "Session"
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

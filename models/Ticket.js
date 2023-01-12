@@ -79,7 +79,7 @@ const ticketSchema = new mongoose.Schema({
     },
     resolvedAt: {
         type: Date,
-        default: Date.now()
+        default: Date.now
     },
     affectedEndUser: {
         type: [mongoose.Types.ObjectId],
