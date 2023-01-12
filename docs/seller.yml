@@ -295,14 +295,14 @@ components:
             name: minDiscount
             schema:
                 type: number
-            mininmum: 0
+            minimum: 0
             maximum: 100
         maxDiscountParam:
             in: query
             name: maxDiscount
             schema:
                 type: number
-            mininmum: 0
+            minimum: 0
             maximum: 100
         currencyParam:
             in: query
@@ -315,14 +315,14 @@ components:
             name: minPrice
             schema:
                 type: number
-            mininmum: 0
+            minimum: 0
             maximum: 100
         maxPriceParam:
             in: query
             name: maxPrice
             schema:
                 type: number
-            mininmum: 0
+            minimum: 0
             maximum: 100
         languageParam:
             in: query
@@ -418,7 +418,7 @@ components:
                             success:
                                 type: boolean
                                 default: false
-                            messag:
+                            message:
                                 type: string
                             error:
                                 type: boolean
