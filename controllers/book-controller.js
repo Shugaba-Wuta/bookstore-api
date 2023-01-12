@@ -118,8 +118,7 @@ const getAllBooks = async (req, res) => {
 
 }
 const getSingleBook = async (req, res) => {
-    const { _id: bookID } = req.params
-    console.log(req.params._id)
+    const { bookID } = req.params
     const { fields } = req.query
     const findQuery = Book.findOne({ deleted: false, _id: bookID })
 
@@ -162,9 +161,9 @@ const registerBook = async (req, res) => {
 }
 
 const updateBook = async (req, res) => {
-    const bookID = req.params._id
+    const { bookID } = req.params
     if (!bookID) {
-        throw new BadRequestError("Please provide a Book ID: _id")
+        throw new BadRequestError("Please provide a value for field bookID")
     }
     const { images } = req.files || {}
 
@@ -187,14 +186,14 @@ const updateBook = async (req, res) => {
 
     const updatedBook = await Book.findOneAndUpdate({ _id: bookID, deleted: false }, updateParams, { new: true }).select(PRODUCT_FORBIDDEN_FIELDS)
     if (!updatedBook) {
-        throw new BadRequestError("Please provide a valid Book ID: _id")
+        throw new BadRequestError("Please provide a value for field bookID")
     }
 
     res.status(StatusCodes.OK).json({ message: "Update was successful", success: true, result: [updatedBook] })
 
 }
 const removeBook = async (req, res) => {
-    const bookID = req.params._id
+    const { bookID } = req.params
 
     const deletedBook = await Book.findOneAndUpdate({ deleted: false, _id: bookID }, { $set: { deleted: true, deletedOn: Date.now() } })
 
@@ -218,7 +217,7 @@ CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOK_ID
 */
 
 const getAllReviewsOnBook = async (req, res) => {
-    const { _id: bookID } = req.params
+    const { bookID } = req.params
 
 
 

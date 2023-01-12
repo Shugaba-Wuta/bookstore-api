@@ -6,9 +6,9 @@ const { authenticateUser, authorizeRoles, ensureSamePerson } = require("../middl
 
 
 router.route("/").get(getAllSellers).post(registerNewSeller)
-router.route("/:_id").get(getASingleSeller).patch([authorizeRoles("seller", "admin", "staff", "manager"), ensureSamePerson], updateASeller).delete([authorizeRoles("seller", "admin", "staff", "manager"), ensureSamePerson], deleteASeller)
+router.route("/:sellerID").get(getASingleSeller).patch([authorizeRoles("seller", "admin", "staff", "manager"), ensureSamePerson], updateASeller).delete([authorizeRoles("seller", "admin", "staff", "manager"), ensureSamePerson], deleteASeller)
 
-router.route("/:_id/documents").delete(deleteUploadedFiles)
+router.route("/:sellerID/documents").delete(deleteUploadedFiles)
 
 
 

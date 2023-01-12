@@ -16,15 +16,15 @@ router.get("/", getAllBooks)
 
 router.post("/", [authorizeRoles("seller"), ensureSamePerson], registerBook)
 
-router.get("/:_id", getSingleBook)
+router.get("/:bookID", getSingleBook)
 
 
 
-router.patch("/:_id", [authorizeRoles("seller"), ensureSamePerson], updateBook)
+router.patch("/:bookID", [authorizeRoles("seller"), ensureSamePerson], updateBook)
 
 
-router.delete("/:_id", [authorizeRoles("seller"), ensureSamePerson], removeBook)
+router.delete("/:bookID", [authorizeRoles("seller"), ensureSamePerson], removeBook)
 
-router.get("/:_id/reviews", getAllReviewsOnBook)
+router.get("/:bookID/reviews", getAllReviewsOnBook)
 
 module.exports = router

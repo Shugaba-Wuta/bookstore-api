@@ -71,7 +71,7 @@ paths:
                     content:
                         $ref: "#/components/responses/error/content"
 
-    "/api/v1/users/{_id}":
+    "/api/v1/users/{userID}":
         get:
             tags: [Users]
             summary: Get a single user
@@ -180,7 +180,7 @@ paths:
                     description: Server error
                     content:
                         $ref: "#/components/responses/error/content"
-    "/api/v1/user/{_id}/documents":
+    "/api/v1/user/{userID}/documents":
         delete:
             tags: [Users]
             summary: Delete avatar
@@ -257,7 +257,7 @@ components:
     parameters:
         idParam:
             in: path
-            name: _id
+            name: userID
             schema:
                 type: string
             required: true

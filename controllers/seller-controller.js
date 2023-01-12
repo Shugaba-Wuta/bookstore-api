@@ -79,7 +79,7 @@ const registerNewSeller = async (req, res) => {
             })
 }
 const getASingleSeller = async (req, res) => {
-    const { _id: sellerID } = req.params
+    const { sellerID } = req.params
     if (!sellerID) {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }
@@ -92,7 +92,7 @@ const getASingleSeller = async (req, res) => {
 }
 const updateASeller = async (req, res) => {
     //get sellerID from request parameter aka url
-    const { _id: sellerID } = req.params
+    const { sellerID } = req.params
     if (!sellerID) {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }
@@ -151,7 +151,7 @@ const updateASeller = async (req, res) => {
 
 }
 const deleteASeller = async (req, res) => {
-    const { _id: sellerID } = req.params
+    const { sellerID } = req.params
     if (!sellerID) {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }
@@ -163,7 +163,7 @@ const deleteASeller = async (req, res) => {
     res.status(StatusCodes.OK).json({ message: "seller was deleted successfully", success: true })
 }
 const deleteUploadedFiles = async (req, res) => {
-    const { _id: sellerID } = req.params
+    const { sellerID } = req.params
     if (!sellerID) {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }

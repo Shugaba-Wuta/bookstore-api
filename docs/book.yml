@@ -82,14 +82,14 @@ paths:
                     description: Server error
                     content:
                         $ref: "#/components/responses/error/content"
-    "/api/v1/products/books/{_id}":
+    "/api/v1/products/books/{bookID}":
         get:
             tags: [Books]
             summary: Get a single book
-            description: Returns a book that match provided ID _id in path parameter
+            description: Returns a book that match provided ID bookID in path parameter
             parameters:
                 - in: path
-                  name: _id
+                  name: bookID
                   schema:
                       type: string
                   required: true
@@ -118,10 +118,10 @@ paths:
         patch:
             tags: [Books]
             summary: Get a single book
-            description: Returns a book that match provided ID _id in path parameter
+            description: Returns a book that match provided ID bookID in path parameter
             parameters:
                 - in: path
-                  name: _id
+                  name: bookID
                   schema:
                       type: string
                   required: true
@@ -157,10 +157,10 @@ paths:
         delete:
             tags: [Books]
             summary: Delete a single book
-            description: Deletes a book that match provided ID _id in path parameter
+            description: Deletes a book that match provided ID bookID in path parameter
             parameters:
                 - in: path
-                  name: _id
+                  name: bookID
                   schema:
                       type: string
                   required: true

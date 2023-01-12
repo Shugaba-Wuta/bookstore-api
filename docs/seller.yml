@@ -71,7 +71,7 @@ paths:
                     content:
                         $ref: "#/components/responses/error/content"
 
-    "/api/v1/sellers/{_id}":
+    "/api/v1/sellers/{sellerID}":
         get:
             tags: [Sellers]
             summary: Get a single seller
@@ -180,7 +180,7 @@ paths:
                     description: Server error
                     content:
                         $ref: "#/components/responses/error/content"
-    "/api/v1/seller/{_id}/documents":
+    "/api/v1/seller/{sellerID}/documents":
         delete:
             tags: [Sellers]
             summary: Delete document, pictures, avatar
@@ -276,7 +276,7 @@ components:
     parameters:
         idParam:
             in: path
-            name: _id
+            name: sellerID
             schema:
                 type: string
             required: true

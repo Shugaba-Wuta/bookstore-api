@@ -93,7 +93,7 @@ const authorizeRoles = (...roles) => {
 };
 const ensureSamePerson = async (req, res, next) => {
   const tokenUserID = req.user.userID
-  const userParamID = req.params._id
+  const userParamID = req.params.sellerID || req.params.userID
 
   if (userParamID && (userParamID !== tokenUserID)) {
     throw new UnauthenticatedError("Unauthorized, cannot proceed!")

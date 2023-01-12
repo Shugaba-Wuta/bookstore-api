@@ -55,10 +55,10 @@ const login = async (req, res) => {
 
     //Migrate sessionID to the now logged in user
     const oldPayload = req.user
-    let payload, session
+    let payload
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
     if (oldPayload) {
-        session = await Session.findOne({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(query._id) })
+        await Session.findOne({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(query._id) })
         payload = {
             user: {
                 userID: String(query._id),
@@ -84,7 +84,7 @@ const login = async (req, res) => {
         }
     }
 
-    //Recreate access and refresh tokens to be added to response object 
+    //Recreate access and refresh tokens to be added to response object
     const token = await createToken(payload)
     const refreshToken = await createToken(payload, "refresh")
     const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
@@ -157,13 +157,13 @@ const startPasswordResetFlow = async (req, res) => {
     if (isOldOTPValid) {
         return res.status(StatusCodes.OK).json({ message: "Check your email for the OTP", success: true })
     }
-    //If no valid OTP exists, delete any OTP in DB for user and create a new OTP 
+    //If no valid OTP exists, delete any OTP in DB for user and create a new OTP
     await TOTP.deleteMany({ email })
     const dbPerson = await query
     if (!dbPerson) {
         throw new NotFoundError(`Account not found ${email}`)
     }
-    //Generate set OTP 
+    //Generate set OTP
     const otpCode = generateOtpCode(OTP_CODE_LENGTH)
     await TOTP.create({
         email,
@@ -171,7 +171,7 @@ const startPasswordResetFlow = async (req, res) => {
         userType: role[0].toUpperCase() + role.slice(1),
         user: dbPerson._id
     })
-    //send email with the OTP 
+    //send email with the OTP
 
 
 

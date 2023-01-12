@@ -2,7 +2,6 @@
 const { faker } = require("@faker-js/faker")
 const { Seller, Book } = require("../models")
 const { bookCategory } = require("../app-data")
-const fs = require("fs")
 
 
 

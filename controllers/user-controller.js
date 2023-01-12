@@ -79,7 +79,7 @@ const registerUser = async (req, res) => {
 
 
 const getSingleUser = async (req, res) => {
-    const { _id: userID } = req.params
+    const { userID } = req.params
     const dbUser = await User.findOne({ _id: mongoose.Types.ObjectId(userID), deleted: false })
         // Ensure sensitive fields (password, createdAt...) are not returned from DB
         .select(String(FORBIDDEN_FIELDS
@@ -93,7 +93,7 @@ const getSingleUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     // Only user can update their account. Elevated updates are done via the staff the interface
-    const { _id: userID } = req.params
+    const { userID } = req.params
     const updateParams = {}
     const imagePath = ["uploads", req.user.role, req.user.userID].join("-")
     const updatableUserTextFields = ["firstName", "lastName", "middleName", "gender"]
@@ -136,7 +136,7 @@ const updateUser = async (req, res) => {
 }
 
 const removeUser = async (req, res) => {
-    const { _id: userID } = req.params
+    const { userID } = req.params
     const userInDB = await User.findOneAndUpdate({ _id: userID, deleted: false }, { deleted: true, deletedOn: Date.now() })
     if (!userInDB) {
         throw new NotFoundError(`No user with the id: ${userID}`)
@@ -152,7 +152,7 @@ The following section contains the CRUD operation for reviews made by the user.
 
 
 const getAllReviewBySingleUser = async (req, res) => {
-    const { _id: userID } = req.params
+    const { userID } = req.params
     if (!userID) {
         throw new BadRequestError("Please provide a valid user ID")
     }
@@ -185,7 +185,7 @@ const updateASingleReviewBySingleUser = async (req, res) => {
 }
 
 const reviewProduct = async (res, req) => {
-    const { _id: userID } = req.params
+    const { userID } = req.params
     const { rating, title, comment, product } = req.body
     const userInDB = await User.findOne({ _id: userID, deleted: false })
     if (!userInDB) {
@@ -212,10 +212,9 @@ const reviewProduct = async (res, req) => {
     res.status(StatusCodes.CREATED).json({ message: "Review created successfully", success: true, result: [newReview] })
 }
 const getASingleReviewByUser = async (req, res) => {
-    const { reviewID, _id: userID } = req.params
-    const queryObject = {}
-    queryObject._id = reviewID
-    queryObject.user = userID
+    const { reviewID, userID } = req.params
+    const queryObject = { id: reviewID, user: userID }
+
 
     const reviewInDB = await Review.findOne(queryObject).select("-verified")
     if (!reviewInDB) {
@@ -225,7 +224,7 @@ const getASingleReviewByUser = async (req, res) => {
     return res.status(StatusCodes.OK).json({ message: "Fetched review", success: true, result: [reviewInDB] })
 }
 const deleteASingleReview = async (req, res) => {
-    const { reviewID, _id: userID } = req.params
+    const { reviewID, userID } = req.params
     await Review.findOneAndUpdate({ _id: reviewID, user: userID }, { deleted: true })
     res.status(StatusCodes.OK).json({ message: "Deleted review successfully", success: true, result: [] })
 }
