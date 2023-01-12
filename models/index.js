@@ -1,4 +1,4 @@
-const Book = require("./Book")
+const { Book } = require("./Book")
 const Department = require("./Department")
 const Order = require("./Order")
 const Product = require("./Product")

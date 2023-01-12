@@ -145,4 +145,4 @@ BookSchema.index(
 )
 BookSchema.index({ seller: 1, ISBN10: 1, ISBN13: 1, ISSN: 1 }, { unique: true })
 
-module.exports = Product.discriminator("Book", BookSchema)
+module.exports = { Book: Product.discriminator("Book", BookSchema), bookCoverType }

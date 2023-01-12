@@ -225,17 +225,8 @@ components:
                 seller:
                     type: string
                 price:
-                    type: object
-                    properties:
-                        Hardcover:
-                            type: number
-                            minimum: 0
-                        Papercover:
-                            type: number
-                            minimum: 0
-                        Others:
-                            type: number
-                            minimum: 0
+                    type: number
+                    minimum: 0
                 discount:
                     type: number
                     minimum: 0

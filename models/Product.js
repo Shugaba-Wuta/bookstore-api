@@ -43,8 +43,8 @@ const ProductSchema = new mongoose.Schema(
       ref: "Seller"
     },
     price: {
-      type: Object,
-      of: Number,
+      type: Number,
+      min: 0,
       required: [true, "Please provide a price for product"]
     },
     currency: {

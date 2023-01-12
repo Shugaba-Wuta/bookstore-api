@@ -35,10 +35,8 @@ const createBook = async () => {
                 book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 1)]
                 book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
-                book.price = {}
-                book.format.forEach((format) => {
-                    book.price[`${format}`] = Math.random() * 10000
-                })
+                book.price = Math.random() * 10000
+
                 return book
             }
         })
@@ -53,11 +51,6 @@ const createBook = async () => {
 }
 createBook()
 const addBooksToDB = async (number) => {
-    try {
-
-    } catch (err) {
-        throw err
-    }
 
 }
 

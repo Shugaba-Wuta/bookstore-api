@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
 const bcrypt = require("bcryptjs")
-const { CustomAPIError } = require("../errors")
 const { MAX_OTP_TIME_IN_SECONDS } = require("../config/app-data")
 
 const totpSchema = mongoose.Schema({
