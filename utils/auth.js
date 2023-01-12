@@ -6,7 +6,7 @@ const crypto = require("crypto")
 const { MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP } = require("../config/app-data")
 
 const createToken = async (payload, type = "token") => {
-    const duration = type === "token" ? process.env.TOKEN_DURATION : process.env.REFRESH_DURATION
+    const duration = type === "token" ? process.env.TOKEN_DURATION : process.env.COOKIE_REFRESH_DURATION
     const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: duration })
     return token
 }

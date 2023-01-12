@@ -6,6 +6,8 @@ const BANK_NAMES = nigerianCommercialBanks.map((item) => {
     return item.name
 })
 const GENDER = ["M", "F", null]
+const { DEFAULT_SELLER_PERMISSION } = require("../config/app-data")
+
 
 const sellerSchema = new mongoose.Schema({
     firstName: {
@@ -123,6 +125,11 @@ const sellerSchema = new mongoose.Schema({
             type: Date
         }
     }],
+    permissions: {
+        type: [String],
+        trim: true,
+        default: DEFAULT_SELLER_PERMISSION
+    }
 
 },
     {

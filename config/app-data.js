@@ -79,9 +79,11 @@ const PRODUCT_FORBIDDEN_FIELDS = { "deleted": 0, "deletedOn": 0, "__v": 0, "comm
 const PRODUCT_DEPARTMENTS = ["Books"]
 const RESULT_LIMIT = 50
 const OTP_CODE_LENGTH = 5
-const MAX_OTP_TIME_IN_SECONDS = 10 * 60 //time in secs 
+const MAX_OTP_TIME_IN_SECONDS = 10 * 60 //time in secs
 const TIME_TOLERANCE_FOR_OTP = 0.5 //Values from 0...1
 
+const DEFAULT_USER_PERMISSION = ["user:read", "user:write", "purchase", "book:read", "book:review", "seller:read:basic"]
+const DEFAULT_SELLER_PERMISSION = ["seller:read", "seller:write", "purchase", "user:read", "book:read", "book:write", "book:review", "coupon:write", "coupon:read", "ticket:read", "ticket:write"]
 
 
 
@@ -89,4 +91,4 @@ const TIME_TOLERANCE_FOR_OTP = 0.5 //Values from 0...1
 
 
 
-module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP }
+module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEFAULT_USER_PERMISSION, DEFAULT_SELLER_PERMISSION }

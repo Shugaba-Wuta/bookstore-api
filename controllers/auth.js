@@ -5,7 +5,6 @@ const { BadRequestError, NotFoundError, UnauthenticatedError } = require("../err
 const { User, Session, Staff, Seller, TOTP } = require("../models")
 const { StatusCodes } = require("http-status-codes")
 const { createToken, generateOtpCode, isOTPValid } = require("../utils/auth")
-const mongoose = require("mongoose")
 const { OTP_CODE_LENGTH } = require("../config/app-data")
 
 
@@ -15,9 +14,8 @@ const { OTP_CODE_LENGTH } = require("../config/app-data")
 
 
 const login = async (req, res) => {
-    //
-    //Check if DB record match provided credentials
-    //
+    /*Check if DB record match provided credentials*/
+
     let { email, password, role } = req.body
     //Get and format role of user
     if (!role) {
@@ -29,26 +27,26 @@ const login = async (req, res) => {
         throw new BadRequestError("Please provide email and password")
     }
     email = email.trim().toLowerCase()
-    var query
+    var person
     switch (role) {
         case "user":
-            query = await User.findOne({ email: email, deleted: false })
+            person = await User.findOne({ email: email, deleted: false })
             break
         case "seller":
-            query = await Seller.findOne({ email: email, deleted: false })
+            person = await Seller.findOne({ email: email, deleted: false })
             break
         case "admin":
-            query = await Staff.findOne({ email: email, deleted: false })
+            person = await Staff.findOne({ email: email, deleted: false })
             break
         case "staff":
-            query = await Staff.findOne({ email: email, deleted: false })
+            person = await Staff.findOne({ email: email, deleted: false })
             break
         default:
-            throw new BadRequestError("Please provide a valid user role")
+            throw new BadRequestError("Please provide a valid role")
     }
 
     //Ensure passwords match
-    const isPasswordMatch = query ? await query.comparePassword(password) : false
+    const isPasswordMatch = person ? await person.comparePassword(password) : false
     if (!isPasswordMatch) {
         throw new NotFoundError("email and password does not match any record")
     }
@@ -58,13 +56,14 @@ const login = async (req, res) => {
     let payload
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
     if (oldPayload) {
-        await Session.findOne({ _id: oldPayload.sessionID }, { user: mongoose.Types.ObjectId(query._id) })
+        await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id })
         payload = {
             user: {
-                userID: String(query._id),
-                fullName: query.fullName,
-                role: query.role,
-                sessionID: oldPayload.sessionID
+                userID: String(person._id),
+                fullName: person.fullName,
+                role: person.role,
+                sessionID: oldPayload.sessionID,
+                permissions: person.permissions
             }
         }
 
@@ -72,23 +71,23 @@ const login = async (req, res) => {
         const session = await new Session({
             IP: req.ip,
             userAgent: req.get("user-agent")
-
         }).save()
         payload = {
             user: {
-                fullName: query.fullName,
-                userID: String(query._id),
-                role: query.role,
-                sessionID: session._id
+                fullName: person.fullName,
+                userID: String(person._id),
+                role: person.role,
+                sessionID: session._id,
+                permissions: person.permissions
             }
         }
     }
 
     //Recreate access and refresh tokens to be added to response object
     const token = await createToken(payload)
-    const refreshToken = await createToken(payload, "refresh")
-    const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
-    res.cookie("refreshToken", refreshToken, { maxAge: refreshDuration, signed: true, httpOnly: true, secured: true })
+    const cookieToken = await createToken(payload, "refresh")
+    const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
+    res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true })
 
 
     return res.status(StatusCodes.OK).json({ accessToken: token, userID: payload.user.userID })
@@ -104,8 +103,8 @@ const newTokenFromRefresh = async (req, res) => {
         token = authHeader.split(' ')[1];
     }
     // check cookies
-    else if (req.signedCookies.refreshToken) {
-        token = req.signedCookies.refreshToken;
+    else if (req.signedCookies.cookieToken) {
+        token = req.signedCookies.cookieToken;
     }
     if (!token) {
         throw new UnauthenticatedError("Please log in")
@@ -119,9 +118,10 @@ const newTokenFromRefresh = async (req, res) => {
     throw UnauthenticatedError("Please login to refresh access tokens")
 }
 const logout = async (req, res) => {
-    res.clearCookie("refreshToken")
+    res.clearCookie("cookieToken")
     res.status(StatusCodes.OK).json({ message: "logged out successful", success: true, })
 }
+
 const startPasswordResetFlow = async (req, res) => {
     const { email, role } = req.body
     if (!email) {
@@ -130,19 +130,19 @@ const startPasswordResetFlow = async (req, res) => {
     if (!role) {
         throw new BadRequestError(`Required field missing: 'role'`)
     }
-    let query
+    let person
     switch (role) {
         case "seller":
-            query = Seller.findOne({ deleted: false, email, verifiedEmail: true })
+            person = Seller.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "user":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "staff":
-            query = Staff.findOne({ deleted: false, email, verifiedEmail: true })
+            person = Staff.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "admin":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         default:
             throw new BadRequestError('Invalid role provided')
@@ -159,7 +159,7 @@ const startPasswordResetFlow = async (req, res) => {
     }
     //If no valid OTP exists, delete any OTP in DB for user and create a new OTP
     await TOTP.deleteMany({ email })
-    const dbPerson = await query
+    const dbPerson = await person
     if (!dbPerson) {
         throw new NotFoundError(`Account not found ${email}`)
     }
@@ -172,6 +172,7 @@ const startPasswordResetFlow = async (req, res) => {
         user: dbPerson._id
     })
     //send email with the OTP
+    //send otp via mail()
 
 
 
@@ -184,24 +185,24 @@ const resetPassword = async (req, res) => {
     if (!otp) throw new BadRequestError(`Required field missing: 'otp' `)
     if (!newPassword) throw new BadRequestError(`Required field missing: 'newPassword'`)
 
-    let query
+    let person
     switch (role) {
         case "seller":
-            query = Seller.findOne({ deleted: false, email, verifiedEmail: true })
+            person = Seller.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "user":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "staff":
-            query = Staff.findOne({ deleted: false, email, verifiedEmail: true })
+            person = Staff.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "admin":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         default:
             throw new BadRequestError('Invalid role provided')
     }
-    const dbPerson = await query
+    const dbPerson = await person
     if (!dbPerson) {
         throw new NotFoundError(`Account not found ${email}`)
     }
@@ -217,24 +218,24 @@ const changeEmail = async (req, res) => {
     if (!email) throw new BadRequestError(`Required field missing: 'email'`)
     if (!role) throw new BadRequestError(`Required field missing: 'role' `)
 
-    let query
+    let person
     switch (role) {
         case "seller":
-            query = Seller.findOne({ deleted: false, email, verifiedEmail: true },)
+            person = Seller.findOne({ deleted: false, email, verifiedEmail: true },)
             break
         case "user":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "staff":
-            query = Staff.findOne({ deleted: false, email, verifiedEmail: true })
+            person = Staff.findOne({ deleted: false, email, verifiedEmail: true })
             break
         case "admin":
-            query = User.findOne({ deleted: false, email, verifiedEmail: true })
+            person = User.findOne({ deleted: false, email, verifiedEmail: true })
             break
         default:
             throw new BadRequestError('Invalid role provided')
     }
-    if (!query) {
+    if (!person) {
         throw new NotFoundError(`No record matched ${email}`)
     }
     return res.status(StatusCodes.OK).json({ message: "Email has been" })

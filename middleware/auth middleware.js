@@ -17,8 +17,8 @@ const assignSessionID = async (req, res, next) => {
     token = authHeader.split(' ')[1];
   }
   // check cookies
-  else if (req.signedCookies.refreshToken) {
-    token = req.signedCookies.refreshToken;
+  else if (req.signedCookies.cookieToken) {
+    token = req.signedCookies.cookieToken;
   }
   //Check if token is valid and issue another token if token is not valid.
   let payload
@@ -31,9 +31,9 @@ const assignSessionID = async (req, res, next) => {
       IP: req.ip
     }).save()
     payload = { user: { sessionID: String(newSession._id), userID: null, role: null, fullName: null } }
-    const refreshToken = await createToken(payload, "refresh")
-    const refreshDuration = ms(process.env.REFRESH_DURATION) || 3 * 24 * 60 * 60
-    res.cookie("refreshToken", refreshToken, { maxAge: refreshDuration, signed: true, httpOnly: true, secured: true })
+    const cookieToken = await createToken(payload, "refresh")
+    const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
+    res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true })
 
 
 
@@ -58,8 +58,8 @@ const authenticateUser = async (req, res, next) => {
     token = authHeader.split(' ')[1];
   }
   // check cookies
-  else if (req.signedCookies.refreshToken) {
-    token = req.signedCookies.refreshToken;
+  else if (req.signedCookies.cookieToken) {
+    token = req.signedCookies.cookieToken;
   }
   try {
     var payload = isTokenValid(token);

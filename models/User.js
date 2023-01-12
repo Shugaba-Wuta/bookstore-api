@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 
 
 const GENDER = ["M", "F", null]
+const { DEFAULT_USER_PERMISSION } = require("../config/app-data")
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -57,7 +58,13 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    default: "user"
+    default: "user",
+    trim: true
+  },
+  permissions: {
+    type: [String],
+    trim: true,
+    default: DEFAULT_USER_PERMISSION
   },
   deleted: {
     type: Boolean,
