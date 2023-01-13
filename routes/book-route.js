@@ -1,9 +1,10 @@
 
 
 const express = require("express")
+const guard = require("express-jwt-permissions")()
 
 const { getAllBooks, getSingleBook, removeBook, registerBook, updateBook, getAllReviewsOnBook } = require("../controllers/book-controller")
-const { authorizeRoles, ensureSamePerson } = require("../middleware/auth middleware")
+const { isPersonAuthorized } = require("../middleware/auth middleware")
 
 
 
@@ -14,16 +15,16 @@ const router = express.Router()
 router.get("/", getAllBooks)
 
 
-router.post("/", [authorizeRoles("seller"), ensureSamePerson], registerBook)
+router.post("/", [guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], registerBook)
 
 router.get("/:bookID", getSingleBook)
 
 
 
-router.patch("/:bookID", [authorizeRoles("seller"), ensureSamePerson], updateBook)
+router.patch("/:bookID", [guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], updateBook)
 
 
-router.delete("/:bookID", [authorizeRoles("seller"), ensureSamePerson], removeBook)
+router.delete("/:bookID", [guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], removeBook)
 
 router.get("/:bookID/reviews", getAllReviewsOnBook)
 

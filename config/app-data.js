@@ -86,9 +86,12 @@ const DEFAULT_USER_PERMISSION = ["user:read", "user:write", "purchase", "book:re
 const DEFAULT_SELLER_PERMISSION = ["seller:read", "seller:write", "purchase", "user:read", "book:read", "book:write", "book:review", "coupon:write", "coupon:read", "ticket:read", "ticket:write"]
 
 
+const SUPER_ROLES = ["admin", "staff"]
 
 
 
 
 
-module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEFAULT_USER_PERMISSION, DEFAULT_SELLER_PERMISSION }
+
+
+module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEFAULT_USER_PERMISSION, DEFAULT_SELLER_PERMISSION, SUPER_ROLES }

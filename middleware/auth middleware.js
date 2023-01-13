@@ -2,14 +2,13 @@ const CustomError = require('../errors');
 const { Session } = require('../models');
 const ms = require("ms")
 
-const { UnauthenticatedError } = require("../errors")
+const { UnauthorizedError } = require("../errors")
 const { isTokenValid, createToken } = require('../utils/auth');
-
-// const elevatedRoles = ["admin", "manager", "staff"]
+const { SUPER_ROLES } = require("../config/app-data")
 
 const assignSessionID = async (req, res, next) => {
   let token;
-  //Look for token (bearer or refresh)
+  //Look for token (bearer or refreshCookie)
   // check header
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer')) {
@@ -30,7 +29,7 @@ const assignSessionID = async (req, res, next) => {
       userAgent: req.get('user-agent'),
       IP: req.ip
     }).save()
-    payload = { user: { sessionID: String(newSession._id), userID: null, role: null, fullName: null } }
+    payload = { user: { sessionID: String(newSession._id), userID: null, role: null, fullName: null, permissions: [] } }
     const cookieToken = await createToken(payload, "refresh")
     const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
     res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true })
@@ -43,6 +42,7 @@ const assignSessionID = async (req, res, next) => {
       role: payload.user.role,
       fullName: payload.user.fullName,
       sessionID: payload.user.sessionID,
+      permissions: payload.user.permissions
     };
     console.log("Session ID: ", payload.user.sessionID)
     next()
@@ -70,6 +70,7 @@ const authenticateUser = async (req, res, next) => {
       role: payload.user.role,
       fullName: payload.user.fullName,
       sessionID: payload.user.sessionID,
+      permissions: payload.user.permissions
     };
 
   } catch (error) {
@@ -91,15 +92,18 @@ const authorizeRoles = (...roles) => {
     next();
   };
 };
-const ensureSamePerson = async (req, res, next) => {
+const isPersonAuthorized = async (req, res, next) => {
   const tokenUserID = req.user.userID
   const userParamID = req.params.sellerID || req.params.userID
 
-  if (userParamID && (userParamID !== tokenUserID)) {
-    throw new UnauthenticatedError("Unauthorized, cannot proceed!")
+
+  if (userParamID === tokenUserID || SUPER_ROLES.includes(req.user.role)) {
+    return next()
   }
 
-  return next()
+
+  throw new UnauthorizedError("Unauthorized, cannot proceed!")
 }
 
-module.exports = { authenticateUser, authorizeRoles, assignSessionID, ensureSamePerson };
+
+module.exports = { authenticateUser, authorizeRoles, assignSessionID, isPersonAuthorized };

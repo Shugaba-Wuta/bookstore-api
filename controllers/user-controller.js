@@ -7,7 +7,7 @@ const { BadRequestError, NotFoundError, UnauthorizedError, Conflict } = require(
 const mongoose = require("mongoose")
 const RESULT_LIMIT = 50
 const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "deletedOn", "deleted", "permissions"]
-const DEFAULT_USER_SORT_OPTIONS = ["firstName", "createdAt"]
+const DEFAULT_USER_SORT_OPTIONS = { "firstName": 1, "createdAt": 1 }
 const POSSIBLE_USER_SORT_OPTIONS = ["createdAt", "email", "firstName", "lastName", "middleName"]
 const { uploadFileToS3 } = require("../utils/generic-utils")
 
