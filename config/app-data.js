@@ -73,7 +73,7 @@ const nigerianCommercialBanks = [
     { id: null, name: null, code: null }
 ]
 
-const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0 }
+const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0, "permissions": 0 }
 const PRODUCT_FORBIDDEN_FIELDS = { "deleted": 0, "deletedOn": 0, "__v": 0, "commission": 0, "kind": 0 }
 
 const PRODUCT_DEPARTMENTS = ["Books"]

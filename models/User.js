@@ -100,6 +100,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.virtual("fullName").get(function () {
   return ([this.firstName, this.middleName, this.lastName]).filter((item) => { return item && item.length > 0 }).join(" ")
 })
-userSchema.index({ "firstName": "text", "lastName": "text", "middleName": "text" })
+userSchema.index({ "firstName": "text", "lastName": "text", "middleName": "text", "createdAt": "text", "email": "text" })
 module.exports = mongoose.model("User", userSchema)
 

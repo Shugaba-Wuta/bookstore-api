@@ -3,12 +3,12 @@ const { StatusCodes } = require("http-status-codes")
 const { User, Review, } = require("../models")
 const crypto = require("crypto")
 const path = require("path")
-const fs = require("fs")
 const { BadRequestError, NotFoundError, UnauthorizedError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
-const { writeRequestFiles } = require("../utils/user-utils")
 const RESULT_LIMIT = 50
-const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "deletedOn", "deleted"]
+const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "deletedOn", "deleted", "permissions"]
+const DEFAULT_USER_SORT_OPTIONS = ["firstName", "createdAt"]
+const POSSIBLE_USER_SORT_OPTIONS = ["createdAt", "email", "firstName", "lastName", "middleName"]
 const { uploadFileToS3 } = require("../utils/generic-utils")
 
 
@@ -19,19 +19,17 @@ const getAllUsers = async (req, res) => {
     const queryObject = { deleted: false }
     let query = User.find(queryObject)
 
-    if (sort && !queryString) {
-        const DEFAULT_SORT = "firstName createdAt"
-        const finalSortList = (sort) => {
-            const SORT_OPTIONS = ["createdAt", "email", "firstName", "lastName", "middleName"]
-                .flatMap((item) => { return [item, `-${item}`] })
-            const sortList = sort.replace(/\s/g, "").split(",")
-            const newSortList = sortList.filter((sort) => {
-                return SORT_OPTIONS.includes(sort)
-            })
-            return newSortList.join(" ")
-        }
-        const finalSort = finalSortList(sort)
-        query = query.sort(finalSort || DEFAULT_SORT)
+
+    if (queryString) {
+        queryObject.$text = { $search: queryString }
+        query = User.find(queryObject)
+        query.sort({ $meta: "textScore" })
+    } else {
+        query.sort(DEFAULT_USER_SORT_OPTIONS)
+    }
+    if (sort) {
+        const sortArray = (sort instanceof Array) ? sort : [sort]
+        query.sort(sortArray.filter(item => { return POSSIBLE_USER_SORT_OPTIONS.includes(item) }))
     }
     if (fields) {
         const finalQueryFields = fields.replace(/\s/g, "")
@@ -54,8 +52,6 @@ const getAllUsers = async (req, res) => {
     query = query.limit(limit).skip(skip)
     const dbUser = await query
     return res.status(StatusCodes.OK).json({ success: true, message: "fetched users", result: dbUser, page: page })
-
-
 
 }
 
@@ -123,14 +119,6 @@ const updateUser = async (req, res) => {
     const dbUser = await User.findOneAndUpdate({ _id: userID, deleted: false }, updateParams, { new: true })
     if (!dbUser) {
         throw new NotFoundError(`No user with the id: ${userID}`)
-    }
-    if (avatar) {
-        fs.mkdir(imagePath, { recursive: true }, async (err) => {
-            if (err) {
-                throw err
-            }
-            await writeRequestFiles(avatar, avatar.path)
-        })
     }
     res.status(StatusCodes.OK).json({ message: "user update was successful", success: true, result: dbUser })
 }

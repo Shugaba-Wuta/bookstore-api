@@ -22,6 +22,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.msg = `No item found with id: ${err.value}`;
     customError.statusCode = StatusCodes.NOT_FOUND;
   }
+  if (err.code === "permission_denied") {
+    customError.msg = "Unauthorized access to this route."
+    customError.code = StatusCodes.FORBIDDEN
+  }
 
   return res.status(customError.statusCode).json({
     success: false,
