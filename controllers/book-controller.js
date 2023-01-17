@@ -110,9 +110,7 @@ const getAllBooks = async (req, res) => {
     findQuery = findQuery.limit(limit).skip(skip)
 
     const booksInDB = await findQuery
-    if (booksInDB.length < 1) {
-        throw new NotFoundError("No book found")
-    }
+
 
     return res.status(StatusCodes.OK).json({ message: "Fetched books", success: true, result: booksInDB })
 

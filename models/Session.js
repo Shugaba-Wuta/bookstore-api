@@ -3,11 +3,16 @@ const mongoose = require("mongoose")
 const sessionSchema = mongoose.Schema({
     user: {
         type: mongoose.Types.ObjectId,
-        ref: "User"
+        refPath: "userModel"
     },
-    order: {
-        type: mongoose.Types.ObjectId,
-        ref: "Order"
+    userModel: {
+        required: true,
+        type: String,
+        enum: {
+            values: ["User", "Seller", "Admin", "Staff"]
+        },
+        default: "User"
+
     },
     IP: {
         type: String,

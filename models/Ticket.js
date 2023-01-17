@@ -46,7 +46,7 @@ const ticketSchema = new mongoose.Schema({
     },
     product: {
         type: mongoose.Types.ObjectId,
-        ref: "Product"
+        ref: "Book"
     },
     status: {
         type: String,

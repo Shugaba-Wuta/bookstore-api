@@ -24,7 +24,7 @@ const OrderSchema = mongoose.Schema(
     },
     orderItems: {
       type: [mongoose.Types.ObjectId],
-      ref: "Product"
+      ref: "Book"
     },
     status: {
       type: String,

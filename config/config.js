@@ -24,6 +24,7 @@ const authRouter = require("../routes/auth")
 const sellerRouter = require("../routes/seller-route")
 const swaggerSpec = require("../utils/swagger-docs")
 const homeRouter = require("../routes/index-route")
+const cartRouter = require("../routes/cart-route")
 
 
 
@@ -69,6 +70,7 @@ app.use("/api/v1/users", userRouter)
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/sellers", sellerRouter)
 app.use("/", homeRouter)
+app.use("/api/v1/carts", cartRouter)
 
 //Low-level middlewares
 

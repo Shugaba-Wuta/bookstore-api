@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const mongooseHidden = require("mongoose-hidden")
 
 
 const GENDER = ["M", "F", null]
@@ -29,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   verified: {
     type: String,
-    default: false
+    default: false, hide: true
   },
   verifiedEmail: {
     type: Boolean,
@@ -39,6 +40,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide password'],
     minlength: 8,
+    hide: true,
   },
 
   gender: {
@@ -68,10 +70,12 @@ const userSchema = new mongoose.Schema({
   },
   deleted: {
     type: Boolean,
-    default: false
+    default: false,
+    hide: true
   },
   deletedOn: {
-    type: Date
+    type: Date,
+    hide: true
   },
 
 },

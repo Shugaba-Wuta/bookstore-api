@@ -56,7 +56,9 @@ const login = async (req, res) => {
     let payload
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
     if (oldPayload) {
-        await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id })
+        const personModel = role[0].toUpperCase() + role.slice(1)
+        //TODO #10 Log occurrence where personModel !== oldPayload.
+        await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
         payload = {
             user: {
                 userID: String(person._id),

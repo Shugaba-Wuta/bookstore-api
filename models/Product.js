@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { PRODUCT_DEPARTMENTS } = require("../config/app-data")
 
-const ProductSchema = new mongoose.Schema(
+const productBaseSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -13,7 +13,7 @@ const ProductSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "Please provide a product description"],
-      // minLength: [10, "Product description should be more than 10 characters"],
+      minLength: [10, "Product description should be more than 10 characters"],
       trim: true
     },
     images: [{
@@ -85,11 +85,11 @@ const ProductSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-    discriminatorKey: "kind"
+    discriminatorKey: "kind",
   }
 )
 
-ProductSchema.virtual('reviews', {
+productBaseSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
   foreignField: 'product',
@@ -100,10 +100,11 @@ ProductSchema.virtual('reviews', {
 
 
 
-ProductSchema.pre('remove', async function (next) {
+productBaseSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id });
+  next()
 });
 
 
-module.exports = mongoose.model('Product', ProductSchema);
+module.exports = productBaseSchema;
 

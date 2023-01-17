@@ -29,7 +29,7 @@ const ReviewSchema = mongoose.Schema(
     },
     product: {
       type: mongoose.Schema.ObjectId,
-      ref: 'Product',
+      ref: 'Book',
       required: true,
     },
     verified: {
@@ -74,7 +74,7 @@ ReviewSchema.statics.calculateAverageRating = async function (productId) {
   ]);
 
   try {
-    await this.model('Product').findOneAndUpdate(
+    await this.model('Book').findOneAndUpdate(
       { _id: productId },
       {
         averageRating: Math.ceil(result[0]?.averageRating || 0),

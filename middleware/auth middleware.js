@@ -25,11 +25,11 @@ const assignSessionID = async (req, res, next) => {
     payload = isTokenValid(token)
 
   } catch (err) {
-    const newSession = await Session({
+    const newSession = await new Session({
       userAgent: req.get('user-agent'),
-      IP: req.ip
+      IP: req.ip,
     }).save()
-    payload = { user: { sessionID: String(newSession._id), userID: null, role: null, fullName: null, permissions: [] } }
+    payload = { user: { sessionID: String(newSession._id), userID: null, role: newSession.userModel.toLowerCase(), fullName: null, permissions: [] } }
     const cookieToken = await createToken(payload, "refresh")
     const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
     res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true })
