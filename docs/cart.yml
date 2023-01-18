@@ -1,0 +1,340 @@
+paths:
+    "/api/v1/carts":
+        get:
+            tags: [Carts]
+            summary: Get  carts belonging to a user
+            description: Admin route to return a list of carts that match query
+            parameters:
+                - $ref: "#/components/parameters/activeParam"
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/carts/active":
+        get:
+            tags: [Carts]
+            summary: Get all carts belonging to a user
+            description: User route to return a list of carts that match query
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/carts/cart":
+        post:
+            tags: [Carts]
+            summary: Adds a new product to cart
+            description: Adds/ Increase the quantity of products in the cart
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                productID:
+                                    type: string
+            responses:
+                201:
+                    description: Creates a new record
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        patch:
+            tags: [Carts]
+            summary: Decreases quantity of product in cart
+            description: Decrease the quantity of products in the cart by 1
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                productID:
+                                    type: string
+
+            responses:
+                200:
+                    description: Successfully decreased quantity
+                201:
+                    description: Creates a new record
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        delete:
+            tags: [Carts]
+            summary: Removes an item from the cart
+            description: Delete an item from a cart
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                productID:
+                                    type: string
+            responses:
+                201:
+                    description: Creates a new record
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+components:
+    schemas:
+        Cart:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        properties:
+                            $ref: "#/components/schemas/Book"
+
+                personID:
+                    type: string
+                sessionID:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                id:
+                    type: string
+
+        Book:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Title of book
+                inventory:
+                    type: number
+                department:
+                    type: string
+                    enum: [Books]
+                    default: Books
+                seller:
+                    type: string
+                price:
+                    type: number
+                    minimum: 0
+                discount:
+                    type: number
+                    minimum: 0
+                    default: 0
+                tags:
+                    type: array
+                    items:
+                        type: string
+                shippingFee:
+                    type: number
+                    minimum: 0
+                subtitle:
+                    type: string
+                abstract:
+                    type: string
+                publisher:
+                    type: string
+                authors:
+                    type: array
+                    items:
+                        type: string
+                ISBN10:
+                    type: string
+                ISBN13:
+                    type: string
+                ISSN:
+                    type: string
+                category:
+                    type: string
+                edition:
+                    type: number
+                volume:
+                    type: number
+                publicationDate:
+                    type: string
+                numberOfPages:
+                    type: number
+                dimension:
+                    type: object
+                    properties:
+                        length:
+                            type: number
+                        breadth:
+                            type: number
+                        height:
+                            type: number
+                        unit:
+                            type: string
+                            enum: [inches, cm]
+                format:
+                    type: array
+                    items:
+                        type: string
+                        enum: [Hardback, Paperback, Others]
+                language:
+                    type: string
+                    default: en
+                images:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            url: string
+                            uploadedAt: string
+                            id: string
+                quantity:
+                    type: string
+                sessionID:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                id:
+                    type: string
+    parameters:
+        activeParam:
+            in: query
+            name: active
+            schema:
+                type: boolean
+    responses:
+        success:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                            success:
+                                default: true
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Cart"
+                            error:
+                                type: boolean
+                                default: false
+
+        error:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                default: false
+                            message:
+                                type: string
+                            error:
+                                type: boolean
+                                default: true
