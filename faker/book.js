@@ -1,7 +1,7 @@
 "use strict"
 const { faker } = require("@faker-js/faker")
 const { Seller, Book } = require("../models")
-const { bookCategory } = require("../app-data")
+const { bookCategory } = require("../config/app-data")
 
 
 
@@ -41,8 +41,6 @@ const createBook = async () => {
             }
         })
         await Book.insertMany(dbBooks)
-        console.log(dbBooks.length)
-
 
     })
 

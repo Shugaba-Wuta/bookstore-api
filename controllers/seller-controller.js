@@ -127,7 +127,6 @@ const updateASeller = async (req, res) => {
             return { name, data: doc.data }
         })
         let publicUrls = await uploadFileToS3(docs)
-        // console.log("GovtIssued ID: ", publicUrls)
         updateParams.$push["govtIssuedID"] = { $each: publicUrls }
 
     }

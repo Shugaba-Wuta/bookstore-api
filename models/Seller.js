@@ -5,6 +5,9 @@ const { nigerianCommercialBanks } = require("../config/app-data")
 const BANK_NAMES = nigerianCommercialBanks.map((item) => {
     return item.name
 })
+
+
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { password: true, deleted: true, deletedOn: true } })
 const GENDER = ["M", "F", null]
 const { DEFAULT_SELLER_PERMISSION } = require("../config/app-data")
 
@@ -128,7 +131,8 @@ const sellerSchema = new mongoose.Schema({
     permissions: {
         type: [String],
         trim: true,
-        default: DEFAULT_SELLER_PERMISSION
+        default: DEFAULT_SELLER_PERMISSION,
+        hide: true
     }
 
 },
@@ -157,5 +161,8 @@ sellerSchema.virtual("fullName").get(function () {
     return ([this.firstName, this.middleName, this.lastName]).filter((item) => { return item && item.length > 0 }).join(" ")
 })
 sellerSchema.index({ "firstName": "text", "lastName": "text", "middleName": "text" })
+
+
+sellerSchema.plugin(mongooseHidden)
 
 module.exports = mongoose.model("Seller", sellerSchema)

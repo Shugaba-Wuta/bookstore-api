@@ -43,16 +43,14 @@ const createSeller = async () => {
 
 
 const addSellersToDB = async (number = 10000) => {
-    try {
-        let user
-        for (let i = 0; i <= number; i++) {
-            user = await createSeller()
-            await user.save()
-        }
-        console.log(`Added ${number} to DB`)
-    } catch (err) {
-        throw err
+
+    let user
+    for (let i = 0; i <= number; i++) {
+        user = await createSeller()
+        await user.save()
     }
+    console.log(`Added ${number} to DB`)
+
 
 }
 addSellersToDB()

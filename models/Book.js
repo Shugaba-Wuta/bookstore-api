@@ -2,7 +2,7 @@ const validator = require("validator")
 const mongoose = require("mongoose")
 const mongooseHidden = require("mongoose-hidden")()
 
-const productBaseSchema = require("./Product")
+const productBaseSchema = require("./productSchemaBase")
 const { bookCategory } = require("../config/app-data")
 const { BadRequestError } = require("../errors")
 
@@ -104,15 +104,11 @@ const BookSchema = new mongoose.Schema({
         type: Number,
         min: 0,
         default: 0
-    },
-    unwanted: {
-        default: "Default Unwanted comments",
-        type: String
     }
 
 },
     {
-        timestamps: true, discriminatorKey: "kind",
+        timestamps: true,
         toJSON: { virtuals: true },
         toObject: { virtuals: true }
     }
@@ -150,9 +146,10 @@ BookSchema.index(
 )
 BookSchema.index({ seller: 1, ISBN10: 1, ISBN13: 1, ISSN: 1 }, { unique: true })
 
-BookSchema.plugin(mongooseHidden)
 
 
 
 BookSchema.add(productBaseSchema)
+BookSchema.plugin(mongooseHidden)
+
 module.exports = { Book: mongoose.model("Book", BookSchema), bookCoverType }

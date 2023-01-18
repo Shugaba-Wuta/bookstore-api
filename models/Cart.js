@@ -10,22 +10,17 @@ const cartItem = new mongoose.Schema({
     quantity: {
         type: Number,
         min: 1,
-        // default: 1,
-        required: true,
+        required: [true, "Please provide a value for product `quantity`"],
     },
     sessionID: {
         type: mongoose.Types.ObjectId,
         ref: "Session",
         required: [true, "Please provide sessionID for cart Item."]
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: true
 })
 
 const cartSchema = new mongoose.Schema({
@@ -61,7 +56,7 @@ const cartSchema = new mongoose.Schema({
 
 
 cartSchema.pre("save", async function mergeCart(next) {
-    /* Middleware ensures that all items in the cart have unique bookID/productID */
+    /* Middleware ensures that all items in the cart have unique productID */
     const uniqueProducts = {}
     this.products.forEach(item => {
         const productID = String(item.productID)
@@ -110,9 +105,12 @@ cartSchema.pre("save", function removeZeroQuantityProducts(next) {
     this.products = this.products.filter(item => {
         return item.quantity > 0
     })
-
-
     return next()
+})
+cartSchema.post("save", function deleteEmptyCarts() {
+    if (this.products.length < 1) {
+        this.deleteOne({ _id: this._id })
+    }
 })
 cartSchema.plugin(mongooseHidden)
 module.exports = mongoose.model("Cart", cartSchema)

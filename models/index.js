@@ -1,7 +1,7 @@
 const { Book } = require("./Book")
 const Department = require("./Department")
 const Order = require("./Order")
-const productBaseSchema = require("./Product")
+const productBaseSchema = require("./productSchemaBase")
 const Review = require("./Review")
 const Staff = require("./Staff")
 const StaffBase = require("./StaffBase")

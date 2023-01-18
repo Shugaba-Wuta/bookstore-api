@@ -1,31 +1,27 @@
-const { StatusCodes } = require("http-status-codes/build/cjs/status-codes")
+const { StatusCodes } = require("http-status-codes")
 const { BadRequestError, NotFoundError } = require("../errors")
 const { Cart, Book } = require("../models")
 
 
 
-
-
-
 const addItemToCart = async (req, res) => {
-    const sessionID = req.user.sessionID
-    const personID = req.user.userID
-    const userRole = req.user.role
+    const { userID: personID, sessionID } = req.user
+    const { role: userRole } = req.user
     const personModel = (userRole) ? userRole[0].toUpperCase() + userRole.slice(1) : null
 
-    const { bookID, quantity } = req.body
+    const { productID, quantity } = req.body
 
     //Body validation
-    if (!bookID) {
-        throw new BadRequestError("Please provide a value for bookID")
+    if (!productID) {
+        throw new BadRequestError("Please provide a value for productID")
     }
     if (!quantity) {
         throw new BadRequestError("Please provide a value for quantity")
     }
 
-    const book = await Book.findOne({ _id: bookID, deleted: false })
+    const book = await Book.findOne({ _id: productID, deleted: false })
     if (!book) {
-        throw new NotFoundError(`bookID: ${bookID} does not match any record`)
+        throw new NotFoundError(`productID: ${productID} does not match any record`)
     }
     if (quantity > book.inventory) {
         throw new BadRequestError(`The 'quantity': ${quantity} exceeds inventory`)
@@ -46,28 +42,25 @@ const addItemToCart = async (req, res) => {
         //Creates a new cart because no active cart exists
         newCart = await new Cart({
             products: [{
-                productID: bookID,
+                productID,
                 quantity: quantity,
                 sessionID: sessionID,
-                unwanted: "I am unwanted field "
             }],
-            personID: personID,
+            personID,
             personSchema: (personID) ? personModel : "User",
-            sessionID: sessionID
+            sessionID
         }).save()
     } else if (existingCart.length === 1) {
         //Cart exists, so push the new book to it.
         let r = existingCart[0]
         r.products.push({
-            productID: bookID,
+            productID,
             quantity: quantity,
             sessionID: sessionID,
         })
         newCart = await r.save()
     }
-    let populatedCart = await newCart.populate({ path: "products.productID" })
-
-
+    let populatedCart = await newCart.populate("products.productID")
 
     res.status(StatusCodes.CREATED).json({ result: populatedCart, msg: "Successfully added item to cart", success: true })
 
@@ -75,27 +68,21 @@ const addItemToCart = async (req, res) => {
 
 
 const decreaseCartItemQuantityByOne = async (req, res) => {
-    const sessionID = req.user.sessionID
-    const personID = req.user.userID
-
-    const { bookID } = req.body
+    const { userID: personID, sessionID } = req.user
+    const { productID } = req.body
 
     //Body validation
-    if (!bookID) {
-        throw new BadRequestError("Please provide a value for bookID")
+    if (!productID) {
+        throw new BadRequestError("Please provide a value for productID")
     }
 
-    const book = await Book.findOne({ _id: bookID, deleted: false })
+    const book = await Book.findOne({ _id: productID, deleted: false })
     if (!book) {
-        throw new NotFoundError(`bookID: ${bookID} does not match any record`)
+        throw new NotFoundError(`productID: ${productID} does not match any record`)
     }
 
-    let existingCart
-    if (personID) {
-        existingCart = await Cart.findOne({ active: true, personID: personID })
-    } else if (sessionID) {
-        existingCart = await Cart.findOne({ active: true, sessionID: sessionID })
-    }
+    let existingCart = await Cart.find({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
+
 
     if (!existingCart) {
         throw new BadRequestError("Item must be added to cart before it's quantity can be decreased")
@@ -103,7 +90,7 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
 
 
     existingCart.products.forEach(item => {
-        if (String(item.productID) === bookID)
+        if (String(item.productID) === productID)
             item.quantity -= 1
     })
 
@@ -114,26 +101,42 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
 
 
 }
+const viewAllActiveCart = async (req, res) => {
+    /*Deleting the active query parameter and calling `viewAllCarts` will result in active=true*/
+    delete req.query.active
+
+    await viewAllCarts(req, res)
+}
 
 
 const viewAllCarts = async (req, res) => {
-    const { userID } = req.params
-    const { sessionID, active = true } = req.query
-    if (!userID) {
-        throw new BadRequestError("Please provide a userID in ")
-    }
-    const allCarts = await Cart.find({ personID: userID, active })
-    if (sessionID) {
-        const moreCarts = await Cart.find({ sessionID, active })
-        allCarts.push(...moreCarts)
-    }
-    let result = await allCarts.save()
+    const { userID: personID, sessionID } = req.user
+    const { active = true } = req.query
+    let allCarts = await Cart.find({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
+    res.status(StatusCodes.OK).json({ result: allCarts, msg: "Successfully returned all user carts", success: true })
+}
 
-    result = await result.populate("products.productID")
+const removeAnItemFromActiveCart = async (req, res) => {
+    const { productID } = req.body
+    const { userID: personID, sessionID } = req.user
+    if (!productID) {
+        throw new BadRequestError("`productID` is a required parameter")
+    }
+    let cart = await Cart.findOne({ $or: [{ active: true, personID }, { active: true, sessionID }] })
+    if (!cart) {
+        throw new NotFoundError(`User has no active cart`)
+    }
+    const modifiedProducts = []
+    cart.products.forEach((prod) => {
+        if (String(prod.productID) !== productID)
+            modifiedProducts.push(prod)
+    })
+    cart.products = modifiedProducts
+    await cart.save()
 
-    res.status(StatusCodes.OK).json({ result: result, msg: "Successfully returned all user carts" })
+    res.status(StatusCodes.OK).json({ result: cart, success: true, message: "Successfully removed product from cart" })
 }
 
 
 
-module.exports = { addItemToCart, decreaseCartItemQuantityByOne, viewAllCarts }
+module.exports = { addItemToCart, decreaseCartItemQuantityByOne, viewAllCarts, viewAllActiveCart, removeAnItemFromActiveCart }

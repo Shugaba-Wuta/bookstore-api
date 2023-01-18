@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const mongooseHidden = require("mongoose-hidden")
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { password: true, deleted: true, deletedOn: true } })
 
 
 const GENDER = ["M", "F", null]
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   verified: {
     type: String,
-    default: false, hide: true
+    default: false,
   },
   verifiedEmail: {
     type: Boolean,
@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide password'],
     minlength: 8,
-    hide: true,
   },
 
   gender: {
@@ -66,16 +65,14 @@ const userSchema = new mongoose.Schema({
   permissions: {
     type: [String],
     trim: true,
-    default: DEFAULT_USER_PERMISSION
+    default: DEFAULT_USER_PERMISSION,
   },
   deleted: {
     type: Boolean,
     default: false,
-    hide: true
   },
   deletedOn: {
     type: Date,
-    hide: true
   },
 
 },
@@ -83,7 +80,6 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
     toJSON: { virtuals: true, password: false },
     toObject: { virtuals: true },
-    discriminatorKey: "kind"
   }
 )
 userSchema.pre('save', async function () {
@@ -105,5 +101,11 @@ userSchema.virtual("fullName").get(function () {
   return ([this.firstName, this.middleName, this.lastName]).filter((item) => { return item && item.length > 0 }).join(" ")
 })
 userSchema.index({ "firstName": "text", "lastName": "text", "middleName": "text", "createdAt": "text", "email": "text" })
+
+
+
+userSchema.plugin(mongooseHidden)
+
+
 module.exports = mongoose.model("User", userSchema)
 

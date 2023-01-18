@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const mongooseHidden = require("mongoose-hidden")()
 const { PRODUCT_DEPARTMENTS } = require("../config/app-data")
+const { DEFAULT_COMMISSION } = require("../config/app-data")
 
 const productBaseSchema = new mongoose.Schema(
   {
@@ -13,7 +15,7 @@ const productBaseSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "Please provide a product description"],
-      minLength: [10, "Product description should be more than 10 characters"],
+      // minLength: [10, "Product description should be more than 10 characters"],
       trim: true
     },
     images: [{
@@ -65,13 +67,16 @@ const productBaseSchema = new mongoose.Schema(
     tags: [String],
     commission: {
       type: Number,
-      default: 15,
+      hide: true,
+      default: DEFAULT_COMMISSION,
     },
     deleted: {
       type: Boolean,
-      default: false
+      default: false,
+      hide: true,
     },
     deletedOn: {
+      hide: true,
       type: Date
     },
     shippingFee: {
@@ -85,7 +90,6 @@ const productBaseSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-    discriminatorKey: "kind",
   }
 )
 
@@ -104,6 +108,7 @@ productBaseSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id });
   next()
 });
+productBaseSchema.plugin(mongooseHidden)
 
 
 module.exports = productBaseSchema;

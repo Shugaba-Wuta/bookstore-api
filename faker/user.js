@@ -28,16 +28,13 @@ const createUser = async () => {
 
 
 const addUsersToDB = async (number = 10000) => {
-    try {
-        let user
-        for (let i = 0; i <= number; i++) {
-            user = await createUser()
-            await user.save()
-        }
-        console.log(`Added ${number} to DB`)
-    } catch (err) {
-        throw err
+    let user
+    for (let i = 0; i <= number; i++) {
+        user = await createUser()
+        await user.save()
     }
+    console.log(`Added ${number} to DB`)
+
 
 }
 addUsersToDB()
