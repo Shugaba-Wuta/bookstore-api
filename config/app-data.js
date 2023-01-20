@@ -39,11 +39,7 @@ const bookCategory = [
     'Travel & Holiday Guides'
 ]
 
-const IDGeneratorInfo = {
-    alphabetLabel: "A",
-    maxNumber: 9999,
-    currentNumber: 1,
-}
+
 
 
 const nigerianCommercialBanks = [
@@ -70,7 +66,7 @@ const nigerianCommercialBanks = [
     { id: "21", name: "Unity Bank Plc", code: "215" },
     { id: "22", name: "Wema Bank", code: "035" },
     { id: "23", name: "Zenith Bank", code: "057" },
-    { id: null, name: null, code: null }
+    // { id: null, name: null, code: null }
 ]
 
 const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0, "createdAt": 0, "updatedAt": 0, "__v": 0, "permissions": 0 }
@@ -88,6 +84,7 @@ const DEFAULT_SELLER_PERMISSION = ["seller:read", "seller:write", "purchase", "u
 
 const SUPER_ROLES = ["admin", "staff"]
 const DEFAULT_COMMISSION = 15
+const DEFAULT_TAX = 10
 
 
 
@@ -95,4 +92,4 @@ const DEFAULT_COMMISSION = 15
 
 
 
-module.exports = { bookCategory, IDGeneratorInfo, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEFAULT_USER_PERMISSION, DEFAULT_SELLER_PERMISSION, SUPER_ROLES, DEFAULT_COMMISSION }
+module.exports = { bookCategory, nigerianCommercialBanks, USER_FORBIDDEN_FIELDS, PRODUCT_DEPARTMENTS, PRODUCT_FORBIDDEN_FIELDS, RESULT_LIMIT, OTP_CODE_LENGTH, MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEFAULT_USER_PERMISSION, DEFAULT_SELLER_PERMISSION, SUPER_ROLES, DEFAULT_COMMISSION, DEFAULT_TAX }

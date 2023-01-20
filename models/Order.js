@@ -1,18 +1,48 @@
 const mongoose = require('mongoose');
+const mongooseHidden = require("mongoose-hidden")()
 
-const orderStatus = ['pending', 'failed', 'paid', 'delivered', 'canceled']
+const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Canceled', 'Failed']
+const { cartItem } = require("./Cart")
+const { DEFAULT_TAX } = require("../config/app-data")
+const orderItem = new mongoose.Schema({
+
+  status: {
+    type: String,
+    enum: orderStatus,
+    default: 'Pending',
+  },
+
+})
+orderItem.add(cartItem)
 
 
-const OrderSchema = mongoose.Schema(
+const orderSchema = new mongoose.Schema(
   {
+    cartID: {
+      type: mongoose.Types.ObjectId,
+      ref: "Cart",
+      required: [true, "Please provide a cartID"]
+    },
+    orderItems: {
+      type: [orderItem],
+      required: [true, "Please provide orderItem"]
+    },
     tax: {
       type: Number,
       required: true,
-      default: 10
+      default: DEFAULT_TAX,
+      min: 0
     },
-    shippingFee: {
-      type: Number,
+    personID: {
+      type: mongoose.Types.ObjectId,
       required: true,
+      refPath: "personSchema"
+    },
+    personSchema: {
+      type: String,
+      enum: {
+        values: ["User", "Seller"],
+      }
     },
     subtotal: {
       type: Number,
@@ -22,39 +52,45 @@ const OrderSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    orderItems: {
-      type: [mongoose.Types.ObjectId],
-      ref: "Book"
-    },
-    status: {
-      type: String,
-      enum: orderStatus,
-      default: 'pending',
-    },
-    person: {
-      type: mongoose.Types.ObjectId,
-      ref: "personSchemaType",
-      required: [true, "Please provide the person's ID"]
-    },
-    personSchemaType: {
-      type: String,
-      enum: ["Seller", "User"],
-      required: true
-    },
     sessionID: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "Session",
+      hide: true,
       required: [true, "Please provide a valid SessionID"]
     },
     clientSecret: {
       type: String,
-      required: true,
+      // required: true,
+      hide: true
     },
     paymentIntentId: {
       type: String,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
-module.exports = mongoose.model('Order', OrderSchema);
+orderSchema.pre("save", async function ensureCartPersonIsNotNull(next) {
+  if (!this.personID) {
+    throw new mongoose.Error(`Failed to save order:${this._id} because path: 'personID' is not set or is null`)
+  }
+  return next()
+})
+
+orderSchema.post("save", async function deleteEmptyOrders() {
+  if (this.orderItems.length < 1) {
+
+    this.deleteOne({ id: this._id })
+  }
+})
+
+
+
+
+orderSchema.plugin(mongooseHidden)
+
+module.exports = mongoose.model('Order', orderSchema);

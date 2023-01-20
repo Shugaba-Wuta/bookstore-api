@@ -13,7 +13,7 @@ const Session = require("./Session")
 const TOTP = require("./TOTP")
 const Document = require("./Document")
 const Coupon = require("./Coupon")
-const Cart = require("./Cart")
+const { Cart } = require("./Cart")
 
 
 

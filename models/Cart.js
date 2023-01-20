@@ -46,7 +46,8 @@ const cartSchema = new mongoose.Schema({
     },
     sessionID: {
         type: mongoose.Types.ObjectId,
-        ref: "Session"
+        ref: "Session",
+        hide: true
     }
 }, {
     timestamps: true,
@@ -110,7 +111,9 @@ cartSchema.pre("save", function removeZeroQuantityProducts(next) {
 cartSchema.post("save", function deleteEmptyCarts() {
     if (this.products.length < 1) {
         this.deleteOne({ _id: this._id })
+        throw new mongoose.Error("cart must contain more than one item")
+
     }
 })
 cartSchema.plugin(mongooseHidden)
-module.exports = mongoose.model("Cart", cartSchema)
+module.exports = { Cart: mongoose.model("Cart", cartSchema), cartItem }
