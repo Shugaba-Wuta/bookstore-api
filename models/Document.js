@@ -1,25 +1,24 @@
 const mongoose = require("mongoose")
-const path = require("path")
-const fs = require("fs")
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true } })
+
 
 const documentSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
-    purpose: {
+    refID: {
         type: String,
-        required: true
     },
     url: {
         type: String,
         required: true
     },
-    user: {
+    person: {
         type: mongoose.Types.ObjectId,
-        refPath: "userType",
+        refPath: "personSchema",
     },
-    userType: {
+    personSchema: {
         type: String,
         required: true,
     },
@@ -37,4 +36,6 @@ const documentSchema = new mongoose.Schema({
 })
 
 
+
+documentSchema.plugin(mongooseHidden)
 module.exports = mongoose.model("Document", documentSchema)

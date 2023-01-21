@@ -76,8 +76,8 @@ StaffBaseSchema.pre('save', async function () {
     this.password = await bcrypt.hash(this.password, salt);
 })
 
-StaffBaseSchema.methods.comparePassword = async function (canditatePassword) {
-    const isMatch = await bcrypt.compare(canditatePassword, this.password);
+StaffBaseSchema.methods.comparePassword = async function (candidatePassword) {
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
     return isMatch;
 };
 

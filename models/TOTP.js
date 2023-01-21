@@ -37,8 +37,8 @@ totpSchema.pre("save", async function () {
     this.totp = await bcrypt.hash(this.totp, salt);
 })
 
-totpSchema.methods.compareOTP = async function (canditateOTP) {
-    const isMatch = await bcrypt.compare(canditateOTP, this.totp);
+totpSchema.methods.compareOTP = async function (candidateOTP) {
+    const isMatch = await bcrypt.compare(candidateOTP, this.totp);
     return isMatch;
 };
 totpSchema.index({ createdAt: 1 }, { expireAfterSeconds: MAX_OTP_TIME_IN_SECONDS })
