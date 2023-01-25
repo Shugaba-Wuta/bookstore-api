@@ -103,12 +103,16 @@ sellerSchema.virtual("addresses", {
 sellerSchema.virtual("documents", {
     ref: "Document",
     foreignField: "person",
-    localField: "_id"
+    localField: "_id",
+    match: { deleted: false }
 })
 sellerSchema.virtual("bankAccounts", {
     ref: "BankAccount",
     foreignField: "person",
-    localField: "_id"
+    localField: "_id",
+    match: { deleted: false }
+
+
 })
 sellerSchema.pre('save', async function () {
     if (!this.isModified('password')) return;

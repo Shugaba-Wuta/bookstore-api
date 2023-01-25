@@ -5,7 +5,7 @@ const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: tr
 const statesAndLG = require("../config/states-and-lgs.json")
 const STATES = Object.keys(statesAndLG)
 const LG = []
-statesAndLG.array.forEach(state => {
+STATES.forEach(state => {
     LG.push(...statesAndLG[state])
 
 });

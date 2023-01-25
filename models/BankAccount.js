@@ -1,17 +1,28 @@
 const mongoose = require("mongoose")
-const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true } })
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, subaccount: true, verificationStatus: true } })
 
 const { nigerianCommercialBanks } = require("../config/app-data")
 const BANK_NAMES = nigerianCommercialBanks.map((item) => {
     return item.name
 })
+const accountType = ["personal", "business"]
 
 
 const bankInfoSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
         trim: true
+    },
+    firstName: String,
+    lastName: String,
+    middleName: String,
+    type: {
+        type: String,
+        enum: {
+            values: accountType,
+            message: `accountType must be any of ${accountType}`
+        },
+        required: [true, "accountType is a required field"]
     },
     BVN: {
         type: String,
@@ -30,17 +41,18 @@ const bankInfoSchema = new mongoose.Schema({
     bankName: {
         type: String,
         enum: { values: BANK_NAMES, message: `Please provide a value from any of the following values: ${BANK_NAMES}` },
-        trim: true
+        trim: true,
+        required: [true, "bankName is a required field"]
     },
     code: {
         type: String,
         minLength: 3,
-        required: true,
+        required: [true, "sortCode is a required field"],
         trim: true
     },
     verificationStatus: {
         type: Boolean,
-        default: true
+        default: false
     },
     person: {
         type: mongoose.Types.ObjectId,
@@ -48,9 +60,12 @@ const bankInfoSchema = new mongoose.Schema({
     },
     personSchema: {
         type: String,
-        required: true,
+        default: "Seller"
     },
-    subaccount: String,
+    subaccount: {
+        type: String,
+        required: true
+    },
     deleted: {
         type: Boolean,
         default: false
@@ -61,8 +76,12 @@ const bankInfoSchema = new mongoose.Schema({
     default: {
         type: Boolean,
         default: true
-    }
+    },
 
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 bankInfoSchema.pre("save", async function ensureOnlyOneDefaultBankAccount(next) {
     const samePerson = await this.model("BankAccount").find({ person: this.person, personSchemaType: this.personSchemaType }).lean()

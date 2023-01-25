@@ -3,17 +3,19 @@ const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: tr
 
 
 const documentSchema = new mongoose.Schema({
-    name: {
+    category: {
         type: String,
         required: true
     },
     refID: {
         type: String,
     },
-    url: {
-        type: String,
-        required: true
+    url: String,
+    uploadedAt: {
+        type: Date,
+        default: Date.now
     },
+
     person: {
         type: mongoose.Types.ObjectId,
         refPath: "personSchema",
