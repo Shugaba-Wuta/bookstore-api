@@ -25,17 +25,30 @@ const verifyBankAccount = async ({ account_number, bank_code }) => {
         }
     }
 }
+const isSameName = (accountName, providedName) => {
+    const unitNames = providedName.split(" ")
+    const accountNameLowerCase = String(accountName.toLowerCase())
+    const cond = unitNames.every((name) => {
+        let toMatch = name.toLowerCase().replace(/\s/, "")
+        console.log(toMatch, accountNameLowerCase.match(toMatch), accountNameLowerCase)
+        if (!accountNameLowerCase.match(toMatch)) {
+            console.log("isSameName is false")
+            return false
+        }
+        accountNameLowerCase.replace(name, "")
+        return true
+    })
+    return cond
 
-const isBankAccountValid = async ({ account_number, bank_code, firstName, lastName, name = null }) => {
+}
+
+const isBankAccountValid = async ({ account_number, bank_code, name }) => {
     const verifyInfo = await verifyBankAccount({ account_number, bank_code })
     if (verifyInfo.status) {
         //Basic name check
-        const accountName = String(verifyInfo.data.account_name).toLowerCase()
-        let includesFirstName = accountName.includes(firstName.toLowerCase())
-        let includesLastName = accountName.replace(firstName, "").includes(lastName.toLowerCase())
-        if (includesFirstName && includesLastName)
-            return true
-        else if (name && accountName.includes(name.toLowerCase())) {
+        const accountName = String(verifyInfo.data.account_name)
+        const requestName = name
+        if (isSameName(accountName, requestName)) {
             return true
         }
     }

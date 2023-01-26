@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, subaccount: true, verificationStatus: true } })
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, verificationStatus: true, personSchema: true } })
 
 const { nigerianCommercialBanks } = require("../config/app-data")
 const BANK_NAMES = nigerianCommercialBanks.map((item) => {
@@ -13,8 +13,6 @@ const bankInfoSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    firstName: String,
-    lastName: String,
     middleName: String,
     type: {
         type: String,
@@ -89,6 +87,9 @@ bankInfoSchema.pre("save", async function ensureOnlyOneDefaultBankAccount(next) 
     samePerson.forEach(bankInfo => {
         if (numberOfDefaults > 0 && bankInfo.default) {
             bankInfo.default = false
+        } else if (numberOfDefaults === 0) {
+            numberOfDefaults += 1
+
         }
     })
     next()

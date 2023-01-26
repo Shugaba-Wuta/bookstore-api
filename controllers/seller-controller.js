@@ -258,39 +258,52 @@ SELLER/ BANK ACCOUNTS MANIPULATION
 
 const addBankAccount = async (req, res) => {
     const { sellerID } = req.params
-    const { BVN, accountName: name, email, accountNumber: number, bankName, firstName, lastName, middleName, accountType: type } = req.body
+    const { BVN, accountName: name, email, accountNumber: number, bankName, accountType: type } = req.body
     if (!sellerID) {
         throw new BadRequestError("Please provide a sellerID")
     }
+    if (!BVN) {
+        throw new BadRequestError("Required field `BVN` is missing")
+    }
+    if (!type) {
+        throw new BadRequestError("Required field `accountType` is missing")
+    }
+    if (!email) {
+        throw new BadRequestError("Required field `email` is missing")
+    }
+    if (!number) {
+        throw new BadRequestError("Required field `accountNumber` is missing")
+    }
+    if (!bankName) {
+        throw new BadRequestError("Required field `bankName` is missing")
+    }
+    if (!name) {
+        throw new BadRequestError("Please provide `accountName` ")
+    }
+
+
     const bankDetails = nigerianCommercialBanks.filter(item => {
         return item.name === bankName
     })
     if (!bankDetails) {
         throw new BadRequestError("Please provide a valid bankName")
     }
-    const code = bankDetails.code
+    const code = bankDetails[0].code
     //Verify provided bank Info using pay-stack
-    const bankValid = await isBankAccountValid(number, code, firstName, lastName, name)
+    const bankValid = await isBankAccountValid({ account_number: number, bank_code: code, name, email, type })
     if (!bankValid) {
         throw new BadRequestError("Bank information provided is not valid")
     }
     // Create paystack subaccount
-    const business_name = name || [firstName, lastName].join(" ")
-    const subaccountResponse = await createASubaccount({ bank_code: code, business_name, account_number: number, email })
+    const business_name = name
+    const subaccountResponse = await createASubaccount({ bank_code: code, business_name, account_number: number, email: email })
     if (!subaccountResponse.status) {
         throw new BadRequestError("Could not create a subaccount with provided information")
     }
 
-    var newAccount = new BankAccount({ BVN, number, bankName, code, type, verificationStatus: true, person: sellerID })
-    if (type === "personal") {
-        newAccount.firstName = firstName
-        newAccount.lastName = lastName
-        newAccount.middleName = middleName
-    } else if (type === "business") {
-        newAccount.name = name
-    } else {
-        throw new BadRequestError("Invalid accountType provided")
-    }
+    var newAccount = new BankAccount({ BVN, number, bankName, code, type, verificationStatus: true, person: sellerID, email, accountName: name })
+
+
     newAccount.subaccount = subaccountResponse.data.subaccount_code
 
     newAccount = await newAccount.save()
@@ -299,11 +312,14 @@ const addBankAccount = async (req, res) => {
 
 const updateBankInfo = async (req, res) => {
     const { sellerID } = req.params
-    const { email, setDefault, bankID } = req.body
+    const { email, setDefault, bankID, accountType: type } = req.body
 
 
     if (!sellerID) {
         throw new BadRequestError("sellerID is a required field")
+    }
+    if (!bankID) {
+        throw new BadRequestError("field `bankID` is required")
     }
     const oldBankInfo = await BankAccount.findOne({ person: sellerID, _id: bankID })
     if (!oldBankInfo) {
@@ -313,9 +329,12 @@ const updateBankInfo = async (req, res) => {
     if (email) {
         oldBankInfo.email = email
     }
-    if (setDefault) {
+    if (setDefault && setDefault === true) {
         await BankAccount.updateMany({ person: sellerID, default: true }, { default: false })
         oldBankInfo.default = true
+    }
+    if (type) {
+        oldBankInfo.type = type
     }
     const updatedBankInfo = await oldBankInfo.save()
     res.status(StatusCodes.OK).json({ success: true, result: updatedBankInfo, message: "Successfully updated Bank Account" })

@@ -87,6 +87,8 @@ addressSchema.pre("save", async function ensureOnlyOneDefaultAddress(next) {
     samePerson.forEach(address => {
         if (numberOfDefaults > 0 && address.default) {
             address.default = false
+        } else if (numberOfDefaults === 0) {
+            numberOfDefaults += 1
         }
     })
     next()
