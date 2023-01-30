@@ -52,11 +52,11 @@ const addressSchema = new mongoose.Schema({
         required: [true, "zipCode is a required field"]
     },
     person: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         refPath: "personSchemaType",
     },
     personSchemaType: {
-        type: mongoose.Types.ObjectId,
+        type: String,
         required: [true, "personSchema is missing"],
         enum: {
             values: ["User", "Seller"],

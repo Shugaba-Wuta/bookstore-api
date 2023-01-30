@@ -2,7 +2,7 @@
 const { StatusCodes } = require("http-status-codes")
 const crypto = require("crypto")
 const path = require("path")
-const { Seller, Document, BankAccount, Address } = require("../models")
+const { Seller, Document, BankAccount } = require("../models")
 const { Conflict, NotFoundError, BadRequestError } = require("../errors")
 const { RESULT_LIMIT } = require("../config/app-data")
 const { USER_FORBIDDEN_FIELDS: FORBIDDEN_FIELDS } = require("../config/app-data")
@@ -350,11 +350,13 @@ const deleteBankInfo = async (req, res) => {
     if (!bankID) {
         throw new BadRequestError("bankID is a required body parameter")
     }
-    await BankAccount.findOneAndUpdate({
+    const deletedBank = await BankAccount.findOneAndUpdate({
         person: sellerID, _id: bankID, deleted: false
-    }, { deleted: true, deletedOn: Date.now() })
-
-    res.status(StatusCodes.OK).json({ result: null, message: "Bank Account has been deleted", success: true })
+    }, { deleted: true, deletedOn: Date.now() }, { new: true })
+    if (!deletedBank) {
+        throw new NotFoundError("No record found")
+    }
+    res.status(StatusCodes.OK).json({ deletedBank, result: null, message: "Bank Account has been deleted", success: true })
 }
 
 const getAllSellerBanks = async (req, res) => {
@@ -376,71 +378,6 @@ Seller Address manipulation
 */
 
 
-const addAddress = async (req, res) => {
-    const { sellerID } = req.params
-    const { unit, street, city, LGA, state, zipCode, country = "Nigeria" } = req.body
-    const personSchemaType = "Seller"
-
-    if (!sellerID) {
-        throw new BadRequestError("sellerID is a required field")
-    }
-    const newAddress = await new Address({ unit, street, city, LGA, state, zipCode, personSchemaType, person: sellerID, country }).save()
-
-    res.status(StatusCodes.CREATED).json({ result: newAddress, message: "Successfully created address", success: true })
-}
-
-const updateAddress = async (req, res) => {
-    const { sellerID } = req.params
-    const { unit, street, city, LGA, state, zipCode, addressID, setDefault } = req.body
-    if (!sellerID) {
-        throw new BadRequestError("sellerID is a required field")
-    }
-    if (!addressID) {
-        throw new BadRequestError("addressID is a required field")
-    }
-    const oldAddress = await Address.findOne({ _id: addressID, person: sellerID })
-    if (!oldAddress) {
-        throw new NotFoundError("No address matched request")
-    }
-    const fields = [unit, street, city, LGA, state, zipCode]
-    fields.forEach(field => {
-        if (field) {
-            oldAddress[Object.keys(field)] = field
-        }
-    })
-    if (setDefault) {
-        await Address.updateMany({ person: sellerID, default: true }, { default: false })
-        oldAddress.default = true
-    }
-    const updatedAddress = await oldAddress.save()
-
-    res.status(StatusCodes.OK).json({ result: updatedAddress, message: "Successfully updated address", success: true })
-}
-
-const getAllSellerAddress = async (req, res) => {
-    const { sellerID } = req.params
-    if (!sellerID) {
-        throw new BadRequestError("sellerID is a required field")
-    }
-    const addresses = await Address.find({ person: sellerID, deleted: false })
-    res.status(StatusCodes.OK).json({ result: addresses, message: "Successfully returned address", success: true })
-}
-
-const deleteAddress = async (req, res) => {
-    const { sellerID } = req.params
-    const { addressID } = req.body
-
-    if (!sellerID) {
-        throw new BadRequestError("sellerID is a required field")
-    }
-    if (!addressID) {
-        throw new BadRequestError("addressID is a required field")
-    }
-    await Address.findOneAndUpdate({ _id: addressID, person: sellerID, deleted: false }, { deleted: true, deletedOn: Date.now() })
-    res.status(StatusCodes.OK).json({ result: null, success: true, message: "Successfully deleted address" })
-
-}
-
 
 
 const test = async (req, res) => {
@@ -450,4 +387,4 @@ const test = async (req, res) => {
 }
 
 
-module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedFiles, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks, addAddress, updateAddress, getAllSellerAddress, deleteAddress, test }
+module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedFiles, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks, test }
