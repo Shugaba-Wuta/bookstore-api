@@ -1,0 +1,716 @@
+[
+    {
+        "name": "9mobile 9Payment Service Bank",
+        "code": "120001",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "120001"
+    },
+    {
+        "name": "Abbey Mortgage Bank",
+        "code": "801",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Above Only MFB",
+        "code": "51204",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Abulesoro MFB",
+        "code": "51312",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Access Bank",
+        "code": "044",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "044150149"
+    },
+    {
+        "name": "Access Bank (Diamond)",
+        "code": "063",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "063150162"
+    },
+    {
+        "name": "Accion Microfinance Bank",
+        "code": "602",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Ahmadu Bello University Microfinance Bank",
+        "code": "50036",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Airtel Smartcash PSB",
+        "code": "120004",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "120004"
+    },
+    {
+        "name": "ALAT by WEMA",
+        "code": "035A",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "035150103"
+    },
+    {
+        "name": "Amju Unique MFB",
+        "code": "50926",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "511080896"
+    },
+    {
+        "name": "Aramoko MFB",
+        "code": "50083",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "ASO Savings and Loans",
+        "code": "401",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Astrapolaris MFB LTD",
+        "code": "MFB50094",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Bainescredit MFB",
+        "code": "51229",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Bowen Microfinance Bank",
+        "code": "50931",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Carbon",
+        "code": "565",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "CEMCS Microfinance Bank",
+        "code": "50823",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Chanelle Microfinance Bank Limited",
+        "code": "50171",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "50171"
+    },
+    {
+        "name": "Citibank Nigeria",
+        "code": "023",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "023150005"
+    },
+    {
+        "name": "Corestep MFB",
+        "code": "50204",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Coronation Merchant Bank",
+        "code": "559",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Crescent MFB",
+        "code": "51297",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Dot Microfinance Bank",
+        "code": "50162",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Ecobank Nigeria",
+        "code": "050",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "050150010"
+    },
+    {
+        "name": "Ekimogun MFB",
+        "code": "50263",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Ekondo Microfinance Bank",
+        "code": "098",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Eyowo",
+        "code": "50126",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Fairmoney Microfinance Bank",
+        "code": "51318",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Fidelity Bank",
+        "code": "070",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "070150003"
+    },
+    {
+        "name": "Firmus MFB",
+        "code": "51314",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "First Bank of Nigeria",
+        "code": "011",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "011151003"
+    },
+    {
+        "name": "First City Monument Bank",
+        "code": "214",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "214150018"
+    },
+    {
+        "name": "FSDH Merchant Bank Limited",
+        "code": "501",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Gateway Mortgage Bank LTD",
+        "code": "812",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Globus Bank",
+        "code": "00103",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "103015001"
+    },
+    {
+        "name": "GoMoney",
+        "code": "100022",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Goodnews Microfinance Bank",
+        "code": "50739",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Greenwich Merchant Bank",
+        "code": "562",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Guaranty Trust Bank",
+        "code": "058",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "058152036"
+    },
+    {
+        "name": "Hackman Microfinance Bank",
+        "code": "51251",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Hasal Microfinance Bank",
+        "code": "50383",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Heritage Bank",
+        "code": "030",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "030159992"
+    },
+    {
+        "name": "HopePSB",
+        "code": "120002",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "120002"
+    },
+    {
+        "name": "Ibile Microfinance Bank",
+        "code": "51244",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Ikoyi Osun MFB",
+        "code": "50439",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Ilaro Poly Microfinance Bank",
+        "code": "50442",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Infinity MFB",
+        "code": "50457",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Jaiz Bank",
+        "code": "301",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "301080020"
+    },
+    {
+        "name": "Kadpoly MFB",
+        "code": "50502",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Keystone Bank",
+        "code": "082",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "082150017"
+    },
+    {
+        "name": "Kredi Money MFB LTD",
+        "code": "50200",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Kuda Bank",
+        "code": "50211",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Lagos Building Investment Company Plc.",
+        "code": "90052",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Links MFB",
+        "code": "50549",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Living Trust Mortgage Bank",
+        "code": "031",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Lotus Bank",
+        "code": "303",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Mayfair MFB",
+        "code": "50563",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Mint MFB",
+        "code": "50304",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "MTN Momo PSB",
+        "code": "120003",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "120003"
+    },
+    {
+        "name": "Paga",
+        "code": "100002",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "PalmPay",
+        "code": "999991",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Parallex Bank",
+        "code": "104",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Parkway - ReadyCash",
+        "code": "311",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Paycom",
+        "code": "999992",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Petra Mircofinance Bank Plc",
+        "code": "50746",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Polaris Bank",
+        "code": "076",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "076151006"
+    },
+    {
+        "name": "Polyunwana MFB",
+        "code": "50864",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "null"
+    },
+    {
+        "name": "PremiumTrust Bank",
+        "code": "105",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "000031"
+    },
+    {
+        "name": "Providus Bank",
+        "code": "101",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "QuickFund MFB",
+        "code": "51293",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Rand Merchant Bank",
+        "code": "502",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Refuge Mortgage Bank",
+        "code": "90067",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "ROCKSHIELD MICROFINANCE BANK",
+        "code": "50767",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Rubies MFB",
+        "code": "125",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Safe Haven MFB",
+        "code": "51113",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "51113"
+    },
+    {
+        "name": "Safe Haven Microfinance Bank Limited",
+        "code": "951113",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Shield MFB",
+        "code": "50582",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Solid Rock MFB",
+        "code": "50800",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Sparkle Microfinance Bank",
+        "code": "51310",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Stanbic IBTC Bank",
+        "code": "221",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "221159522"
+    },
+    {
+        "name": "Standard Chartered Bank",
+        "code": "068",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "068150015"
+    },
+    {
+        "name": "Stellas MFB",
+        "code": "51253",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Sterling Bank",
+        "code": "232",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "232150016"
+    },
+    {
+        "name": "Suntrust Bank",
+        "code": "100",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Supreme MFB",
+        "code": "50968",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "TAJ Bank",
+        "code": "302",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Tanadi Microfinance Bank",
+        "code": "090560",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Tangerine Money",
+        "code": "51269",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "TCF MFB",
+        "code": "51211",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Titan Bank",
+        "code": "102",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Titan Paystack",
+        "code": "100039",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Uhuru MFB",
+        "code": "MFB51322",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Unaab Microfinance Bank Limited",
+        "code": "50870",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Unical MFB",
+        "code": "50871",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Unilag Microfinance Bank",
+        "code": "51316",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Union Bank of Nigeria",
+        "code": "032",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "032080474"
+    },
+    {
+        "name": "United Bank For Africa",
+        "code": "033",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "033153513"
+    },
+    {
+        "name": "Unity Bank",
+        "code": "215",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "215154097"
+    },
+    {
+        "name": "VFD Microfinance Bank Limited",
+        "code": "566",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": ""
+    },
+    {
+        "name": "Wema Bank",
+        "code": "035",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "035150103"
+    },
+    {
+        "name": "Zenith Bank",
+        "code": "057",
+        "currency": "NGN",
+        "country": "Nigeria",
+        "longcode": "057150013"
+    }
+]

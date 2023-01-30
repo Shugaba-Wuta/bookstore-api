@@ -66,7 +66,6 @@ const nigerianCommercialBanks = [
     { id: "21", name: "Unity Bank Plc", code: "215" },
     { id: "22", name: "Wema Bank", code: "035" },
     { id: "23", name: "Zenith Bank", code: "057" },
-    // { id: null, name: null, code: null }
 ]
 
 const USER_FORBIDDEN_FIELDS = { "password": 0, "deleted": 0, "deletedOn": 0 }
