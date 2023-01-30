@@ -36,7 +36,7 @@ const createBook = async (limit) => {
                 book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 2)]
                 book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
-                book.price = Math.random() * 10000
+                book.price = (Math.random() * 10000).toFixed(2)
 
                 dbBooks.push(book)
             } else {

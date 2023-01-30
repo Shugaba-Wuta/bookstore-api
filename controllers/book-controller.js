@@ -133,6 +133,12 @@ const getSingleBook = async (req, res) => {
     }
 
     const bookInDB = await findQuery
+    if (!bookInDB) {
+        throw new NotFoundError("bookID does not point to any resource")
+    } else {
+        bookInDB.views += 1
+        await bookInDB.save()
+    }
     return res.status(StatusCodes.OK).json({
         message: "Fetched a single book",
         success: true,
