@@ -6,6 +6,9 @@ const { UnauthenticatedError, BadRequestError, NotFoundError } = require("../err
 
 
 const initiatePay = async (req, res) => {
+    /*Receives user identifier, cart identifier and requests payment URL for the products in the carts.
+    This functionality is only accessible to the use. Admin/ Staff cannot initiatePay on behalf of user.
+    */
 
     const { cartID } = req.params
     const { userID: personID, sessionID } = req.user
