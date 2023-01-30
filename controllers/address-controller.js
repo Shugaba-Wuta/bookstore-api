@@ -7,7 +7,8 @@ const { StatusCodes } = require("http-status-codes")
 
 const addAddress = async (req, res) => {
     const { personID } = req.params
-    const { unit, street, city, LGA, state, zipCode, country = "Nigeria", userType: personSchemaType = "User" } = req.body
+    const { unit, street, city, LGA, state, zipCode, country = "Nigeria", role } = req.body
+    const personSchemaType = role ? String(role[0]).toUpperCase() + String(role).slice(1).toLowerCase() : null
 
     if (!personID) {
         throw new BadRequestError("personID is a required field")
@@ -19,7 +20,7 @@ const addAddress = async (req, res) => {
 
 const updateAddress = async (req, res) => {
     const { personID } = req.params
-    const { unit, street, city, LGA, state, zipCode, addressID, setDefault } = req.body
+    const { addressID, setDefault } = req.body
     if (!personID) {
         throw new BadRequestError("personID is a required field")
     }
@@ -30,10 +31,12 @@ const updateAddress = async (req, res) => {
     if (!oldAddress) {
         throw new NotFoundError("No address matched request")
     }
-    const fields = [unit, street, city, LGA, state, zipCode]
-    fields.forEach(field => {
-        if (field) {
-            oldAddress[Object.keys(field)] = field
+    const fields = req.body
+    delete fields.addressID
+    Object.keys(fields).forEach(field => {
+        if (fields[field]) {
+            console.log(field)
+            oldAddress[field] = fields[field]
         }
     })
     if (setDefault) {
@@ -64,8 +67,13 @@ const deleteAddress = async (req, res) => {
     if (!addressID) {
         throw new BadRequestError("addressID is a required field")
     }
-    await Address.findOneAndUpdate({ _id: addressID, person: personID, deleted: false }, { deleted: true, deletedOn: Date.now() })
+    const deletedAddress = await Address.findOneAndUpdate({ _id: addressID, person: personID, deleted: false }, { deleted: true, deletedOn: Date.now() })
+
+    if (!deletedAddress) {
+        throw new NotFoundError("Address does not exist")
+    }
     res.status(StatusCodes.OK).json({ result: null, success: true, message: "Successfully deleted address" })
+
 
 }
 

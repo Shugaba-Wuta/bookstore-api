@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true } })
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, personSchemaType:true,  } })
 
 
 const statesAndLG = require("../config/states-and-lgs.json")
@@ -35,6 +35,7 @@ const addressSchema = new mongoose.Schema({
     },
     state: {
         type: String,
+        required: [true, "state is a required parameter"],
         trim: [true, "state is a required field for Address"],
         enum: {
             values: STATES,
@@ -57,10 +58,10 @@ const addressSchema = new mongoose.Schema({
     },
     personSchemaType: {
         type: String,
-        required: [true, "personSchema is missing"],
+        required: [true, "role is missing"],
         enum: {
             values: ["User", "Seller"],
-            message: "personSchema should be any of the following values ['User', 'Seller']"
+            message: "role should be any of the following values ['User', 'Seller']"
         },
     },
     default: {
