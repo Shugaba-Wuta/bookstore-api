@@ -262,6 +262,10 @@ const addBankAccount = async (req, res) => {
     if (!sellerID) {
         throw new BadRequestError("Please provide a sellerID")
     }
+    const seller = await Seller.findOne({ deleted: false, _id: sellerID })
+    if (!seller) {
+        throw new NotFoundError("sellerID does not match any record")
+    }
     if (!BVN) {
         throw new BadRequestError("Required field `BVN` is missing")
     }

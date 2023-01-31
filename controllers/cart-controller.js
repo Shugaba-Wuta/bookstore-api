@@ -5,7 +5,7 @@ const { Cart, Book } = require("../models")
 
 
 const addItemToCart = async (req, res) => {
-    const { userID: personID, sessionID } = req.user
+    const { userID: personID, sessionID, } = req.user
     const { role: userRole } = req.user
     const personModel = (userRole) ? userRole[0].toUpperCase() + userRole.slice(1) : null
 
@@ -26,12 +26,8 @@ const addItemToCart = async (req, res) => {
     if (quantity > book.inventory) {
         throw new BadRequestError(`The 'quantity': ${quantity} exceeds inventory`)
     }
-    let existingCart
-    if (personID) {
-        existingCart = await Cart.find({ active: true, personID: personID })
-    } else if (sessionID) {
-        existingCart = await Cart.find({ active: true, sessionID: sessionID })
-    }
+    let existingCart = await Cart.find({ $or: [{ active: true, sessionID }, { active: true, personID }] })
+
 
     //existingCart validation
     var newCart
@@ -58,6 +54,7 @@ const addItemToCart = async (req, res) => {
             quantity: quantity,
             sessionID: sessionID,
         })
+        r.personID = (!r.personID && personID) ? personID : null
         newCart = await r.save()
     }
     let populatedCart = await newCart.populate("products.productID")

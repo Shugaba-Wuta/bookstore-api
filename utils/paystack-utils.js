@@ -84,6 +84,37 @@ const createASubaccount = async ({ bank_code, business_name, account_number }) =
         }
     }
 }
+const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDetails, reference) => {
+    const data = {
+        email,
+        amount: orderTotal,
+        split: {
+            type: "flat",
+            subaccounts: splitPayDetails,
+            bearer_type: "account",
+        }, reference
+    }
+
+    const options = {
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, "Content-Type": "application/json" },
+        method: "POST",
+        baseURL: hostname,
+        url: `/transaction/initialize`,
+        data: JSON.stringify(data)
+    }
+
+    try {
+        const r = await axios(options)
+        return r.data
+
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            return error.response.data
+        } else {
+            throw new CustomAPIError("Unexpected error occurred when verifying account")
+        }
+    }
+}
 
 
-module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount }
+module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit }

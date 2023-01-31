@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken")
 const ms = require("ms")
 const { BadRequestError, NotFoundError, UnauthenticatedError } = require("../errors")
-const { User, Session, Staff, Seller, TOTP } = require("../models")
+const { User, Session, Staff, Seller, TOTP, Cart } = require("../models")
 const { StatusCodes } = require("http-status-codes")
 const { createToken, generateOtpCode, isOTPValid } = require("../utils/auth")
 const { OTP_CODE_LENGTH } = require("../config/app-data")
@@ -59,6 +59,9 @@ const login = async (req, res) => {
         const personModel = role[0].toUpperCase() + role.slice(1)
         //TODO #10 Log occurrence where personModel !== oldPayload.
         await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
+        //Update cart personID with with the authenticated userID
+        await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null }, { personID: person._id, personSchema: personModel })
+        console.log("Updated cart")
         payload = {
             user: {
                 userID: String(person._id),
