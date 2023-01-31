@@ -62,7 +62,7 @@ const orderSchema = new mongoose.Schema({
   ref: {
     type: String,
   },
-  paymentConfirmed: {
+  initiated: {
     type: Boolean,
     default: false
   },

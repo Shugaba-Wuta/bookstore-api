@@ -109,6 +109,7 @@ const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDeta
 
     } catch (error) {
         if (axios.isAxiosError(error)) {
+            console.log(error.response.data)
             return error.response.data
         } else {
             throw new CustomAPIError("Unexpected error occurred when verifying account")

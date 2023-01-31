@@ -10,7 +10,7 @@ const { initiatePay } = require("../controllers/pay-controller")
 
 const router = express.Router()
 
-router.get("/pay/start/:cartID", [guard.check(["purchase"], ["user:read", "user:write"])], initiatePay)
+router.get("/pay/initiate/:cartID", [guard.check(["purchase"], ["user:read", "user:write"])], initiatePay)
 
 
 

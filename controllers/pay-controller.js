@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes")
 const { Cart, Order, BankAccount, User } = require("../models")
-const { UnauthenticatedError, BadRequestError, NotFoundError, UnauthorizedError, CustomAPIError } = require("../errors")
+const { UnauthenticatedError, BadRequestError, NotFoundError, UnauthorizedError, CustomAPIError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
 const { paystackInitiateDynamicMultiSplit } = require("../utils/paystack-utils")
 
@@ -34,12 +34,16 @@ const initiatePay = async (req, res) => {
     if (!cart) {
         throw new NotFoundError(`Cannot find cart belonging to this user`)
     }
-    //Create a new Order.
+    //Create a new Order if no uninitiated Order exists.
     const productPopulateSelect = ["name", "price", "description", "seller", "discount", "images", "shippingFee"]
     let order = await Order.findOne({ cartID, personID }).populate("orderItems.productID", productPopulateSelect)
+
     if (!order) {
         order = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId() }).save()
         await order.populate("orderItems.productID", productPopulateSelect)
+    }
+    if (order.initiated) {
+        throw new Conflict("Checkout has been initiated. Consider verifying the status")
     }
 
     const splitPayDetails = []
@@ -51,11 +55,11 @@ const initiatePay = async (req, res) => {
         const shareInNaira = (discountedUnitPrice * item.quantity + item.productID.shippingFee).toFixed(2)
         splitPayDetails.push({ subaccount, share: shareInNaira * 100 })
     }
-    const initiateResponse = await paystackInitiateDynamicMultiSplit(user.email, order.total * 100, splitPayDetails, order.ref)
-    console.log(initiateResponse)
+    const initiateResponse = await paystackInitiateDynamicMultiSplit(user.email, Math.ceil(order.total * 100), splitPayDetails, order.ref)
     if (!initiateResponse.data)
         throw new CustomAPIError(`The following error occurred while initiating transaction: ${initiateResponse.message}`)
     order.accessCode = initiateResponse.data.access_code
+    order.initiated = true
     await order.save()
     const { authorization_url: authorizationURL, access_code: accessCode, } = initiateResponse.data
 
