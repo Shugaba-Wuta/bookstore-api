@@ -30,9 +30,7 @@ const isSameName = (accountName, providedName) => {
     const accountNameLowerCase = String(accountName.toLowerCase())
     const cond = unitNames.every((name) => {
         let toMatch = name.toLowerCase().replace(/\s/, "")
-        console.log(toMatch, accountNameLowerCase.match(toMatch), accountNameLowerCase)
         if (!accountNameLowerCase.match(toMatch)) {
-            console.log("isSameName is false")
             return false
         }
         accountNameLowerCase.replace(name, "")
@@ -109,7 +107,6 @@ const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDeta
 
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.log(error.response.data)
             return error.response.data
         } else {
             throw new CustomAPIError("Unexpected error occurred when verifying account")

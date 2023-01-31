@@ -61,7 +61,6 @@ const login = async (req, res) => {
         await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
         //Update cart personID with with the authenticated userID
         await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null }, { personID: person._id, personSchema: personModel })
-        console.log("Updated cart")
         payload = {
             user: {
                 userID: String(person._id),

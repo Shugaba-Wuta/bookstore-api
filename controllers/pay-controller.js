@@ -63,7 +63,6 @@ const initiatePay = async (req, res) => {
     await order.save()
     const { authorization_url: authorizationURL, access_code: accessCode, } = initiateResponse.data
 
-    console.log(initiateResponse)
 
 
 

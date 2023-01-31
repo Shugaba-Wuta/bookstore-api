@@ -35,7 +35,6 @@ const updateAddress = async (req, res) => {
     delete fields.addressID
     Object.keys(fields).forEach(field => {
         if (fields[field]) {
-            console.log(field)
             oldAddress[field] = fields[field]
         }
     })
