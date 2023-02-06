@@ -3,7 +3,8 @@ const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { sessionID: 
 
 const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Canceled', 'Failed']
 const { cartItem } = require("./Cart")
-const { DEFAULT_TAX } = require("../config/app-data")
+const { DEFAULT_TAX, DEFAULT_COMMISSION } = require("../config/app-data");
+const { Conflict } = require('../errors');
 const orderItem = new mongoose.Schema({
 
   status: {
@@ -66,7 +67,16 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  accessCode: String
+  transactionSuccessful: {
+    type: Boolean,
+    default: false
+  },
+  accessCode: String,
+  coupon: { type: mongoose.Types.ObjectId, ref: "Coupon" },
+  deliveryAddress: {
+    type: mongoose.Types.ObjectId,
+    ref: "Address"
+  }
 },
   {
     timestamps: true,
@@ -74,6 +84,28 @@ const orderSchema = new mongoose.Schema({
     toObject: { virtuals: true }
   }
 );
+
+orderSchema.virtual("totalInKobo").get(function () {
+  return Math.ceil(this.total * 100)
+}
+);
+
+orderSchema.virtual("meta").get(async function () {
+  const splitPayDetails = []
+  const productQuantity = []
+  // await this.populate("orderItems.productID")
+  for await (const item of this.orderItems) {
+    const { subaccount } = await this.model("BankAccount").findOne({ deleted: false, default: true, person: item.productID.seller })
+    const discountedUnitPrice = item.productID.price * ((100 - item.productID.discount) / 100)
+    const shareInNaira = (discountedUnitPrice * item.quantity + item.productID.discount).toFixed(2)
+    splitPayDetails.push({ subaccount, share: shareInNaira * 100 })
+    //Add the quantity and productID to productQuantity
+    productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
+  }
+  console.log(splitPayDetails)
+  return { splitPayDetails, productQuantity, cartID: this.cartID, orderID: this._id }
+
+})
 
 orderSchema.pre("validate", async function ensureCartPersonIsNotNull(next) {
   if (!this.personID) {
@@ -84,17 +116,64 @@ orderSchema.pre("validate", async function ensureCartPersonIsNotNull(next) {
 
 orderSchema.pre("validate", async function calculateOrderTotal(next) {
   let subtotal = 0
-  let sumOfShipping = 0
-  const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID }).populate("products.productID", ["price", "shippingFee", "discount"])
-  cart.products.forEach(item => {
+  let couponValue = 0
+  await this.populate("coupon")
+  await this.populate("orderItems.productID")
+  const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID })
+  for (const item of cart.products) {
     this.orderItems.push(item)
-    const productPrice = item.productID.price * item.quantity
-    subtotal += (productPrice * (100 - Number(item.productID.discount)) / 100)
-    sumOfShipping += Number(item.productID.shippingFee || 0)
-  })
-  this.subtotal = subtotal.toFixed(2)
+    subtotal += item.itemPrice
 
-  this.total = (this.subtotal * ((this.tax + 100) / 100) + sumOfShipping).toFixed(2)
+    if (!this.coupon) {
+      continue
+    }
+    const coupon = await item.coupon.populate("orders")
+    if (coupon.orders.includes(this._id)) {
+      //Skip because coupon can only be applied once.
+      continue
+    }
+    if (this.coupon.items.includes(item.productID._id)) {
+      //Apply coupon to Coupon.scope === "Book" that is specific to books.
+      if (item.coupon.flat) {
+        couponValue = item.coupon.flat
+      } else {
+        //coupon is of type percentage
+        couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
+      }
+      //adjust the subtotal and itemPrice after adding a coupon on a product
+      subtotal -= item.itemPrice
+      item.itemPrice -= couponValue
+      subtotal += item.itemPrice
+
+    } else if (this.coupon.type === "ORDER") {
+      //Apply coupon to entire cart subtotal, limit this coupon to <= (COMMISSION + TAX) so that sellers share is not affected.
+      if (item.coupon.flat) {
+        couponValue = item.coupon.flat
+        const couponMaxValue = ((DEFAULT_TAX + DEFAULT_COMMISSION) / 100) * subtotal
+        if (couponValue > couponMaxValue) {
+          throw new Conflict(`Amount cannot be settled because coupon exceeds limit of: ${couponMaxValue}`)
+        }
+      } else {
+        //coupon is of type percentage
+        couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
+      }
+      //adjust the subtotal and itemPrice after adding a coupon on a product
+      subtotal -= item.itemPrice
+      item.itemPrice -= couponValue
+      subtotal += item.itemPrice
+      subtotal = (subtotal - couponValue)
+    }
+
+
+  }
+  this.subtotal = subtotal.toFixed(2)
+  this.total = (this.subtotal * ((this.tax + 100) / 100))
+
+
+
+
+
+
 
   return next()
 })
@@ -106,7 +185,6 @@ orderSchema.post("save", async function deleteEmptyOrders() {
     this.deleteOne({ id: this._id })
   }
 })
-
 
 
 

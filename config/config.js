@@ -27,6 +27,7 @@ const homeRouter = require("../routes/index-route")
 const cartRouter = require("../routes/cart-route")
 const payRouter = require("../routes/pay-route")
 const addressRouter = require("../routes/address-route")
+const webhookRouter = require("../routes/webhook-route")
 
 
 
@@ -60,10 +61,12 @@ app.use(morgan("tiny"))
 app.use(mongoSanitize());
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(express.static('../public'));
 app.use(fileUpload({ limits: { fileSize: Number(process.env.MAX_FILE_SIZE_IN_KB) * 1024 }, limitHandler }));
+//ENDPOINTS that do not need sessions. e.g. webhooks, AWS health checker.
+app.use(webhookRouter)
+
+
 app.use(assignSessionID)
-app.use(express.static("../public"))
 
 
 //Register routers

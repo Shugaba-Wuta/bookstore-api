@@ -3,6 +3,9 @@ const { s3Client } = require("./s3-setup")
 const { StatusCodes } = require("http-status-codes")
 const s3ParseUrl = require('s3-url-parser')
 
+const { Book } = require("../models")
+const { CustomAPIError } = require("../errors")
+
 const uploadFileToS3 = async (files, bucket = process.env.AWS_GEN_S3_BUCKET) => {
 
     const urls = []
@@ -53,5 +56,30 @@ const limitHandler = (req, res) => {
 }
 
 
+const addOrDecreaseProductQuantity = async (productQuantity = [], operation = "increment") => {
+    const INC = "increment"
+    const DEC = "decrement"
+    if (![INC, DEC].includes(operation)) {
+        throw new CustomAPIError("Invalid 'operation' defined for addOrDecreaseProductQuantity function")
+    }
+    let multiplier = 1
+    if (operation === DEC) {
+        multiplier = -1
+    }
+    const queryBody = productQuantity.map(item => {
+        return {
+            updateOne: {
+                filter: { _id: item.productID },
+                update: { $inc: { quantity: multiplier * item.quantity } }
+            }
+        }
+    })
+    await Book.bulkWrite(queryBody)
 
-module.exports = { uploadFileToS3, limitHandler, deleteFilesFromS3 }
+
+
+}
+
+
+
+module.exports = { uploadFileToS3, limitHandler, deleteFilesFromS3, addOrDecreaseProductQuantity }

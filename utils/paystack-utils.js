@@ -82,7 +82,7 @@ const createASubaccount = async ({ bank_code, business_name, account_number }) =
         }
     }
 }
-const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDetails, reference) => {
+const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDetails, reference, metadata) => {
     const data = {
         email,
         amount: orderTotal,
@@ -90,7 +90,7 @@ const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDeta
             type: "flat",
             subaccounts: splitPayDetails,
             bearer_type: "account",
-        }, reference
+        }, reference, metadata
     }
 
     const options = {
@@ -107,12 +107,15 @@ const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDeta
 
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            return error.response.data
+            return error.response.data || error.data
         } else {
             throw new CustomAPIError("Unexpected error occurred when verifying account")
         }
     }
 }
+const verifyTransactionStatus = async () => {
+
+}
 
 
-module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit }
+module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit, verifyTransactionStatus }

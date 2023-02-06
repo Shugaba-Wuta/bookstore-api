@@ -2,9 +2,53 @@ const { StatusCodes } = require("http-status-codes")
 const { Cart, Order, BankAccount, User } = require("../models")
 const { UnauthenticatedError, BadRequestError, NotFoundError, UnauthorizedError, CustomAPIError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
+const { addOrDecreaseProductQuantity } = require("../utils/generic-utils")
 const { paystackInitiateDynamicMultiSplit } = require("../utils/paystack-utils")
 
 
+
+const generateOrderSummary = async (req, res) => {
+    /* Create a new order using cartID. Compute the totals
+    */
+    const { cartID } = req.body
+    const { sessionID, userID: personID } = req.user
+    if (!cartID) {
+        throw new BadRequestError("Required parameter: 'cartID' is missing")
+    }
+    if (!personID) {
+        throw new BadRequestError("Required parameter: 'personID' is missing")
+    }
+    const cart = await Cart.findOne({
+        _id: cartID, active: true, personID
+    }).populate("products.productID")
+    if (!cart) {
+        throw new NotFoundError("Cart does not exist")
+    }
+
+    const user = await User.findOne({ _id: personID })
+    if (!user) {
+        throw new NotFoundError("User does not exist")
+    }
+
+    //Create a new Order if no uninitiated Order exists.
+    const productPopulateSelect = ["name", "price", "description", "seller", "discount", "images", "shippingFee"]
+    let order = await Order.findOne({ cartID, personID }).populate("orderItems.productID", productPopulateSelect)
+
+    if (!order) {
+        order = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId() }).save()
+        await order.populate("orderItems.productID", productPopulateSelect)
+    } else {
+        //Change the reference for the order so payment gateway does not reject to initiate transaction
+        //transactionIsFalse(order.ref)
+
+        order.ref = mongoose.Types.ObjectId()
+    }
+    order = await order.save()
+
+
+
+
+}
 
 
 const initiatePay = async (req, res) => {
@@ -28,9 +72,7 @@ const initiatePay = async (req, res) => {
         throw new BadRequestError("Required parameter: 'cartID' is missing")
     }
 
-
-    let cart = await Cart.findOne({ _id: cartID, active: true, personID }).populate("products.productID")
-
+    const cart = await Cart.findOne({ _id: cartID, active: true, personID }).populate("products.productID")
     if (!cart) {
         throw new NotFoundError(`Cannot find cart belonging to this user`)
     }
@@ -46,27 +88,22 @@ const initiatePay = async (req, res) => {
         throw new Conflict("Checkout has been initiated. Consider verifying the status")
     }
 
-    const splitPayDetails = []
-
-    for await (const item of order.orderItems) {
-        const { subaccount } = await BankAccount.findOne({ deleted: false, default: true, person: item.productID.seller })
-        const discountedUnitPrice = item.productID.price * ((100 - item.productID.discount) / 100)
-
-        const shareInNaira = (discountedUnitPrice * item.quantity + item.productID.shippingFee).toFixed(2)
-        splitPayDetails.push({ subaccount, share: shareInNaira * 100 })
-    }
-    const initiateResponse = await paystackInitiateDynamicMultiSplit(user.email, Math.ceil(order.total * 100), splitPayDetails, order.ref)
+    const meta = order.meta
+    console.log(meta.splitPayDetails)
+    const initiateResponse = await paystackInitiateDynamicMultiSplit(user.email, Math.ceil(order.total * 100), meta.splitPayDetails, order.ref, meta)
     if (!initiateResponse.data)
         throw new CustomAPIError(`The following error occurred while initiating transaction: ${initiateResponse.message}`)
+
+    //Modify fields after successful request is sent.
     order.accessCode = initiateResponse.data.access_code
-    order.initiated = true
+    // order.initiated = true
     await order.save()
+
+    //Remove quantity from stock.
+    // await addOrDecreaseProductQuantity(productQuantity, "increment")
+
+    //Prepare response with authorizationURL
     const { authorization_url: authorizationURL, access_code: accessCode, } = initiateResponse.data
-
-
-
-
-
     res.status(StatusCodes.OK).json({
         result: {
             authorizationURL, accessCode
@@ -74,6 +111,7 @@ const initiatePay = async (req, res) => {
         msg: initiateResponse.message,
         success: initiateResponse.status
     })
+
 
 }
 
@@ -84,4 +122,4 @@ const initiatePay = async (req, res) => {
 
 
 
-module.exports = { initiatePay }
+module.exports = { initiatePay, generateOrderSummary }
