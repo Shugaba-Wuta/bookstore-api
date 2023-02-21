@@ -150,14 +150,17 @@ const registerBook = async (req, res) => {
     const { images } = req.files || {}
     let bookPath = ["uploads", req.user.userID].join("-")
     const imagesArray = (images instanceof Array) ? images : [images]
-    const docs = imagesArray.map(doc => {
-        var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-        return { name, data: doc.data }
-    });
-    const publicUrls = await uploadFileToS3(docs)
-    Object.keys(NON_EDITABLE_FIELDS).forEach(field => {
-        delete req.body[field]
-    })
+    if (images) {
+        console.log("\n\n\n\n\n\n\n\n\n", imagesArray, images)
+        const docs = imagesArray.map(doc => {
+            var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data }
+        });
+        var publicUrls = await uploadFileToS3(docs)
+        Object.keys(NON_EDITABLE_FIELDS).forEach(field => {
+            delete req.body[field]
+        })
+    }
     const newBook = new Book(req.body)
     newBook.images = publicUrls
     await newBook.save()

@@ -94,7 +94,7 @@ const authorizeRoles = (...roles) => {
 };
 const isPersonAuthorized = async (req, res, next) => {
   const tokenUserID = req.user.userID
-  const userParamID = req.params.sellerID || req.params.userID
+  const userParamID = req.params.sellerID || req.body.sellerID || req.body.seller || req.params.userID || req.body.userID || req.body.personID
 
 
   if (userParamID === tokenUserID || SUPER_ROLES.includes(req.user.role)) {
