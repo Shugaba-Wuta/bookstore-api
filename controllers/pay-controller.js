@@ -8,7 +8,7 @@ const { paystackInitiateDynamicMultiSplit } = require("../utils/paystack-utils")
 
 
 const generateOrderSummary = async (req, res) => {
-    /* Create a new order using cartID. Compute the totals
+    /* Creates a new order using cartID.
     */
     const { cartID } = req.body
     const { sessionID, userID: personID } = req.user
@@ -117,9 +117,33 @@ const initiatePay = async (req, res) => {
 
 
 
+const initiatePay2 = async (req, res) => {
+    const { orderID, personID } = req.body
+
+
+    if (!orderID) {
+        throw new BadRequestError("orderID is missing")
+    }
+    const order = await Order.findOne({ _id: orderID, transactionSuccessful: false, personID: personID })
+
+    if (!order) {
+        throw new NotFoundError("order does not exist")
+    }
+    if (!order.initiated) {
+        //Order has never been initiated.
+        console.log("\n\n\nNEW ORDER")
+    } else {
+        //Order has been initiated but it is still unsuccessful.
+        console.log("\n\n\nRE-INITIATED ORDER")
+        
+    }
+
+}
 
 
 
 
 
-module.exports = { initiatePay, generateOrderSummary }
+
+
+module.exports = { initiatePay, initiatePay2, generateOrderSummary }
