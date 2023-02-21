@@ -1,10 +1,10 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
 const bcrypt = require("bcryptjs")
-const { nigerianCommercialBanks } = require("../config/app-data")
-const BANK_NAMES = nigerianCommercialBanks.map((item) => {
-    return item.name
-})
+// const { nigerianCommercialBanks } = require("../config/app-data")
+// const BANK_NAMES = nigerianCommercialBanks.map((item) => {
+//     return item.name
+// })
 
 
 const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { password: true, deleted: true, deletedOn: true } })
@@ -51,24 +51,20 @@ const sellerSchema = new mongoose.Schema({
         required: [true, 'Please provide password'],
         minlength: 8,
     },
-
     gender: {
         type: String,
         enum: GENDER
     },
-
     avatar: {
         url: String,
         uploadedAt: {
             type: Date
         }
     },
-
     role: {
         type: String,
         default: "seller"
     },
-
     deleted: {
         type: Boolean,
         default: false
@@ -76,58 +72,14 @@ const sellerSchema = new mongoose.Schema({
     deletedOn: {
         type: Date
     },
-    accountNumber: {
-        type: String,
-        minLength: 10
-    },
-    accountName: {
-        type: String,
-        trim: true
-    },
-    bankName: {
-        type: String,
-        enum: { values: BANK_NAMES, message: `Please provide a value from any of the following values: ${BANK_NAMES}` },
-        trim: true
-    },
     phoneNumber: {
-        type: String
-    },
-    BVN: {
-        type: Number,
-        min: 9999999999
+        type: String,
+        trim: true
     },
     NIN: {
         type: Number,
         min: 9999999999
     },
-    govtIssuedID: [{
-        url: String,
-        name: String,
-        uploadedAt: {
-            type: Date,
-        },
-        deleted: {
-            type: Boolean,
-            default: false
-        },
-        deletedOn: {
-            type: Date
-        }
-    }],
-    pictures: [{
-        url: String,
-        name: String,
-        uploadedAt: {
-            type: Date,
-        },
-        deleted: {
-            type: Boolean,
-            default: false
-        },
-        deletedOn: {
-            type: Date
-        }
-    }],
     permissions: {
         type: [String],
         trim: true,
@@ -143,6 +95,25 @@ const sellerSchema = new mongoose.Schema({
     }
 )
 
+sellerSchema.virtual("addresses", {
+    ref: "Address",
+    localField: "_id",
+    foreignField: "person",
+})
+sellerSchema.virtual("documents", {
+    ref: "Document",
+    foreignField: "person",
+    localField: "_id",
+    match: { deleted: false }
+})
+sellerSchema.virtual("bankAccounts", {
+    ref: "BankAccount",
+    foreignField: "person",
+    localField: "_id",
+    match: { deleted: false }
+
+
+})
 sellerSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);

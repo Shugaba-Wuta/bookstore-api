@@ -5,7 +5,7 @@ const cartItem = new mongoose.Schema({
     productID: {
         type: mongoose.Types.ObjectId,
         ref: "Book",
-        required: [true, "Please provide productID. "]
+        required: [true, "Please provide productID "]
     },
     quantity: {
         type: Number,
@@ -17,6 +17,15 @@ const cartItem = new mongoose.Schema({
         ref: "Session",
         required: [true, "Please provide sessionID for cart Item."]
     },
+    itemPrice: {
+        type: Number,
+        min: 0,
+        required: [true, `field itemPrice is required`]
+    },
+    coupon: {
+        type: mongoose.Types.ObjectId,
+        ref: "Coupon"
+    }
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -46,7 +55,8 @@ const cartSchema = new mongoose.Schema({
     },
     sessionID: {
         type: mongoose.Types.ObjectId,
-        ref: "Session"
+        ref: "Session",
+        hide: true
     }
 }, {
     timestamps: true,
@@ -110,7 +120,38 @@ cartSchema.pre("save", function removeZeroQuantityProducts(next) {
 cartSchema.post("save", function deleteEmptyCarts() {
     if (this.products.length < 1) {
         this.deleteOne({ _id: this._id })
+        throw new mongoose.Error("cart must contain more than one item")
+
     }
 })
+
+cartSchema.pre("validate", async function (next) {
+    for await (const item of this.products) {
+        const { price = 1, discount = 0, shippingFee = 0 } = item.productID || {}
+        let totalCost = (price * item.quantity) + shippingFee * item.quantity
+        let discountValue = ((100 - discount) / 100) * item.quantity
+
+        item.itemPrice = (totalCost - discountValue).toFixed(2)
+
+        if (!(item.coupon && item.coupon.items.includes(item.productID._id))) {
+            continue
+        }
+        const coupon = await item.coupon.populate("carts")
+        if (coupon.carts.includes(this._id)) {
+            //Skip because coupon can only be applied once.
+            continue
+        }
+        let couponValue = 0
+        if (item.coupon.flat) {
+            couponValue = item.coupon.flat
+        } else {
+            //coupon is of type percentage
+            couponValue = price * ((100 - item.coupon.percentage) / 100) * item.quantity
+        }
+        item.itemPrice -= couponValue
+    }
+    return next()
+
+})
 cartSchema.plugin(mongooseHidden)
-module.exports = mongoose.model("Cart", cartSchema)
+module.exports = { Cart: mongoose.model("Cart", cartSchema), cartItem }

@@ -12,34 +12,37 @@ const getSellerIDList = async function () {
 }
 const allBooks = require("./complete-books-detail.json")
 
-const createBook = async () => {
-
+const createBook = async (limit) => {
 
     const LENGTH_UNITS = ['inches', "cm", "mm"]
     getSellerIDList().then(async sellerList => {
-        const dbBooks = allBooks.map((book, index) => {
-            if (index < allBooks.length) {
+        const dbBooks = []
+        let index = 0
+        for await (let book of allBooks) {
+            if (index <= limit) {
+                index += 1
                 book.dimension = {
-                    length: Math.random() * 12,
-                    breadth: Math.random() * 8,
-                    height: Math.random() * 4,
+                    length: (Math.random() * 12).toFixed(2),
+                    breadth: (Math.random() * 8).toFixed(2),
+                    height: (Math.random() * 4).toFixed(2),
                     unit: LENGTH_UNITS[Math.round(Math.random() * 2)]
                 }
                 book.seller = sellerList[Math.floor(Math.random() * sellerList.length)]._id
                 book.discount = Math.floor(Math.random() * 100)
                 book.inventory = Math.floor(Math.random() * 1000)
-                const newImages = book.images
-                book.images = [{ url: newImages }]
-                book.publisher = book.publisher || faker.company.name()
+                book.images = [{ url: book.images }]
+                book.publisher = book.publisher ? book.publisher : faker.company.name()
                 book.description = book.description || faker.commerce.productDescription()
-                book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 1)]
+                book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 2)]
                 book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
-                book.price = Math.random() * 10000
+                book.price = (Math.random() * 10000).toFixed(2)
 
-                return book
+                dbBooks.push(book)
+            } else {
+                break
             }
-        })
+        }
         await Book.insertMany(dbBooks)
 
     })
@@ -47,9 +50,9 @@ const createBook = async () => {
 
 
 }
-createBook()
-const addBooksToDB = async (number) => {
 
-}
+const addBooksToDB = (async (number) => {
+    createBook(number)
+})(50)
 
 module.exports = addBooksToDB

@@ -13,9 +13,10 @@ const Session = require("./Session")
 const TOTP = require("./TOTP")
 const Document = require("./Document")
 const Coupon = require("./Coupon")
-const Cart = require("./Cart")
+const { Cart } = require("./Cart")
+const BankAccount = require("./BankAccount")
 
 
 
 
-module.exports = { Book, Department, Order, productBaseSchema, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session, TOTP, Document, Cart, Coupon }
+module.exports = { Book, Department, Order, productBaseSchema, Review, Staff, StaffBase, Ticket, User, Address, Seller, Session, TOTP, Document, Cart, Coupon, BankAccount }

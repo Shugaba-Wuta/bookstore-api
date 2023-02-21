@@ -3,7 +3,7 @@ const router = express.Router()
 
 
 const guard = require("express-jwt-permissions")()
-const { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, deleteUploadedFiles } = require("../controllers/seller-controller")
+const { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedFiles, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks, } = require("../controllers/seller-controller")
 
 const { isPersonAuthorized } = require("../middleware/auth middleware")
 
@@ -14,10 +14,18 @@ router.route("/:sellerID")
     .patch([guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], updateASeller)
     .delete([guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], deleteASeller)
 
+
 router.route("/:sellerID/documents")
-    .delete([guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], deleteUploadedFiles)
+    .post(addDocsToSeller)
+    .delete(deleteUploadedFiles)
+    .get(getSellerDocs)
+    .patch(updateDocumentProp)
 
-
+router.route("/:sellerID/bankAccounts")
+    .post(addBankAccount)
+    .get(getAllSellerBanks)
+    .delete(deleteBankInfo)
+    .patch(updateBankInfo)
 
 
 

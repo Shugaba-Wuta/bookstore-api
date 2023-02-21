@@ -19,7 +19,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
   if (err.name === 'CastError') {
-    customError.msg = `No item found with id: ${err.value}`;
+    customError.msg = `Invalid id: '${err.value}' provided`;
     customError.statusCode = StatusCodes.NOT_FOUND;
   }
   if (err.code === "permission_denied") {

@@ -1,15 +1,15 @@
 const { StatusCodes } = require("http-status-codes")
-const { BadRequestError, NotFoundError } = require("../errors")
+const { BadRequestError, NotFoundError, Conflict } = require("../errors")
 const { Cart, Book } = require("../models")
 
 
 
 const addItemToCart = async (req, res) => {
-    const { userID: personID, sessionID } = req.user
+    const { userID: personID, sessionID, } = req.user
     const { role: userRole } = req.user
     const personModel = (userRole) ? userRole[0].toUpperCase() + userRole.slice(1) : null
 
-    const { productID, quantity } = req.body
+    const { productID, quantity, couponCode } = req.body
 
     //Body validation
     if (!productID) {
@@ -26,23 +26,19 @@ const addItemToCart = async (req, res) => {
     if (quantity > book.inventory) {
         throw new BadRequestError(`The 'quantity': ${quantity} exceeds inventory`)
     }
-    let existingCart
-    if (personID) {
-        existingCart = await Cart.find({ active: true, personID: personID })
-    } else if (sessionID) {
-        existingCart = await Cart.find({ active: true, sessionID: sessionID })
-    }
+    let existingCart = await Cart.find({ $or: [{ active: true, sessionID }, { active: true, personID }] })
+
 
     //existingCart validation
     var newCart
     if (existingCart.length > 1) {
         //log this as error
-        throw new BadRequestError("Multiple carts found")
+        throw new Conflict("Multiple carts found")
     } else if (existingCart.length === 0) {
         //Creates a new cart because no active cart exists
         newCart = await new Cart({
             products: [{
-                productID,
+                productID: productID,
                 quantity: quantity,
                 sessionID: sessionID,
             }],
@@ -58,9 +54,10 @@ const addItemToCart = async (req, res) => {
             quantity: quantity,
             sessionID: sessionID,
         })
+        r.personID = (!r.personID && personID) ? personID : null
         newCart = await r.save()
     }
-    let populatedCart = await newCart.populate("products.productID")
+    let populatedCart = await newCart.populate(["products.productID", "sessionID"])
 
     res.status(StatusCodes.CREATED).json({ result: populatedCart, msg: "Successfully added item to cart", success: true })
 

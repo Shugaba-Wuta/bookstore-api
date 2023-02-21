@@ -15,7 +15,6 @@ const productBaseSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "Please provide a product description"],
-      // minLength: [10, "Product description should be more than 10 characters"],
       trim: true
     },
     images: [{
@@ -83,7 +82,6 @@ const productBaseSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0
-
     }
   },
   {
