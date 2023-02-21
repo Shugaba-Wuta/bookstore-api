@@ -151,7 +151,6 @@ const registerBook = async (req, res) => {
     let bookPath = ["uploads", req.user.userID].join("-")
     const imagesArray = (images instanceof Array) ? images : [images]
     if (images) {
-        console.log("\n\n\n\n\n\n\n\n\n", imagesArray, images)
         const docs = imagesArray.map(doc => {
             var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
             return { name, data: doc.data }
