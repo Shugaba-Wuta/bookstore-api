@@ -32,22 +32,12 @@ const generateOrderSummary = async (req, res) => {
 
     //Create a new Order if no uninitiated Order exists.
     const productPopulateSelect = ["name", "price", "description", "seller", "discount", "images", "shippingFee"]
-    let order = await Order.findOne({ cartID, personID }).populate("orderItems.productID", productPopulateSelect)
+    let order = await Order.findOne({ cartID, personID }) //.populate("orderItems.productID", productPopulateSelect)
 
-    if (!order) {
-        order = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId() }).save()
-        await order.populate("orderItems.productID", productPopulateSelect)
-    } else {
-        //Change the reference for the order so payment gateway does not reject to initiate transaction
-        //transactionIsFalse(order.ref)
-
-        order.ref = mongoose.Types.ObjectId()
+    if (order) {
+        throw new BadRequestError("Order already exists, consider updating order")
     }
-    order = await order.save()
-
-
-
-
+    const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId() }).save().populate("orderItems.productID", productPopulateSelect)
 }
 
 
@@ -127,7 +117,7 @@ const initiatePay2 = async (req, res) => {
     const order = await Order.findOne({ _id: orderID, transactionSuccessful: false, personID: personID })
 
     if (!order) {
-        throw new NotFoundError("order does not exist")
+        throw new NotFoundError("Cannot checkout this order")
     }
     if (!order.initiated) {
         //Order has never been initiated.
@@ -135,7 +125,7 @@ const initiatePay2 = async (req, res) => {
     } else {
         //Order has been initiated but it is still unsuccessful.
         console.log("\n\n\nRE-INITIATED ORDER")
-        
+
     }
 
 }
