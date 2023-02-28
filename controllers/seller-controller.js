@@ -128,7 +128,7 @@ const updateASeller = async (req, res) => {
         }
     }
 
-    const newSeller = await oldSeller.save({}).select(FORBIDDEN_FIELDS)
+    const newSeller = await oldSeller.save()
 
     res.status(StatusCodes.OK).json({ message: "Seller was updated successfully", success: true, result: newSeller })
 
