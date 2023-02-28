@@ -2,12 +2,11 @@ const { StatusCodes } = require("http-status-codes")
 const { Cart, Order, BankAccount, User } = require("../models")
 const { UnauthenticatedError, BadRequestError, NotFoundError, UnauthorizedError, CustomAPIError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
-const { addOrDecreaseProductQuantity } = require("../utils/generic-utils")
 const { paystackInitiateDynamicMultiSplit } = require("../utils/paystack-utils")
 
 
 
-const generateOrderSummary = async (req, res) => {
+const createOrderSummary = async (req, res) => {
     /* Creates a new order using cartID.
     */
     const { cartID } = req.body
@@ -25,7 +24,7 @@ const generateOrderSummary = async (req, res) => {
         throw new NotFoundError("Cart does not exist")
     }
 
-    const user = await User.findOne({ _id: personID })
+    const user = await User.findOne({ _id: personID }).populate("addresses")
     if (!user) {
         throw new NotFoundError("User does not exist")
     }
@@ -37,7 +36,15 @@ const generateOrderSummary = async (req, res) => {
     if (order) {
         throw new BadRequestError("Order already exists, consider updating order")
     }
-    const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId() }).save().populate("orderItems.productID", productPopulateSelect)
+    //Ensure deliveryAddress or default address.
+    const address = user.addresses.filter((address) => {
+        return address.default
+    })
+    const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId(), deliveryAddress: address }).save().populate("orderItems.productID", productPopulateSelect)
+
+    res.status(StatusCodes.OK).json({
+        message: "Order created", result: newOrder, success: true
+    })
 }
 
 
@@ -108,11 +115,15 @@ const initiatePay = async (req, res) => {
 
 
 const initiatePay2 = async (req, res) => {
-    const { orderID, personID } = req.body
+    const { personID } = req.body
+    const { orderID } = req.params
 
 
     if (!orderID) {
         throw new BadRequestError("orderID is missing")
+    }
+    if (!personID) {
+        throw new BadRequestError("personID is missing")
     }
     const order = await Order.findOne({ _id: orderID, transactionSuccessful: false, personID: personID })
 
@@ -136,4 +147,4 @@ const initiatePay2 = async (req, res) => {
 
 
 
-module.exports = { initiatePay, initiatePay2, generateOrderSummary }
+module.exports = { initiatePay, initiatePay2, createOrderSummary }
