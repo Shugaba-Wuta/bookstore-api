@@ -7,6 +7,7 @@ const { DEFAULT_TAX, DEFAULT_COMMISSION } = require("../config/app-data");
 const { Conflict } = require('../errors');
 const orderItem = new mongoose.Schema({
 
+
   status: {
     type: String,
     enum: orderStatus,
@@ -23,6 +24,7 @@ const orderSchema = new mongoose.Schema({
     ref: "Cart",
     required: [true, "Please provide a cartID"],
     unique: true
+
 
   },
   orderItems: {
@@ -83,12 +85,6 @@ const orderSchema = new mongoose.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
-);
-
-orderSchema.virtual("totalInKobo").get(function () {
-  return Math.ceil(this.total * 100)
-}
-);
 
 orderSchema.virtual("meta").get(async function () {
   const splitPayDetails = []

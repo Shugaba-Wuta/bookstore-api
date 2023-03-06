@@ -2,10 +2,14 @@ const { StatusCodes } = require("http-status-codes")
 const { Cart, Order, BankAccount, User } = require("../models")
 const { UnauthenticatedError, BadRequestError, NotFoundError, UnauthorizedError, CustomAPIError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
+const { addOrDecreaseProductQuantity } = require("../utils/generic-utils")
 const { paystackInitiateDynamicMultiSplit } = require("../utils/paystack-utils")
 
 
 
+
+const generateOrderSummary = async (req, res) => {
+    /* Create a new order using cartID. Compute the totals
 const createOrderSummary = async (req, res) => {
     /* Creates a new order using cartID.
     */
@@ -24,6 +28,7 @@ const createOrderSummary = async (req, res) => {
         throw new NotFoundError("Cart does not exist")
     }
 
+
     const user = await User.findOne({ _id: personID }).populate("addresses")
     if (!user) {
         throw new NotFoundError("User does not exist")
@@ -31,6 +36,7 @@ const createOrderSummary = async (req, res) => {
 
     //Create a new Order if no uninitiated Order exists.
     const productPopulateSelect = ["name", "price", "description", "seller", "discount", "images", "shippingFee"]
+
     let order = await Order.findOne({ cartID, personID }) //.populate("orderItems.productID", productPopulateSelect)
 
     if (order) {
@@ -114,6 +120,7 @@ const initiatePay = async (req, res) => {
 
 
 
+
 const initiatePay2 = async (req, res) => {
     const { personID } = req.body
     const { orderID } = req.params
@@ -148,3 +155,4 @@ const initiatePay2 = async (req, res) => {
 
 
 module.exports = { initiatePay, initiatePay2, createOrderSummary }
+

@@ -128,7 +128,7 @@ const updateASeller = async (req, res) => {
         }
     }
 
-    const newSeller = await oldSeller.save()
+
 
     res.status(StatusCodes.OK).json({ message: "Seller was updated successfully", success: true, result: newSeller })
 
@@ -390,5 +390,5 @@ const test = async (req, res) => {
     return res.status(200).json({ response })
 }
 
-
 module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedFiles, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks, test }
+
