@@ -13,9 +13,9 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
   if (err.code && err.code === 11000) {
-    customError.msg = `Duplicate value entered for ${Object.keys(
+    customError.msg = `Unique index failed for: ${Object.keys(
       err.keyValue
-    )} field, please choose another value`;
+    )} field: Duplicate entry`;
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
   if (err.name === 'CastError') {
