@@ -73,18 +73,21 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  accessCode: String,
+  transactionUrl: String,
   coupon: { type: mongoose.Types.ObjectId, ref: "Coupon" },
   deliveryAddress: {
     type: mongoose.Types.ObjectId,
     ref: "Address"
-  }
+  },
+  prevRef: { type: [String] },
+  deleted: { type: Boolean, default: false },
+  deletedOn: { type: Date }
 },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
-  }
+  })
 
 orderSchema.virtual("meta").get(async function () {
   const splitPayDetails = []
@@ -99,7 +102,7 @@ orderSchema.virtual("meta").get(async function () {
     productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
   }
   console.log(splitPayDetails)
-  return { splitPayDetails, productQuantity, cartID: this.cartID, orderID: this._id }
+  return { splitPayDetails, productQuantity, }
 
 })
 
