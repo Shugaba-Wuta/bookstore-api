@@ -169,12 +169,6 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
   this.subtotal = subtotal.toFixed(2)
   this.total = (this.subtotal * ((this.tax + 100) / 100))
 
-
-
-
-
-
-
   return next()
 })
 
