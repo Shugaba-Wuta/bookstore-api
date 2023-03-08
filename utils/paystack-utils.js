@@ -146,14 +146,18 @@ const verifyTransactionStatus = async (transactionRef) => {
     }
 
 }
+const getPaymentDetails = async (transactionRef) => {
+    const response = await verifyTransactionStatus(transactionRef)
+    return response
+}
 
 const isPaymentSuccessful = async (transactionRef) => {
     //
     const response = await verifyTransactionStatus(transactionRef)
-    if (response && response.status && response.data.status) {
+    if (response.status && response.status) {
         return true
     }
     return false
 }
 
-module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit, verifyTransactionStatus, isPaymentSuccessful, getAccessUrl }
+module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit, verifyTransactionStatus, isPaymentSuccessful, getAccessUrl, getPaymentDetails }

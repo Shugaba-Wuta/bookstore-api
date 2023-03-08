@@ -1,9 +1,9 @@
 const { StatusCodes } = require("http-status-codes")
-const { Cart, Order, User } = require("../models")
+const { Cart, Order, User, Seller } = require("../models")
 const { BadRequestError, NotFoundError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
 const { SUPER_ROLES } = require("../config/app-data")
-const { isPaymentSuccessful, getAccessUrl } = require("../utils/paystack-utils")
+const { getPaymentDetails, getAccessUrl, isPaymentSuccessful } = require("../utils/paystack-utils")
 
 
 
@@ -167,11 +167,84 @@ const initiatePay = async (req, res) => {
 
 }
 
+const getTransactionDetail = async (req, res) => {
+    var { orderID, deleted } = req.body
+    if (!orderID) {
+        throw new BadRequestError("missing required parameter: orderID")
+    }
+    if (!SUPER_ROLES.includes(String(req.user.role).toLowerCase())) {
+        deleted = false
+    }
+
+    const order = await Order.findOne({ deleted, _id: orderID })
+    if (!order) {
+        throw new NotFoundError("order does not exist")
+    }
+    const paymentDetail = await getPaymentDetails(order.ref)
+
+    return res.status(StatusCodes.OK).json({
+        message: "payment detail", success: true, result: { paymentDetail }
+    })
+}
+
+
+
+
+/*
+Order manipulation for sellers
+*/
+
+const getSellerOrders = async (req, res) => {
+    var { sellerID, deletedOrder, deletedUser } = req.body
+    if (!sellerID) {
+        throw new BadRequestError("required param missing: sellerID")
+    }
+    // if (!orderID) {
+    //     throw new BadRequestError("required param missing: sellerID")
+    // }
+    if (!SUPER_ROLES.includes(req.user.role)) {
+        deletedOrder = false
+        deletedUser = false
+    }
+    const seller = await Seller.findOne({ deleted: deletedUser, _id: sellerID })
+    const sellerBooks = seller.books
+
+    const sellerOrders = await Order.find(
+        { deleted: deletedOrder, $match: { "orderItems.productID": { $in: sellerBooks } } }
+    )
+    res.status(StatusCodes.OK).join({ result: sellerOrders, message: "seller orders", success: true })
+
+}
+const orderUpdateStatus = async (req, res) => {
+    const { orderID, productID, status } = req.body
+    const requiredParams = { orderID, productID, status }
+
+    Object.key(requiredParams).forEach(key => {
+        let value = requiredParams[key]
+        if (!value) {
+            throw new BadRequestError(`required param is missing: ${key}`)
+        }
+    })
+
+    const order = await Order.findOne({ _id: orderID })
+    if (!order) {
+        throw new NotFoundError("order does not exist")
+    }
+
+    order.orderItems.forEach(item => {
+        if (String(item.productID) === productID) {
+            item.status = status
+        }
+    })
+    await order.save()
+
+    return res.status(StatusCodes.OK).json({ result: order, message: "successful updated order status", success: true })
+
+}
 
 
 
 
 
-
-module.exports = { initiatePay, createOrder, getOrder, getOrders, updateOrder, }
+module.exports = { initiatePay, createOrder, getOrder, getOrders, updateOrder, getSellerOrders, orderUpdateStatus, getTransactionDetail }
 
