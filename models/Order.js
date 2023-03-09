@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { sessionID: true, } })
 
-const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Canceled', 'Failed']
+const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Failed']
 const { cartItem } = require("./Cart")
 const { DEFAULT_TAX, DEFAULT_COMMISSION } = require("../config/app-data");
 const { Conflict } = require('../errors');
@@ -13,6 +13,10 @@ const orderItem = new mongoose.Schema({
     enum: orderStatus,
     default: 'Pending',
   },
+  trackingUrl: {
+    type: String,
+    trim: true
+  }
 
 })
 orderItem.add(cartItem)
