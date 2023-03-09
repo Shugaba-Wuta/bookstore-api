@@ -10,11 +10,12 @@ const { initiatePay, getOrders, getOrder, updateOrder, createOrder, getSellerOrd
 const router = express.Router()
 
 
-router.route("")
+router.route("/user/:userID")
     .get(getOrders).post(createOrder)
+
 router.route("/:orderID").get(getOrder).patch(updateOrder)
 
-router.post("/initiatePayment", initiatePay)
+router.post("/:ordreID/initiatePayment", initiatePay)
 router.post("/seller/update", orderUpdateStatus)
 router.post("/seller/view", getSellerOrders)
 router.post("/payment/details", getTransactionDetail)
