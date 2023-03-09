@@ -10,7 +10,7 @@ const router = express.Router()
 router.post("/login", login)
 
 
-router.get("/refresh-token", [authorizeRoles("seller", "staff", "admin", "user"), isPersonAuthorized], refresh)
+router.get("/refresh-token", refresh)
 
 router.get("/logout", logout)
 
