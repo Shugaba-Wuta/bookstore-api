@@ -1,6 +1,7 @@
 // const nanoid = require("nanoid")
-const User = require("../models/User")
+const { User, Coupon } = require("../models")
 const { IDGeneratorInfo } = require("../config/app-data")
+
 
 
 const staffIdGenerator = async () => {
@@ -20,4 +21,18 @@ const staffIdGenerator = async () => {
     }
 
 }
-module.exports = { staffIdGenerator }
+const couponValid = async (code, bookID) => {
+    /*
+        Returns coupon `id` if coupon is valid for given bookID
+    */
+    const coupon = await Coupon.findOne({ code, active: true })
+    if (!code) {
+        return null
+    }
+    const couponItems = coupon.items.map(item => { return String(item) })
+    if (!couponItems.includes(String(bookID))) {
+        return null
+    }
+    return coupon._id
+}
+module.exports = { staffIdGenerator, couponValid }

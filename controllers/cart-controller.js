@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes")
 const { BadRequestError, NotFoundError, Conflict } = require("../errors")
 const { Cart, Book } = require("../models")
+const { couponValid } = require("../utils/model-utils")
 
 
 
@@ -9,7 +10,7 @@ const addItemToCart = async (req, res) => {
     const { role: userRole } = req.user
     const personModel = (userRole) ? userRole[0].toUpperCase() + userRole.slice(1) : null
 
-    const { productID, quantity, couponCode } = req.body
+    let { productID, quantity, couponCode } = req.body
 
     //Body validation
     if (!productID) {
@@ -26,6 +27,7 @@ const addItemToCart = async (req, res) => {
     if (quantity > book.inventory) {
         throw new BadRequestError(`The 'quantity': ${quantity} exceeds inventory`)
     }
+    const couponID = await couponValid(couponCode, productID)
     let existingCart = await Cart.find({ $or: [{ active: true, sessionID }, { active: true, personID }] })
 
 
@@ -41,6 +43,7 @@ const addItemToCart = async (req, res) => {
                 productID: productID,
                 quantity: quantity,
                 sessionID: sessionID,
+                coupon: couponID
             }],
             personID,
             personSchema: (personID) ? personModel : "User",
@@ -53,6 +56,7 @@ const addItemToCart = async (req, res) => {
             productID,
             quantity: quantity,
             sessionID: sessionID,
+            coupon: couponID
         })
         r.personID = (!r.personID && personID) ? personID : null
         newCart = await r.save()
@@ -78,18 +82,17 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
         throw new NotFoundError(`productID: ${productID} does not match any record`)
     }
 
-    let existingCart = await Cart.find({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
-
+    let existingCart = await Cart.findOne({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
 
     if (!existingCart) {
         throw new BadRequestError("Item must be added to cart before it's quantity can be decreased")
     }
-
-
-    existingCart.products.forEach(item => {
-        if (String(item.productID) === productID)
-            item.quantity -= 1
-    })
+    for (const product of existingCart.products) {
+        console.log(`{existingCart}`, product)
+        if (String(product.productID) === productID) {
+            product.quantity -= 1
+        }
+    }
 
     let result = await existingCart.save()
     await result.populate("products.productID")
