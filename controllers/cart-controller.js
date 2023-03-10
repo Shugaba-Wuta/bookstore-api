@@ -70,7 +70,7 @@ const addItemToCart = async (req, res) => {
 
 const decreaseCartItemQuantityByOne = async (req, res) => {
     const { userID: personID, sessionID } = req.user
-    const { productID } = req.body
+    const { productID, couponCode } = req.body
 
     //Body validation
     if (!productID) {
@@ -91,6 +91,10 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
         console.log(`{existingCart}`, product)
         if (String(product.productID) === productID) {
             product.quantity -= 1
+        }
+        const couponID = await couponValid(couponCode, productID)
+        if (couponCode && couponID) {
+            product.coupon = couponID
         }
     }
 
