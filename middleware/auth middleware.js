@@ -25,6 +25,10 @@ const assignSessionID = async (req, res, next) => {
     payload = isTokenValid(token)
 
   } catch (err) {
+    console.log(`\n\n${err}\n\n`)
+    if (authHeader && authHeader.startsWith('Bearer')) {
+      throw new CustomError.BadRequestError(err)
+    }
     const newSession = await new Session({
       userAgent: req.get('user-agent'),
       IP: req.ip,
@@ -36,17 +40,17 @@ const assignSessionID = async (req, res, next) => {
 
 
 
-  } finally {
-    req.user = {
-      userID: payload.user.userID,
-      role: payload.user.role,
-      fullName: payload.user.fullName,
-      sessionID: payload.user.sessionID,
-      permissions: payload.user.permissions
-    };
-    console.log("Session ID: ", payload.user.sessionID)
-    next()
   }
+  req.user = {
+    userID: payload.user.userID,
+    role: payload.user.role,
+    fullName: payload.user.fullName,
+    sessionID: payload.user.sessionID,
+    permissions: payload.user.permissions
+  };
+  console.log("Session ID: ", payload.user.sessionID)
+  next()
+
 }
 
 const authenticateUser = async (req, res, next) => {

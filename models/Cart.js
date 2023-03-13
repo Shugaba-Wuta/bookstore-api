@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const { BadRequestError } = require("../errors")
 const mongooseHidden = require("mongoose-hidden")()
 
 const cartItem = new mongoose.Schema({
@@ -17,15 +18,20 @@ const cartItem = new mongoose.Schema({
         ref: "Session",
         required: [true, "Please provide sessionID for cart Item."]
     },
-    itemPrice: {
+    finalPrice: {
         type: Number,
         min: 0,
-        required: [true, `field itemPrice is required`]
+        required: [true, `field finalPrice is required`]
     },
-    coupon: {
+    couponValue: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    coupons: [{
         type: mongoose.Types.ObjectId,
         ref: "Coupon"
-    }
+    }]
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -33,9 +39,8 @@ const cartItem = new mongoose.Schema({
 })
 
 const cartSchema = new mongoose.Schema({
-    products: {
-        type: [cartItem]
-    },
+    products: [cartItem]
+    ,
     personID: {
         type: mongoose.Types.ObjectId,
         refPath: "personSchemaType"
@@ -64,9 +69,54 @@ const cartSchema = new mongoose.Schema({
     toObject: { virtuals: true },
 })
 
+cartSchema.methods.applyCoupon = async function (couponID, value, type, productID) {
+    //ensure "products.productID" has been populated
+    if (!await this.populated("products.productID")) {
+        await this.populate("products.productID")
+    }
+    const matchingProduct = this.products.filter(item => {
+        return String(item.productID._id) === productID
+    })
+    let hasBeenApplied = matchingProduct[0].coupons ? matchingProduct[0].coupons.contains(couponID) : false
+    if (!hasBeenApplied) {
+        //Ensure the coupon has not been applied
+        let couponValue
+        if (type === "percentage") {
+            const totalCost = this.products[productID].finalPrice * this.products[productID].quantity
+            couponValue = (totalCost * (100 - value) / 100).toFixed(2)
 
-cartSchema.pre("save", async function mergeCart(next) {
+        } else if (type === "flat") {
+            couponValue = value
+        } else {
+            throw new BadRequestError(`invalid coupon type: ${type}`)
+        }
+        this.products[productID].coupons.push(couponID)
+        //Deduct coupon value from order value
+        this.products[productID].finalPrice -= couponValue
+        this.products[productID].couponValue += couponValue
+
+    }
+}
+
+cartSchema.pre("validate", async function ensureFinalPrice(next) {
+    if (!await this.populated("products.productID")) {
+        await this.populate("products.productID")
+    }
+    this.products.forEach((product) => {
+        if (!product.finalPrice) {
+            product.finalPrice = (product.productID.price - (100 - product.productID.discount) / 100).toFixed(2)
+        }
+    })
+    //Depopulate
+    this.depopulate("products.productID")
+    next()
+})
+cartSchema.pre("validate", async function mergeCart(next) {
+
     /* Middleware ensures that all items in the cart have unique productID */
+    // if (!await this.populated("products.productID")) {
+    //     await this.populate("products.productID")
+    // }
     const uniqueProducts = {}
     this.products.forEach(item => {
         const productID = String(item.productID)
@@ -111,7 +161,7 @@ cartSchema.pre("save", async function mergeCart(next) {
 
 
 })
-cartSchema.pre("save", function removeZeroQuantityProducts(next) {
+cartSchema.pre("validate", function removeZeroQuantityProducts(next) {
     this.products = this.products.filter(item => {
         return item.quantity > 0
     })
@@ -125,33 +175,6 @@ cartSchema.post("save", function deleteEmptyCarts() {
     }
 })
 
-cartSchema.pre("validate", async function (next) {
-    for await (const item of this.products) {
-        const { price = 1, discount = 0, shippingFee = 0 } = item.productID || {}
-        let totalCost = (price * item.quantity) + shippingFee * item.quantity
-        let discountValue = ((100 - discount) / 100) * item.quantity
 
-        item.itemPrice = (totalCost - discountValue).toFixed(2)
-
-        if (!(item.coupon && item.coupon.items.includes(item.productID._id))) {
-            continue
-        }
-        const coupon = await item.coupon.populate("carts")
-        if (coupon.carts.includes(this._id)) {
-            //Skip because coupon can only be applied once.
-            continue
-        }
-        let couponValue = 0
-        if (item.coupon.flat) {
-            couponValue = item.coupon.flat
-        } else {
-            //coupon is of type percentage
-            couponValue = price * ((100 - item.coupon.percentage) / 100) * item.quantity
-        }
-        item.itemPrice -= couponValue
-    }
-    return next()
-
-})
 cartSchema.plugin(mongooseHidden)
 module.exports = { Cart: mongoose.model("Cart", cartSchema), cartItem }

@@ -125,7 +125,7 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
   const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID })
   for (const item of cart.products) {
     this.orderItems.push(item)
-    subtotal += item.itemPrice
+    subtotal += item.finalPrice
 
     if (!this.coupon) {
       continue
@@ -143,10 +143,10 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
         //coupon is of type percentage
         couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
       }
-      //adjust the subtotal and itemPrice after adding a coupon on a product
-      subtotal -= item.itemPrice
-      item.itemPrice -= couponValue
-      subtotal += item.itemPrice
+      //adjust the subtotal and finalPrice after adding a coupon on a product
+      subtotal -= item.finalPrice
+      item.finalPrice -= couponValue
+      subtotal += item.finalPrice
 
     } else if (this.coupon.type === "ORDER") {
       //Apply coupon to entire cart subtotal, limit this coupon to <= (COMMISSION + TAX) so that sellers share is not affected.
@@ -160,10 +160,10 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
         //coupon is of type percentage
         couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
       }
-      //adjust the subtotal and itemPrice after adding a coupon on a product
-      subtotal -= item.itemPrice
-      item.itemPrice -= couponValue
-      subtotal += item.itemPrice
+      //adjust the subtotal and finalPrice after adding a coupon on a product
+      subtotal -= item.finalPrice
+      item.finalPrice -= couponValue
+      subtotal += item.finalPrice
       subtotal = (subtotal - couponValue)
     }
 
