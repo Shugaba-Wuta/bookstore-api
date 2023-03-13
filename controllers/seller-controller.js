@@ -127,6 +127,7 @@ const updateASeller = async (req, res) => {
             oldSeller.avatar = { ...publicUrl[0] }
         }
     }
+    const newSeller = await oldSeller.save()
 
 
 
