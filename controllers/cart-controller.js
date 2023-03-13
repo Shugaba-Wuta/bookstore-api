@@ -1,24 +1,21 @@
 const { StatusCodes } = require("http-status-codes")
-const { BadRequestError, NotFoundError, Conflict } = require("../errors")
+const { SUPER_ROLES } = require("../config/app-data")
+const { BadRequestError, NotFoundError } = require("../errors")
 const { Cart, Book } = require("../models")
-
+const { getCouponDetail } = require("../utils/model-utils")
 
 
 const addItemToCart = async (req, res) => {
-    const { userID: personID, sessionID, } = req.user
-    const { role: userRole } = req.user
+    const { userID: personID, sessionID, role: userRole } = req.user
+    //Capitalize first letter to match Model name
     const personModel = (userRole) ? userRole[0].toUpperCase() + userRole.slice(1) : null
 
-    const { productID, quantity, couponCode } = req.body
+    let { productID, quantity = 1, couponCode } = req.body
 
     //Body validation
     if (!productID) {
         throw new BadRequestError("Please provide a value for productID")
     }
-    if (!quantity) {
-        throw new BadRequestError("Please provide a value for quantity")
-    }
-
     const book = await Book.findOne({ _id: productID, deleted: false })
     if (!book) {
         throw new NotFoundError(`productID: ${productID} does not match any record`)
@@ -26,51 +23,53 @@ const addItemToCart = async (req, res) => {
     if (quantity > book.inventory) {
         throw new BadRequestError(`The 'quantity': ${quantity} exceeds inventory`)
     }
-    let existingCart = await Cart.find({ $or: [{ active: true, sessionID }, { active: true, personID }] })
 
+    let cart = await Cart.findOne({ $or: [{ active: true, sessionID }, { active: true, personID }] })
 
-    //existingCart validation
-    var newCart
-    if (existingCart.length > 1) {
-        //log this as error
-        throw new Conflict("Multiple carts found")
-    } else if (existingCart.length === 0) {
-        //Creates a new cart because no active cart exists
-        newCart = await new Cart({
+    if (!cart) {
+        //Create a new cart with the new product
+        cart = await new Cart({
             products: [{
-                productID: productID,
-                quantity: quantity,
-                sessionID: sessionID,
+                productID,
+                quantity,
+                sessionID,
             }],
             personID,
             personSchema: (personID) ? personModel : "User",
             sessionID
         }).save()
-    } else if (existingCart.length === 1) {
-        //Cart exists, so push the new book to it.
-        let r = existingCart[0]
-        r.products.push({
+    } else {
+        //Add a product to cart
+        cart.products.push({
             productID,
-            quantity: quantity,
-            sessionID: sessionID,
+            quantity,
+            sessionID,
         })
-        r.personID = (!r.personID && personID) ? personID : null
-        newCart = await r.save()
     }
-    let populatedCart = await newCart.populate(["products.productID", "sessionID"])
+    if (couponCode) {
+        const { couponID, value, type } = await getCouponDetail(couponCode, productID) || {}
+        if (couponID) {
+            await cart.applyCoupon(couponID, value, type, productID)
+        }
+    }
+    await cart.save()
+
+    let populatedCart = await cart.populate(["products.productID"])
 
     res.status(StatusCodes.CREATED).json({ result: populatedCart, msg: "Successfully added item to cart", success: true })
-
 }
 
 
-const decreaseCartItemQuantityByOne = async (req, res) => {
+const updateCartItem = async (req, res) => {
     const { userID: personID, sessionID } = req.user
-    const { productID } = req.body
+    const { productID, couponCode, operation } = req.body
 
     //Body validation
     if (!productID) {
         throw new BadRequestError("Please provide a value for productID")
+    }
+    if (!operation || !["decrease", "coupon"].includes(operation)) {
+        throw new BadRequestError("bad/ missing field: operation")
     }
 
     const book = await Book.findOne({ _id: productID, deleted: false })
@@ -78,18 +77,22 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
         throw new NotFoundError(`productID: ${productID} does not match any record`)
     }
 
-    let existingCart = await Cart.find({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
-
+    var existingCart = await Cart.findOne({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
 
     if (!existingCart) {
-        throw new BadRequestError("Item must be added to cart before it's quantity can be decreased")
+        throw new BadRequestError("Item must be added to cart before it can be decreased")
     }
 
-
-    existingCart.products.forEach(item => {
-        if (String(item.productID) === productID)
-            item.quantity -= 1
-    })
+    for (const product of existingCart.products) {
+        if (String(product.productID) === productID && operation === "decrease") {
+            //decrease quantity
+            product.quantity -= 1
+        }
+        const { couponID, value, type } = await getCouponDetail(couponCode, productID) || {}
+        if (couponID) {
+            existingCart.applyCoupon(couponID, value, type, product.productID)
+        }
+    }
 
     let result = await existingCart.save()
     await result.populate("products.productID")
@@ -98,18 +101,23 @@ const decreaseCartItemQuantityByOne = async (req, res) => {
 
 
 }
-const viewAllActiveCart = async (req, res) => {
-    /*Deleting the active query parameter and calling `viewAllCarts` will result in active=true*/
-    delete req.query.active
 
-    await viewAllCarts(req, res)
-}
 
 
 const viewAllCarts = async (req, res) => {
     const { userID: personID, sessionID } = req.user
-    const { active = true } = req.query
-    let allCarts = await Cart.find({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
+    let { active = true } = req.query
+    let allCarts
+
+    if (!SUPER_ROLES.includes(req.user.role)) {
+        active = true
+        allCarts = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
+
+        return res.status(StatusCodes.OK).json({ result: allCarts, msg: "Successfully returned active user carts", success: true })
+    }
+
+
+    allCarts = await Cart.find({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
     res.status(StatusCodes.OK).json({ result: allCarts, msg: "Successfully returned all user carts", success: true })
 }
 
@@ -136,4 +144,4 @@ const removeAnItemFromActiveCart = async (req, res) => {
 
 
 
-module.exports = { addItemToCart, decreaseCartItemQuantityByOne, viewAllCarts, viewAllActiveCart, removeAnItemFromActiveCart }
+module.exports = { addItemToCart, updateCartItem, viewAllCarts, removeAnItemFromActiveCart }

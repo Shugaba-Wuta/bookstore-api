@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
-const { staffIdGenerator } = require("../utils/model-utils")
 const validator = require("validator")
+const bcrypt = require("bcryptjs")
 
 
 const ROLES = ["admin", "staff", "manager"]
@@ -85,9 +85,6 @@ StaffBaseSchema.methods.getFullName = async function () {
     return ([this.name.first, this.name.middle, this.name.last]).filter((item) => { return item && item.length > 0 }).join(" ")
 }
 
-StaffBaseSchema.pre("save", async function () {
-    this.staffId = await staffIdGenerator()
-})
 
 
 module.exports = mongoose.model("StaffBase", StaffBaseSchema)

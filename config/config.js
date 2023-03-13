@@ -25,7 +25,7 @@ const sellerRouter = require("../routes/seller-route")
 const swaggerSpec = require("../utils/swagger-docs")
 const homeRouter = require("../routes/index-route")
 const cartRouter = require("../routes/cart-route")
-const payRouter = require("../routes/pay-route")
+const payRouter = require("../routes/order-route")
 const addressRouter = require("../routes/address-route")
 const webhookRouter = require("../routes/webhook-route")
 

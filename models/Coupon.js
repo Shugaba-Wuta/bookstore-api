@@ -46,10 +46,10 @@ const couponSchema = new mongoose.Schema({
             message: `Please provide scope for coupon usage. Choose any of the following: ${scope}`
         }
     },
-    items: {
-        type: [mongoose.Types.ObjectId],
+    items: [{
+        type: mongoose.Types.ObjectId,
         ref: "Book"
-    },
+    }],
     createdBy: {
         type: mongoose.Types.ObjectId,
         refPath: "personSchemaType"

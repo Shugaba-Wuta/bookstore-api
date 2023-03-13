@@ -82,15 +82,16 @@ const createASubaccount = async ({ bank_code, business_name, account_number }) =
         }
     }
 }
-const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDetails, reference, metadata) => {
+const paystackInitiateDynamicMultiSplit = async (email, orderTotal, metadata, reference) => {
     const data = {
+        // splitPayDetails, productQuantity, cartID: this.cartID, orderID: this._id
         email,
         amount: orderTotal,
         split: {
             type: "flat",
-            subaccounts: splitPayDetails,
+            subaccounts: metadata.splitPayDetails,
             bearer_type: "account",
-        }, reference, metadata
+        }, reference, metadata: JSON.stringify(metadata)
     }
 
     const options = {
@@ -113,9 +114,50 @@ const paystackInitiateDynamicMultiSplit = async (email, orderTotal, splitPayDeta
         }
     }
 }
-const verifyTransactionStatus = async () => {
+
+const getAccessUrl = async (email, orderTotal, metadata, reference) => {
+    //Initiate paystack transaction (dynamic split)
+    // email, orderTotal, splitPayDetails, reference, metadata
+    const response = await paystackInitiateDynamicMultiSplit(email, orderTotal, metadata, reference)
+    if (response && response.status) {
+        const { authorization_url: authorizationUrl, access_code: accessCode, reference } = response.data
+        return { authorizationUrl, reference, accessCode }
+    }
 
 }
+const verifyTransactionStatus = async (transactionRef) => {
+    const options = {
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, "Content-Type": "application/json" },
+        method: "get",
+        baseURL: hostname,
+        url: `/transaction/verify/${transactionRef}`
+    }
 
+    try {
+        const r = await axios(options)
+        return r.data
 
-module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit, verifyTransactionStatus }
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            return error.response.data
+        } else {
+            throw new CustomAPIError("Unexpected error occurred when verifying account")
+        }
+    }
+
+}
+const getPaymentDetails = async (transactionRef) => {
+    const response = await verifyTransactionStatus(transactionRef)
+    return response
+}
+
+const isPaymentSuccessful = async (transactionRef) => {
+    //
+    const response = await verifyTransactionStatus(transactionRef)
+    if (response.status && response.status) {
+        return true
+    }
+    return false
+}
+
+module.exports = { verifyBankAccount, isBankAccountValid, createASubaccount, paystackInitiateDynamicMultiSplit, verifyTransactionStatus, isPaymentSuccessful, getAccessUrl, getPaymentDetails }

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { sessionID: true, } })
 
-const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Canceled', 'Failed']
+const orderStatus = ['Pending', 'Paid', "Transit", 'Delivered', 'Failed']
 const { cartItem } = require("./Cart")
 const { DEFAULT_TAX, DEFAULT_COMMISSION } = require("../config/app-data");
 const { Conflict } = require('../errors');
@@ -13,6 +13,10 @@ const orderItem = new mongoose.Schema({
     enum: orderStatus,
     default: 'Pending',
   },
+  trackingUrl: {
+    type: String,
+    trim: true
+  }
 
 })
 orderItem.add(cartItem)
@@ -73,18 +77,21 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  accessCode: String,
+  transactionUrl: String,
   coupon: { type: mongoose.Types.ObjectId, ref: "Coupon" },
   deliveryAddress: {
     type: mongoose.Types.ObjectId,
     ref: "Address"
-  }
+  },
+  prevRef: { type: [String] },
+  deleted: { type: Boolean, default: false },
+  deletedOn: { type: Date }
 },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
-  }
+  })
 
 orderSchema.virtual("meta").get(async function () {
   const splitPayDetails = []
@@ -99,7 +106,7 @@ orderSchema.virtual("meta").get(async function () {
     productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
   }
   console.log(splitPayDetails)
-  return { splitPayDetails, productQuantity, cartID: this.cartID, orderID: this._id }
+  return { splitPayDetails, productQuantity, }
 
 })
 
@@ -118,7 +125,7 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
   const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID })
   for (const item of cart.products) {
     this.orderItems.push(item)
-    subtotal += item.itemPrice
+    subtotal += item.finalPrice
 
     if (!this.coupon) {
       continue
@@ -136,10 +143,10 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
         //coupon is of type percentage
         couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
       }
-      //adjust the subtotal and itemPrice after adding a coupon on a product
-      subtotal -= item.itemPrice
-      item.itemPrice -= couponValue
-      subtotal += item.itemPrice
+      //adjust the subtotal and finalPrice after adding a coupon on a product
+      subtotal -= item.finalPrice
+      item.finalPrice -= couponValue
+      subtotal += item.finalPrice
 
     } else if (this.coupon.type === "ORDER") {
       //Apply coupon to entire cart subtotal, limit this coupon to <= (COMMISSION + TAX) so that sellers share is not affected.
@@ -153,10 +160,10 @@ orderSchema.pre("validate", async function calculateOrderTotal(next) {
         //coupon is of type percentage
         couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
       }
-      //adjust the subtotal and itemPrice after adding a coupon on a product
-      subtotal -= item.itemPrice
-      item.itemPrice -= couponValue
-      subtotal += item.itemPrice
+      //adjust the subtotal and finalPrice after adding a coupon on a product
+      subtotal -= item.finalPrice
+      item.finalPrice -= couponValue
+      subtotal += item.finalPrice
       subtotal = (subtotal - couponValue)
     }
 
