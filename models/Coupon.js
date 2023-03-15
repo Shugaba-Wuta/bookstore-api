@@ -69,13 +69,13 @@ const couponSchema = new mongoose.Schema({
 })
 couponSchema.virtual("carts", {
     localField: "_id",
-    foreignField: "coupon",
+    foreignField: "coupons",
     ref: "Cart"
 
 })
 couponSchema.virtual("orders", {
     localField: "_id",
-    foreignField: "coupon",
+    foreignField: "coupons",
     ref: "Order"
 })
 couponSchema.pre("validate", function () {

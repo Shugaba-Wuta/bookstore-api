@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, personSchemaType:true,  } })
+const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, personSchemaType: true, } })
 
 
 const statesAndLG = require("../config/states-and-lgs.json")

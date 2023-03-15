@@ -76,13 +76,13 @@ cartSchema.methods.applyCoupon = async function (couponID, value, type, productI
     }
     const matchingProduct = this.products.filter(item => {
         return String(item.productID._id) === productID
-    })
-    let hasBeenApplied = matchingProduct[0].coupons ? matchingProduct[0].coupons.contains(couponID) : false
+    })[0]
+    let hasBeenApplied = matchingProduct ? matchingProduct.coupons.contains(couponID) : false
     if (!hasBeenApplied) {
         //Ensure the coupon has not been applied
         let couponValue
         if (type === "percentage") {
-            const totalCost = this.products[productID].finalPrice * this.products[productID].quantity
+            const totalCost = matchingProduct.quantity * matchingProduct.productID.price
             couponValue = (totalCost * (100 - value) / 100).toFixed(2)
 
         } else if (type === "flat") {
@@ -91,22 +91,26 @@ cartSchema.methods.applyCoupon = async function (couponID, value, type, productI
             throw new BadRequestError(`invalid coupon type: ${type}`)
         }
         this.products[productID].coupons.push(couponID)
-        //Deduct coupon value from order value
-        this.products[productID].finalPrice -= couponValue
-        this.products[productID].couponValue += couponValue
+        //Update couponValue
+        this.products.forEach(item => {
+            if (item.productID._id == productID)
+                item.couponValue += couponValue
+        })
 
     }
 }
 
-cartSchema.pre("validate", async function ensureFinalPrice(next) {
+cartSchema.pre(["validate", "update"], async function ensureFinalPrice(next) {
     if (!await this.populated("products.productID")) {
         await this.populate("products.productID")
     }
     this.products.forEach((product) => {
-        if (!product.finalPrice) {
-            product.finalPrice = (product.productID.price - (100 - product.productID.discount) / 100).toFixed(2)
-        }
+        const discountAmount = product.quantity * product.productID.price * (product.productID.discount) / 100
+        const totalCost = (product.productID.price + product.productID.shippingFee) * product.quantity
+        product.finalPrice = (totalCost - discountAmount - product.couponValue).toFixed(2)
+
     })
+
     //Depopulate
     this.depopulate("products.productID")
     next()
@@ -170,7 +174,7 @@ cartSchema.pre("validate", function removeZeroQuantityProducts(next) {
 cartSchema.post("save", function deleteEmptyCarts() {
     if (this.products.length < 1) {
         this.deleteOne({ _id: this._id })
-        throw new mongoose.Error("cart must contain more than one item")
+        throw new mongoose.Error("cart must not be empty")
 
     }
 })

@@ -78,7 +78,8 @@ const orderSchema = new mongoose.Schema({
     default: false
   },
   transactionUrl: String,
-  coupon: { type: mongoose.Types.ObjectId, ref: "Coupon" },
+  coupons: [{ type: mongoose.Types.ObjectId, ref: "Coupon" }],
+  couponValue: { type: Number, min: 0, default: 0 },
   deliveryAddress: {
     type: mongoose.Types.ObjectId,
     ref: "Address"
@@ -92,22 +93,61 @@ const orderSchema = new mongoose.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   })
+orderSchema.methods.applyCoupon = async function (couponID, value, type) {
+  if (this.coupons.includes(String(couponID)) || this.coupons.includes(mongoose.Types.ObjectId(couponID))) {
+    return
+  }
+  const subtotal = this.orderItems.map(item => {
+    return item.finalPrice
+  }).reduce((sum, val) => { return sum + val, 0 })
+  let couponValue
+  if (type === "percentage") {
+    couponValue = (subtotal * (value / 100)).toFixed(2)
 
+  } else {
+    couponValue = subtotal - value
+  }
+  //Check that the couponValue is not more than the commission charged by the platform
+  if (!couponValue < (subtotal * (DEFAULT_COMMISSION / 100))) {
+    throw new Conflict("Coupon cannot be applied")
+  }
+  this.couponValue = couponValue
+  this.coupons.push(couponID)
+
+}
 orderSchema.virtual("meta").get(async function () {
   const splitPayDetails = []
   const productQuantity = []
-  // await this.populate("orderItems.productID")
+  if (!this.orderItems.seller) {
+    //Check if the path: orderItems.productID has been populated
+    await this.populate("orderItems.productID")
+  }
   for await (const item of this.orderItems) {
-    const { subaccount } = await this.model("BankAccount").findOne({ deleted: false, default: true, person: item.productID.seller })
-    const discountedUnitPrice = item.productID.price * ((100 - item.productID.discount) / 100)
-    const shareInNaira = (discountedUnitPrice * item.quantity + item.productID.discount).toFixed(2)
-    splitPayDetails.push({ subaccount, share: shareInNaira * 100 })
+    //Get default account detail for seller
+    const { subaccount } = await this.model("BankAccount").findOne({ deleted: false, default: true, person: String(item.productID.seller) })
+
+    splitPayDetails.push({ subaccount, share: (item.finalPrice).toFixed(2) * 100 })
     //Add the quantity and productID to productQuantity
     productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
   }
-  console.log(splitPayDetails)
-  return { splitPayDetails, productQuantity, }
+  // console.log("splitPayDetails", splitPayDetails)
+  return { splitPayDetails, productQuantity, orderID: String(this._id) }
 
+})
+orderSchema.pre("validate", async function (next) {
+  const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID }).lean()
+  const orderItemsID = new Set(this.orderItems.map(item => { return String(item.productID._id) }))
+  cart.products.forEach((item) => {
+    if (!orderItemsID.has(String(item.productID))) {
+      console.log(item.productID, String(item.productID))
+      console.log(orderItemsID)
+      this.orderItems.push({ ...item, createdAt: Date.now(), updatedAt: Date.now() })
+      orderItemsID.add(String(item.productID))
+    }
+  })
+
+
+  return next()
 })
 
 orderSchema.pre("validate", async function ensureCartPersonIsNotNull(next) {
@@ -117,68 +157,18 @@ orderSchema.pre("validate", async function ensureCartPersonIsNotNull(next) {
   return next()
 });
 
-orderSchema.pre("validate", async function calculateOrderTotal(next) {
-  let subtotal = 0
-  let couponValue = 0
-  await this.populate("coupon")
-  await this.populate("orderItems.productID")
-  const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID })
-  for (const item of cart.products) {
-    this.orderItems.push(item)
-    subtotal += item.finalPrice
-
-    if (!this.coupon) {
-      continue
-    }
-    const coupon = await item.coupon.populate("orders")
-    if (coupon.orders.includes(this._id)) {
-      //Skip because coupon can only be applied once.
-      continue
-    }
-    if (this.coupon.items.includes(item.productID._id)) {
-      //Apply coupon to Coupon.scope === "Book" that is specific to books.
-      if (item.coupon.flat) {
-        couponValue = item.coupon.flat
-      } else {
-        //coupon is of type percentage
-        couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
-      }
-      //adjust the subtotal and finalPrice after adding a coupon on a product
-      subtotal -= item.finalPrice
-      item.finalPrice -= couponValue
-      subtotal += item.finalPrice
-
-    } else if (this.coupon.type === "ORDER") {
-      //Apply coupon to entire cart subtotal, limit this coupon to <= (COMMISSION + TAX) so that sellers share is not affected.
-      if (item.coupon.flat) {
-        couponValue = item.coupon.flat
-        const couponMaxValue = ((DEFAULT_TAX + DEFAULT_COMMISSION) / 100) * subtotal
-        if (couponValue > couponMaxValue) {
-          throw new Conflict(`Amount cannot be settled because coupon exceeds limit of: ${couponMaxValue}`)
-        }
-      } else {
-        //coupon is of type percentage
-        couponValue = item.productID.price * ((100 - item.coupon.percentage) / 100) * item.quantity
-      }
-      //adjust the subtotal and finalPrice after adding a coupon on a product
-      subtotal -= item.finalPrice
-      item.finalPrice -= couponValue
-      subtotal += item.finalPrice
-      subtotal = (subtotal - couponValue)
-    }
-
-
-  }
-  this.subtotal = subtotal.toFixed(2)
-  this.total = (this.subtotal * ((this.tax + 100) / 100))
-
+orderSchema.pre(["validate", "update"], async function calculateOrderTotal(next) {
+  const subtotal = this.orderItems.map(item => {
+    return item.finalPrice
+  }).reduce((sum, val) => { return sum + val }, 0)
+  this.subtotal = (subtotal - this.couponValue)
+  this.total = (this.subtotal * (DEFAULT_COMMISSION + 100) / 100 + ((this.tax) / 100 * this.subtotal)).toFixed(2)
   return next()
 })
 
 
 orderSchema.post("save", async function deleteEmptyOrders() {
   if (this.orderItems.length < 1) {
-
     this.deleteOne({ id: this._id })
   }
 })

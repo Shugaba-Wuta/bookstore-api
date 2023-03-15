@@ -47,7 +47,7 @@ const addItemToCart = async (req, res) => {
         })
     }
     if (couponCode) {
-        const { couponID, value, type } = await getCouponDetail(couponCode, productID) || {}
+        const { couponID, value, type } = await getCouponDetail({ code: couponCode, bookID: productID }) || {}
         if (couponID) {
             await cart.applyCoupon(couponID, value, type, productID)
         }
@@ -77,7 +77,7 @@ const updateCartItem = async (req, res) => {
         throw new NotFoundError(`productID: ${productID} does not match any record`)
     }
 
-    var existingCart = await Cart.findOne({ $or: [{ active: true, personID: personID }, { active: true, sessionID: sessionID }] })
+    var existingCart = await Cart.findOne({ $or: [{ active: true, personID: personID, "products.productID": { $in: [productID] } }, { active: true, sessionID: sessionID, "products.productID": { $in: [productID] } }] })
 
     if (!existingCart) {
         throw new BadRequestError("Item must be added to cart before it can be decreased")
@@ -88,7 +88,7 @@ const updateCartItem = async (req, res) => {
             //decrease quantity
             product.quantity -= 1
         }
-        const { couponID, value, type } = await getCouponDetail(couponCode, productID) || {}
+        const { couponID, value, type } = await getCouponDetail({ code: couponCode, bookID: productID }) || {}
         if (couponID) {
             existingCart.applyCoupon(couponID, value, type, product.productID)
         }
@@ -131,12 +131,9 @@ const removeAnItemFromActiveCart = async (req, res) => {
     if (!cart) {
         throw new NotFoundError(`User has no active cart`)
     }
-    const modifiedProducts = []
-    cart.products.forEach((prod) => {
-        if (String(prod.productID) !== productID)
-            modifiedProducts.push(prod)
+    cart.products = cart.products.filter((prod) => {
+        return String(prod.productID) !== productID
     })
-    cart.products = modifiedProducts
     await cart.save()
 
     res.status(StatusCodes.OK).json({ result: cart, success: true, message: "Successfully removed product from cart" })

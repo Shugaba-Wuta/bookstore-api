@@ -25,7 +25,7 @@ const sellerRouter = require("../routes/seller-route")
 const swaggerSpec = require("../utils/swagger-docs")
 const homeRouter = require("../routes/index-route")
 const cartRouter = require("../routes/cart-route")
-const payRouter = require("../routes/order-route")
+const orderRouter = require("../routes/order-route")
 const addressRouter = require("../routes/address-route")
 const webhookRouter = require("../routes/webhook-route")
 
@@ -76,7 +76,7 @@ app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/sellers", sellerRouter)
 app.use("/", homeRouter)
 app.use("/api/v1/carts", cartRouter)
-app.use("/api/v1/checkout", payRouter)
+app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/address", addressRouter)
 
 

@@ -4,7 +4,7 @@ const crypto = require("crypto")
 const path = require("path")
 const { Seller, Document, BankAccount } = require("../models")
 const { Conflict, NotFoundError, BadRequestError } = require("../errors")
-const { RESULT_LIMIT } = require("../config/app-data")
+const { RESULT_LIMIT, SUPER_ROLES } = require("../config/app-data")
 const { USER_FORBIDDEN_FIELDS: FORBIDDEN_FIELDS } = require("../config/app-data")
 const { uploadFileToS3 } = require("../utils/generic-utils")
 const { isBankAccountValid, createASubaccount } = require("../utils/paystack-utils")
@@ -156,10 +156,10 @@ const deleteASeller = async (req, res) => {
 
 const addDocsToSeller = async (req, res) => {
     const { pictures, govtIssuedID, others } = req.files || {}
-    const { sellerID } = req.params
-    const imagePath = ["uploads", "seller", sellerID].join("-")
+    const { sellerID: person } = req.params
+    const imagePath = ["uploads", "seller", person].join("-")
     const newDocs = []
-    if (!sellerID) {
+    if (!person) {
         throw new BadRequestError("sellerID is a required parameter")
     }
     if (govtIssuedID) {
@@ -171,7 +171,7 @@ const addDocsToSeller = async (req, res) => {
         let publicUrls = await uploadFileToS3(docs)
         if (publicUrls.length) {
             for await (const url of publicUrls) {
-                const newID = await new Document({ category: "govtIssuedID", ...url }).save()
+                const newID = await new Document({ category: "govtIssuedID", ...url, personSchema: "Seller", person }).save()
                 newDocs.push(newID)
             }
         }
@@ -185,7 +185,7 @@ const addDocsToSeller = async (req, res) => {
         })
         let publicUrls = await uploadFileToS3(docs)
         for await (const url of publicUrls) {
-            const newPics = await new Document({ category: "pictures", ...url }).save()
+            const newPics = await new Document({ category: "pictures", ...url, personSchema: "Seller", person }).save()
             newDocs.push(newPics)
         }
     }
@@ -197,7 +197,7 @@ const addDocsToSeller = async (req, res) => {
         })
         let publicUrls = await uploadFileToS3(docs)
         for await (const url of publicUrls) {
-            const newOther = await new Document({ category: "others", ...url })
+            const newOther = await new Document({ category: "others", ...url, personSchema: "Seller", person }).save()
             newDocs.push(newOther)
         }
     }
@@ -208,13 +208,17 @@ const addDocsToSeller = async (req, res) => {
 }
 const getSellerDocs = async (req, res) => {
     const { sellerID } = req.params
+    var { deleted } = req.query
     if (!sellerID) {
         throw new BadRequestError("sellerID is a required field")
     }
-    const allDocs = await Document.find({ person: sellerID, deleted: false })
+    if (!SUPER_ROLES.includes(req.user.role)) {
+        deleted = false
+    }
+    const allDocs = await Document.find({ person: sellerID, deleted })
     res.status(StatusCodes.OK).json({ result: allDocs, message: "Successfully returned seller documents", success: true })
 }
-const deleteUploadedFiles = async (req, res) => {
+const deleteUploadedDocs = async (req, res) => {
     const { sellerID } = req.params
     const { documentID: docID } = req.body
     if (!sellerID) {
@@ -240,7 +244,10 @@ const updateDocumentProp = async (req, res) => {
     if (!sellerID) {
         throw new BadRequestError("sellerID field is required")
     }
-    const doc = Document.findOne({ _id: docID, person: sellerID })
+    const doc = await Document.findOne({ _id: docID, person: sellerID })
+    if (!doc) {
+        throw new NotFoundError("document does not exist")
+    }
 
     if (refID) {
         doc.refID = refID
@@ -263,10 +270,10 @@ const addBankAccount = async (req, res) => {
     if (!sellerID) {
         throw new BadRequestError("Please provide a sellerID")
     }
-    const seller = await Seller.findOne({ deleted: false, _id: sellerID })
-    if (!seller) {
-        throw new NotFoundError("sellerID does not match any record")
-    }
+    // const seller = await Seller.findOne({ deleted: false, _id: sellerID })
+    // if (!seller) {
+    //     throw new NotFoundError("sellerID does not match any record")
+    // }
     if (!BVN) {
         throw new BadRequestError("Required field `BVN` is missing")
     }
@@ -290,7 +297,7 @@ const addBankAccount = async (req, res) => {
     const bankDetails = nigerianCommercialBanks.filter(item => {
         return item.name === bankName
     })
-    if (!bankDetails) {
+    if (!bankDetails.length) {
         throw new BadRequestError("Please provide a valid bankName")
     }
     const code = bankDetails[0].code
@@ -366,11 +373,12 @@ const deleteBankInfo = async (req, res) => {
 
 const getAllSellerBanks = async (req, res) => {
     const { sellerID } = req.params
+    const { deleted } = req.body
 
     if (!sellerID) {
         throw new BadRequestError("sellerID is a required field")
     }
-    const allBankInfo = await BankAccount.find({ person: sellerID, deleted: false })
+    const allBankInfo = await BankAccount.find({ person: sellerID, deleted })
     res.status(StatusCodes.OK).json({ result: allBankInfo, message: "Successfully returned bank accounts", success: true })
 }
 
@@ -385,11 +393,7 @@ Seller Address manipulation
 
 
 
-const test = async (req, res) => {
-    const response = await createASubaccount({ bank_code: "058", business_name: "Wuta Biz", account_number: "0253412518" })
 
-    return res.status(200).json({ response })
-}
 
-module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedFiles, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks, test }
+module.exports = { getASingleSeller, getAllSellers, registerNewSeller, updateASeller, deleteASeller, addDocsToSeller, getSellerDocs, deleteUploadedDocs, updateDocumentProp, addBankAccount, updateBankInfo, deleteBankInfo, getAllSellerBanks }
 

@@ -1,9 +1,10 @@
 const { StatusCodes } = require("http-status-codes")
-const { Cart, Order, User, Seller } = require("../models")
-const { BadRequestError, NotFoundError, Conflict } = require("../errors")
+const { Cart, Order, User, Seller, Book } = require("../models")
+const { BadRequestError, NotFoundError, Conflict, UnauthorizedError } = require("../errors")
 const mongoose = require("mongoose")
 const { SUPER_ROLES } = require("../config/app-data")
 const { getPaymentDetails, getAccessUrl, isPaymentSuccessful } = require("../utils/paystack-utils")
+const { getCouponDetail } = require("../utils/model-utils")
 
 
 
@@ -13,7 +14,8 @@ const createOrder = async (req, res) => {
     /*
     Creates a new order from existing cart.
     */
-    const { cartID, userID: personID } = req.body
+    const { cartID, couponCode } = req.body
+    const { userID: personID } = req.params
     const { sessionID } = req.user
     if (!cartID) {
         throw new BadRequestError("Required parameter: 'cartID' is missing")
@@ -37,7 +39,7 @@ const createOrder = async (req, res) => {
     //Create a new Order if no uninitiated Order exists.
     const productPopulateSelect = ["name", "price", "description", "seller", "discount", "images", "shippingFee"]
 
-    let order = await Order.findOne({ cartID, personID }).populate("orderItems.productID", productPopulateSelect)
+    let order = await Order.findOne({ cartID, personID }).populate({ path: "orderItems.productID", select: productPopulateSelect })
 
     if (order) {
         throw new BadRequestError("Order already exists, consider updating order")
@@ -45,8 +47,16 @@ const createOrder = async (req, res) => {
     //Ensure deliveryAddress or default address.
     const address = user.addresses.filter((address) => {
         return address.default
-    })
+    })[0] //Get the element at index 0||undefined
     const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId(), deliveryAddress: address }).save()
+
+    //Verify and apply coupon
+    if (couponCode) {
+        const { couponID, value, type } = await getCouponDetail({ code: couponCode, scope: "Purchase" }) || {}
+        if (couponID) {
+            await order.applyCoupon(couponID, value, type)
+        }
+    }
 
     res.status(StatusCodes.CREATED).json({
         message: "Order created", result: newOrder, success: true
@@ -54,9 +64,8 @@ const createOrder = async (req, res) => {
 }
 
 const updateOrder = async (req, res) => {
-    //TODO: Add an activity logger function.
-
-    const { orderID, userID: personID, addressID: deliveryAddress, coupon, tax, initiated, deleteOrder: deleted = false } = req.body
+    const { userID: personID, addressID: deliveryAddress, couponCode, tax, initiated, deleteOrder: deleted = false } = req.body
+    const { orderID } = req.params
     if (!orderID) {
         throw new BadRequestError("Missing parameter orderID")
     }
@@ -64,12 +73,19 @@ const updateOrder = async (req, res) => {
         throw new BadRequestError("Missing parameter userID")
     }
 
-    const order = await Order.findOne({ _id: orderID, personID, deleted }).populate("deliveryAddress")
+    const order = await Order.findOne({ _id: orderID, personID }).populate("deliveryAddress")
     if (!order) {
         throw new NotFoundError("Order does not exist")
     }
+    //Verify and apply coupon
+    if (couponCode) {
+        const { couponID, value, type } = await getCouponDetail({ code: couponCode, scope: "Purchase" }) || {}
+        if (couponID) {
+            await order.applyCoupon(couponID, value, type)
+        }
+    }
 
-    const allowedUpdates = { deliveryAddress, coupon }
+    const allowedUpdates = { deliveryAddress }
     const escalatedUpdates = { tax, initiated, deleted }
     //Generic updates
     Object.keys(allowedUpdates).forEach(item => {
@@ -126,7 +142,8 @@ const getOrders = async (req, res) => {
 
 
 const initiatePay = async (req, res) => {
-    const { userID: personID, orderID, onCancelRedirect } = req.body
+    const { userID: personID, onCancelRedirect } = req.body
+    const { orderID } = req.params
     if (!personID) {
         throw new BadRequestError("missing required body: userID")
     }
@@ -142,7 +159,7 @@ const initiatePay = async (req, res) => {
     if (!order) {
         throw new NotFoundError("order not found")
     }
-    if (!order.transactionSuccessful) {
+    if (order.transactionSuccessful) {
         throw new Conflict("order has been paid successfully")
     }
     if (order.initiated) {
@@ -162,6 +179,7 @@ const initiatePay = async (req, res) => {
     //Reset initiate and accessCode
     order.initiated = true
     order.transactionUrl = authorizationUrl
+    await order.save()
 
     return res.status(StatusCodes.OK).json({ result: { accessCode, authorizationUrl }, message: "retrieved authorization email", success: true })
 
@@ -212,20 +230,26 @@ const getSellerOrders = async (req, res) => {
     const sellerOrders = await Order.find(
         { deleted: deletedOrder, $match: { "orderItems.productID": { $in: sellerBooks } } }
     )
-    res.status(StatusCodes.OK).join({ result: sellerOrders, message: "seller orders", success: true })
+    res.status(StatusCodes.OK).json({ result: sellerOrders, message: "seller orders", success: true })
 
 }
 const orderUpdateStatus = async (req, res) => {
-    const { orderID, productID, status } = req.body
-    const requiredParams = { orderID, productID, status }
+    const { orderID, productID, dispatched, trackingURL: trackingUrl, sellerID } = req.body
+    const requiredParams = { orderID, productID, sellerID }
 
-    Object.key(requiredParams).forEach(key => {
+    Object.keys(requiredParams).forEach(key => {
         let value = requiredParams[key]
         if (!value) {
             throw new BadRequestError(`required param is missing: ${key}`)
         }
     })
-
+    const book = await Book.findOne({ deleted: false, _id: productID })
+    if (!book) {
+        throw new BadRequestError("resource does not exist")
+    }
+    if (!(String(book.seller) === sellerID)) {
+        throw new UnauthorizedError("seller cannot modify this resource")
+    }
     const order = await Order.findOne({ _id: orderID })
     if (!order) {
         throw new NotFoundError("order does not exist")
@@ -233,16 +257,18 @@ const orderUpdateStatus = async (req, res) => {
 
     order.orderItems.forEach(item => {
         if (String(item.productID) === productID) {
-            item.status = status
+            if (dispatched && item.status === "Paid") {
+                item.status = "Transit"
+            }
+            if (trackingUrl) {
+                item.trackingUrl = trackingUrl
+            }
         }
     })
     await order.save()
 
     return res.status(StatusCodes.OK).json({ result: order, message: "successful updated order status", success: true })
-
 }
-
-
 
 
 

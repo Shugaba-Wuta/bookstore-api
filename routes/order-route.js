@@ -15,7 +15,7 @@ router.route("/user/:userID")
 
 router.route("/:orderID").get(getOrder).patch(updateOrder)
 
-router.post("/:ordreID/initiatePayment", initiatePay)
+router.post("/:orderID/initiatePayment", initiatePay)
 router.post("/seller/update", orderUpdateStatus)
 router.post("/seller/view", getSellerOrders)
 router.post("/payment/details", getTransactionDetail)

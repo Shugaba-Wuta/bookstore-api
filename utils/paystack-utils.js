@@ -154,7 +154,8 @@ const getPaymentDetails = async (transactionRef) => {
 const isPaymentSuccessful = async (transactionRef) => {
     //
     const response = await verifyTransactionStatus(transactionRef)
-    if (response.status && response.status) {
+    console.log(response.status)
+    if (response.status && response.data.status == "success") {
         return true
     }
     return false
