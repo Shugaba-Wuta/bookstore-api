@@ -108,6 +108,15 @@ const isPersonAuthorized = async (req, res, next) => {
 
   throw new UnauthorizedError("Unauthorized, cannot proceed!")
 }
+const allowOrigin = (origin) => {
+  return (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  }
+
+}
 
 
-module.exports = { authenticateUser, authorizeRoles, assignSessionID, isPersonAuthorized };
+module.exports = { authenticateUser, authorizeRoles, assignSessionID, isPersonAuthorized, allowOrigin };

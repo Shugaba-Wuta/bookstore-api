@@ -1,18 +1,18 @@
 const express = require("express")
 
 const { logout, login, resetPassword, changeEmail, verifyEmailWithOTP, newTokenFromRefresh: refresh, startPasswordResetFlow } = require("../controllers/auth")
-const { isPersonAuthorized } = require("../middleware/auth middleware")
+const { isPersonAuthorized, allowOrigin } = require("../middleware/auth middleware")
 
 
 
 const router = express.Router()
 
-router.post("/login", login)
+router.post("/login", allowOrigin("http://localhost:3000"), login)
 
 
-router.get("/refresh-token", refresh)
+router.get("/refresh-token", allowOrigin("http://localhost:3000"), refresh)
 
-router.get("/logout", logout)
+router.get("/logout", allowOrigin("http://localhost:3000"), logout)
 
 router.post("/reset-password", resetPassword)
 
