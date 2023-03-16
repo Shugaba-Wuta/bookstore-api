@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
 const { MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP } = require("../config/app-data")
-const { ticketSchema } = require("./Ticket")
 
 const totpSchema = mongoose.Schema({
     purpose: { type: String, required: [true, "Token.purpose is a required field"] },
