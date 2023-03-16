@@ -39,7 +39,7 @@ const sellerSchema = new mongoose.Schema({
         trim: true
     },
     verified: {
-        type: String,
+        type: Boolean,
         default: false
     },
     verifiedEmail: {

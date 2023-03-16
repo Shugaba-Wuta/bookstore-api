@@ -74,8 +74,8 @@ const PRODUCT_FORBIDDEN_FIELDS = { "deleted": 0, "deletedOn": 0, "__v": 0, "comm
 const PRODUCT_DEPARTMENTS = ["Books"]
 const RESULT_LIMIT = 50
 const OTP_CODE_LENGTH = 5
-const MAX_OTP_TIME_IN_SECONDS = 10 * 60 //time in secs
 const TIME_TOLERANCE_FOR_OTP = 0.5 //Values from 0...1
+const MAX_OTP_TIME_IN_SECONDS = 10 * 60 //time in secs
 
 const DOCUMENT_CATEGORY_TYPES = ["others", "govtIssuedID", "pictures"]
 

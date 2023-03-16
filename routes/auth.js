@@ -1,7 +1,7 @@
 const express = require("express")
 
 const { logout, login, resetPassword, changeEmail, verifyEmailWithOTP, newTokenFromRefresh: refresh, startPasswordResetFlow } = require("../controllers/auth")
-const { authorizeRoles, isPersonAuthorized } = require("../middleware/auth middleware")
+const { isPersonAuthorized } = require("../middleware/auth middleware")
 
 
 
@@ -18,10 +18,10 @@ router.post("/reset-password", resetPassword)
 
 router.post("/start-password-reset", startPasswordResetFlow)
 
-router.post("/change-email", [authorizeRoles("seller", "staff", "admin", "user"), isPersonAuthorized], changeEmail)
+router.post("/change-email", [isPersonAuthorized], changeEmail)
 
 
-router.post("/verify-email", [authorizeRoles("seller", "staff", "admin", "user"), isPersonAuthorized], verifyEmailWithOTP)
+router.post("/verify-email", [isPersonAuthorized], verifyEmailWithOTP)
 
 
 

@@ -1,10 +1,10 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
-const bcrypt = require("bcryptjs")
-const { MAX_OTP_TIME_IN_SECONDS } = require("../config/app-data")
+const { MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP } = require("../config/app-data")
+const { ticketSchema } = require("./Ticket")
 
 const totpSchema = mongoose.Schema({
-    role: String,
+    purpose: { type: String, required: [true, "Token.purpose is a required field"] },
     email: {
         type: String,
         validator: { validator: validator.isEmail, message: "Please provide valid email" },
@@ -13,11 +13,11 @@ const totpSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    user: {
+    person: {
         type: mongoose.Types.ObjectId,
         refPath: "userType",
     },
-    userType: {
+    personSchema: {
         type: String,
         required: true,
     },
@@ -31,17 +31,24 @@ const totpSchema = mongoose.Schema({
     timestamps: true,
 })
 
-totpSchema.pre("save", async function () {
-    if (!this.isModified('totp')) return;
-    const salt = await bcrypt.genSalt(10);
-    this.totp = await bcrypt.hash(this.totp, salt);
+
+
+
+totpSchema.static("generateCode", function () {
+    return Math.random().toString(10).substring(3, 9)
+})
+totpSchema.static("createAToken", async function (person, personSchema, email, purpose) {
+    const totp = this.generateCode()
+    const existingToken = await this.findOne({ email, purpose, used: false })
+    if (!existingToken) {
+        const token = await this.create({ person, personSchema, email, purpose, totp })
+        return token.totp
+    }
+    return existingToken.totp
+
 })
 
-totpSchema.methods.compareOTP = async function (candidateOTP) {
-    const isMatch = await bcrypt.compare(candidateOTP, this.totp);
-    return isMatch;
-};
-totpSchema.index({ createdAt: 1 }, { expireAfterSeconds: MAX_OTP_TIME_IN_SECONDS })
+totpSchema.index({ createdAt: 1 }, { expireAfterSeconds: Math.ceil(MAX_OTP_TIME_IN_SECONDS * TIME_TOLERANCE_FOR_OTP) })
 totpSchema.index({ email: 1, used: 1 }, { unique: true })
 
 
