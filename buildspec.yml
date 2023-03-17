@@ -4,6 +4,7 @@ phases:
         commands:
             - echo "Entered the pre-build phase"
             - npm install
+            - npm update
     build:
         commands:
             - echo "Entered the build phase"
