@@ -23,6 +23,7 @@ paths:
                 - $ref: "#/components/parameters/descendingParam"
                 - $ref: "#/components/parameters/limitParam"
                 - $ref: "#/components/parameters/pageParam"
+                - $ref: "#/components/parameters/sellerIDParam"
 
             responses:
                 200:
@@ -289,6 +290,8 @@ components:
                     items:
                         type: string
                         format: binary
+                views:
+                    type: number
     parameters:
         featuredParam:
             in: query
@@ -396,6 +399,11 @@ components:
                 type: number
             minimum: 0
             maximum: 50
+        sellerIDParam:
+            in: query
+            name: sellerID
+            schema:
+                type: string
     responses:
         error:
             content:

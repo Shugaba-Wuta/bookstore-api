@@ -10,7 +10,7 @@ const path = require("path")
 const NON_EDITABLE_FIELDS = { featured: 0, deleted: 0, deletedOn: 0 }
 
 const getAllBooks = async (req, res) => {
-    const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, query, fields, isbn10, isbn13, issn, sortBy: sort, descending } = req.query
+    const { featured, freeShipping, minDiscount, maxDiscount, currency, minPrice, maxPrice, language, format, query, fields, isbn10, isbn13, issn, sortBy: sort, descending, sellerID } = req.query
     const findParams = { deleted: false }
     if (typeof (featured) !== "undefined") {
         findParams.featured = featured
@@ -70,6 +70,9 @@ const getAllBooks = async (req, res) => {
     }
     if (issn) {
         findParams.ISSN = issn
+    }
+    if (sellerID) {
+        findParams.seller = sellerID
     }
 
     let findQuery = Book.find(findParams)
