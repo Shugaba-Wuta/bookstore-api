@@ -1,9 +1,9 @@
 paths:
-    "/api/v1/carts":
+    "/api/v1/carts/{userID}":
         get:
             tags: [Carts]
-            summary: Get  carts belonging to a user
-            description: Admin route to return a list of carts that match query
+            summary: Get carts belonging to a user
+            description: Where the request is sent by a Staff, it can also fetch non-active carts, provided the active=false query is set. When the request is not from a staff, it always returns the active cart if any.
             parameters:
                 - $ref: "#/components/parameters/activeParam"
             responses:
@@ -28,44 +28,49 @@ paths:
                     content:
                         $ref: "#/components/responses/error/content"
     "/api/v1/carts/active":
-        get:
-            tags: [Carts]
-            summary: Get all carts belonging to a user
-            description: User route to return a list of carts that match query
-            responses:
-                200:
-                    description: Ok
-                    content:
-                        $ref: "#/components/responses/success/content"
-                400:
-                    description: Bad Request
-                    content:
-                        $ref: "#/components/responses/error/content"
-                404:
-                    description: Not Found
-                    content:
-                        $ref: "#/components/responses/error/content"
-                409:
-                    description: Conflict
-                    content:
-                        $ref: "#/components/responses/error/content"
-                500:
-                    description: Server error
-                    content:
-                        $ref: "#/components/responses/error/content"
+        # get:
+        #     tags: [Carts]
+        #     summary: Get all carts belonging to a user
+        #     description: User route to return a list of carts that match query
+        #     responses:
+        #         200:
+        #             description: Ok
+        #             content:
+        #                 $ref: "#/components/responses/success/content"
+        #         400:
+        #             description: Bad Request
+        #             content:
+        #                 $ref: "#/components/responses/error/content"
+        #         404:
+        #             description: Not Found
+        #             content:
+        #                 $ref: "#/components/responses/error/content"
+        #         409:
+        #             description: Conflict
+        #             content:
+        #                 $ref: "#/components/responses/error/content"
+        #         500:
+        #             description: Server error
+        #             content:
+        #                 $ref: "#/components/responses/error/content"
     "/api/v1/carts/cart":
         post:
             tags: [Carts]
-            summary: Adds a new product to cart
-            description: Adds/ Increase the quantity of products in the cart
+            summary: Adds a new product to active cart
+            description: Adds/ increase the quantity of products in the cart
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
                             type: object
+                            required: [productID, quantity]
                             properties:
                                 productID:
+                                    type: string
+                                quantity:
+                                    type: number
+                                couponCode:
                                     type: string
             responses:
                 201:
@@ -98,8 +103,8 @@ paths:
                         $ref: "#/components/responses/error/content"
         patch:
             tags: [Carts]
-            summary: Decreases quantity of product in cart
-            description: Decrease the quantity of products in the cart by 1
+            summary: Modifies existing item in cart
+            description: Can decrease the quantity of cart item based on the value of `operation` set. Can also be used to apply couponCode to an existing item in the cart.
             requestBody:
                 required: true
                 content:
@@ -109,6 +114,13 @@ paths:
                             properties:
                                 productID:
                                     type: string
+                                    required: true
+                                couponCode:
+                                    type: string
+                                operation:
+                                    required: true
+                                    type: string
+                                    enum: [decrease, coupon]
 
             responses:
                 200:
@@ -154,6 +166,7 @@ paths:
                             properties:
                                 productID:
                                     type: string
+                                    required: true
             responses:
                 201:
                     description: Creates a new record
