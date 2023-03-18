@@ -1,4 +1,3 @@
-const express = require("express")
 const { StatusCodes } = require("http-status-codes")
 
 const home = async (req, res) => {

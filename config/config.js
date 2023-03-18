@@ -63,6 +63,7 @@ app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(fileUpload({ limits: { fileSize: Number(process.env.MAX_FILE_SIZE_IN_KB) * 1024 }, limitHandler }));
 //ENDPOINTS that do not need sessions. e.g. webhooks, AWS health checker.
+app.use("/", homeRouter)
 app.use(webhookRouter)
 
 
@@ -74,7 +75,6 @@ app.use("/api/v1/products/books", bookRouter)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/sellers", sellerRouter)
-app.use("/", homeRouter)
 app.use("/api/v1/carts", cartRouter)
 app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/address", addressRouter)
