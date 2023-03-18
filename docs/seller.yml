@@ -527,7 +527,7 @@ paths:
                                 bankID:
                                     type: string
 
-                        responses:
+            responses:
                 200:
                     description: Ok
                     content:

@@ -1,0 +1,455 @@
+paths:
+    "/api/v1/orders/user/{userID}":
+        get:
+            tags: [Orders]
+            summary: Get orders belonging to `userID`
+            description: Get all orders for a single user. Elevated roles can access deleted orders using the `deleted` query parameter
+            parameters:
+                - in: query
+                  name: deleted
+                  description: When set by an elevated account, it returns the orders that match value.
+                  type: boolean
+                  default: false
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        post:
+            tags: [Orders]
+            summary: Create a new order using `cartID`
+            description: Create a new order by sending cartID. If couponCode exists send it as well.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                cartID:
+                                    type: string
+                                    required: true
+                                couponCode:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/orders/{orderID}":
+        get:
+            tags: [Orders]
+            summary: Get a single order
+            description: Returns an order that matches the orderID or raise an error
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        patch:
+            tags: [Orders]
+            summary: Updates an existing order
+            description: Change `addressID` or add couponCode `couponCode`
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                userID:
+                                    type: string
+                                    required: true
+                                addressID:
+                                    type: string
+                                couponCode:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/orders/{orderID}/initiatePayment":
+        post:
+            tags: [Orders]
+            summary: Initiates payment for order
+            description: Initiates payment if no successful payment for order. Returns authorization_url to redirect user.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                userID:
+                                    type: string
+                                    required: true
+                                onCancelRedirect:
+                                    type: string
+                                    required: true
+                                    description: URL to visit when user cancels payment on paystack payment site.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/orders/seller/view":
+        post:
+            tags: [Orders]
+            summary: Find orders that match a sellerID
+            description: Returns orders containing items that are registered by a seller.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                sellerID:
+                                    type: string
+                                    required: true
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/orders/seller/update":
+        post:
+            tags: [Orders]
+            summary: Seller update order item.
+            description: Seller update order item `status` and `trackingUrl` of paid orders
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: true
+                            properties:
+                                required: [productID, orderID, sellerID]
+                                productID:
+                                    type: string
+                                orderID:
+                                    type: string
+                                sellerID:
+                                    type: string
+                                trackingUrl:
+                                    type: string
+                                dispatched:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/orders/payment/details":
+        post:
+            tags: [Orders]
+            summary: Get Payment details for an order
+            description: Gets the payment information for an order.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                orderID:
+                                    type: string
+                                    required: true
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+components:
+    schemas:
+        Order:
+            type: object
+            properties:
+                _id:
+                    type: string
+                cartID:
+                    type: string
+                orderItems:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            status:
+                                type: string
+                            trackingUrl:
+                                type: string
+                            productID:
+                                type: string
+                            quantity:
+                                type: string
+                            finalPrice:
+                                type: string
+                            coupons:
+                                type: array
+                                items:
+                                    type: string
+                            couponValue:
+                                type: integer
+                tax:
+                    type: integer
+                personID:
+                    type: string
+                personSchema:
+                    type: string
+                subtotal:
+                    type: string
+                total:
+                    type: string
+                sessionID:
+                    type: string
+                ref:
+                    type: string
+                initiated:
+                    type: boolean
+                    default:
+                transactionSuccessful:
+                    type: boolean
+                coupons:
+                    type: array
+                    items:
+                        type: string
+                couponValue:
+                    type: integer
+                deliveryAddress:
+                    type: string
+                prevRef:
+                    type: array
+                    items:
+                        type: string
+                deleted:
+                    type: boolean
+                deletedOn:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+    responses:
+        success:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                            success:
+                                default: true
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Order"
+                            error:
+                                type: boolean
+                                default: false
+
+        error:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                default: false
+                            message:
+                                type: string
+                            error:
+                                type: boolean
+                                default: true
