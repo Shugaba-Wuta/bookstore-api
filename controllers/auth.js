@@ -113,7 +113,7 @@ const newTokenFromRefresh = async (req, res) => {
         throw new UnauthenticatedError("Please log in")
     }
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
-    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role } }
+    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role, permissions: payload.user.permissions } }
     if (payload && payload.user.userID) {
         const newToken = await createToken(user)
         return res.json({ token: newToken })
