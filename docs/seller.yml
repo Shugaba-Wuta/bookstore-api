@@ -36,13 +36,29 @@ paths:
         post:
             tags: [Sellers]
             summary: Create a new seller record
-            description: Create seller
+            description: Creates a new seller. More information will be uploaded using the patch method.
             requestBody:
                 required: true
                 content:
-                    multipart/form-data:
+                    application/json:
                         schema:
-                            $ref: "#/components/schemas/Seller"
+                            type: object
+                            required:
+                                [firstName, lastName, email, password, role]
+                            properties:
+                                firstName:
+                                    type: string
+                                lastName:
+                                    type: string
+                                middleName:
+                                    type: string
+                                email:
+                                    type: string
+                                password:
+                                    type: string
+                                role:
+                                    type: string
+                                    enum: [user, seller, staff]
             responses:
                 201:
                     description: Creates a new record
@@ -107,7 +123,7 @@ paths:
 
         patch:
             summary: Update a seller record
-            description: Modify a seller record
+            description: Modify a seller record. Email and password cannot be modified through this endpoint. Refer to the /auth path.
             tags: [Sellers]
             parameters:
                 - $ref: "#/components/parameters/idParam"
@@ -180,7 +196,141 @@ paths:
                     description: Server error
                     content:
                         $ref: "#/components/responses/error/content"
-    "/api/v1/seller/{sellerID}/documents":
+    "/api/v1/sellers/{sellerID}/documents":
+        patch:
+            tags: [Sellers]
+            summary: Update information on uploaded document
+            description: Update `category`, `refID` of already existing document.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                documentID:
+                                    type: string
+                                    required: true
+                                categories:
+                                    type: string
+                                    enum: [others, govtIssuedID, pictures]
+                                refID:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        get:
+            tags: [Sellers]
+            summary: Get all seller docs
+            description: Returns all seller docs in all categories. Elevated roles can request for deleted docs using `deleted` query.
+            parameters:
+                - in: query
+                  name: deleted
+                  schema:
+                      type: boolean
+                  description: Select deleted docs. Elevated role is required
+                - in: path
+                  name: sellerID
+                  schema:
+                      type: string
+                  description: Seller ID
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+        post:
+            tags: [Sellers]
+            summary: Upload a document and attach to a seller
+            description: Uploads pictures, govtIssuedID, others on a seller.
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                pictures:
+                                    $ref: "#/components/resources/fileRequestBody"
+                                govtIssuedID:
+                                    $ref: "#/components/resources/fileRequestBody"
+                                others:
+                                    $ref: "#/components/resources/fileRequestBody"
+            responses:
+                200:
+                    description: Ok
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
         delete:
             tags: [Sellers]
             summary: Delete document, pictures, avatar
@@ -228,12 +378,192 @@ paths:
                     content:
                         $ref: "#/components/responses/error/content"
 
+    "/api/v1/sellers/{sellerID}/bankaccounts":
+        post:
+            tags: [Sellers-Banks]
+            summary: Create a new sellers bankaccounts
+            description: Create a new account belonging to the sellerID
+            requestBody:
+                required: true
+                parameters:
+                    - in: path
+                      name: sellerID
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                BVN:
+                                    type: string
+                                accountName:
+                                    type: string
+                                accountNumber:
+                                    type: string
+                                bankName:
+                                    type: string
+                                accountType:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        get:
+            tags: [Sellers-Banks]
+            summary: Get all sellers bankaccounts
+            description: Get all bankaccounts belonging to a seller.
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        patch:
+            tags: [Sellers-Banks]
+            summary: Update an existing bank account
+            description: Change bank account to default. Modify email on bank account. Cannot change accountName/ accountNumber
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            required: true
+                            type: object
+                            properties:
+                                bankID:
+                                    type: string
+                                    required: true
+                                accountType:
+                                    type: string
+                                email:
+                                    type: string
+                                setDefault:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        delete:
+            tags: [Sellers-Banks]
+            summary: Delete a bank account
+            description: Remove bank account from a sellerID
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                bankID:
+                                    type: string
+
+                        responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
 components:
     schemas:
         Seller:
             type: object
-            required: [firstName, lastName, email, password, role]
             properties:
+                _id:
+                    type: string
                 firstName:
                     type: string
                 middleName:
@@ -244,13 +574,15 @@ components:
                     type: string
                 verified:
                     type: boolean
-                password:
-                    type: password
                 gender:
                     type: string
                 avatar:
-                    format: binary
-                    type: string
+                    type: object
+                    properties:
+                        url:
+                            type: string
+                        uploadedAt:
+                            type: string
                 role:
                     type: string
                 accountNumber:
@@ -270,8 +602,14 @@ components:
                 pictures:
                     type: array
                     items:
-                        format: binary
-                        type: string
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                url:
+                                    type: string
+                                uploadedAt:
+                                    type: string
 
     parameters:
         idParam:
@@ -285,95 +623,24 @@ components:
             name: featured
             schema:
                 type: boolean
-        freeShippingParam:
-            in: query
-            name: freeShipping
-            schema:
-                type: boolean
-        minDiscountParam:
-            in: query
-            name: minDiscount
-            schema:
-                type: number
-            minimum: 0
-            maximum: 100
-        maxDiscountParam:
-            in: query
-            name: maxDiscount
-            schema:
-                type: number
-            minimum: 0
-            maximum: 100
-        currencyParam:
-            in: query
-            name: currency
-            schema:
-                type: string
-                default: NGN
-        minPriceParam:
-            in: query
-            name: minPrice
-            schema:
-                type: number
-            minimum: 0
-            maximum: 100
-        maxPriceParam:
-            in: query
-            name: maxPrice
-            schema:
-                type: number
-            minimum: 0
-            maximum: 100
-        languageParam:
-            in: query
-            name: language
-            schema:
-                type: string
-            default: en
-        formatParam:
-            in: query
-            name: format
-            schema:
-                type: string
-                enum: [Paperback, Hardcover, Others]
         queryParam:
             in: query
             name: query
             schema:
                 type: string
-            description: Query all books
+            description: Query string for sellers
         fieldsParam:
             in: query
             name: fields
             schema:
                 type: string
-            description: comma separated string of book field(s) to be returned
-        isbn10Param:
-            in: query
-            name: isbn10
-            schema:
-                type: string
-        isbn13Param:
-            in: query
-            name: isbn13
-            schema:
-                type: string
-        issnParam:
-            in: query
-            name: issn
-            schema:
-                type: string
+            description: comma separated string of seller field(s) to be returned
         sortByParam:
             in: query
             name: sortBy
             schema:
                 type: string
             description: Comma separated string of fields to sort results by
-        descendingParam:
-            in: query
-            name: descending
-            schema:
-                type: boolean
         pageParam:
             in: query
             name: page

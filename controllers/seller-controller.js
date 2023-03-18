@@ -97,6 +97,10 @@ const getASingleSeller = async (req, res) => {
 const updateASeller = async (req, res) => {
     //get sellerID from request parameter aka url
     const { sellerID } = req.params
+    const { email, password } = req.body
+    if (email || password) {
+        throw new BadRequestError("Cannot modify email or password through this endpoint")
+    }
     if (!sellerID) {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }
@@ -266,22 +270,19 @@ SELLER/ BANK ACCOUNTS MANIPULATION
 
 const addBankAccount = async (req, res) => {
     const { sellerID } = req.params
-    const { BVN, accountName: name, email, accountNumber: number, bankName, accountType: type } = req.body
+    const { BVN, accountName: name, accountNumber: number, bankName, accountType: type } = req.body
     if (!sellerID) {
         throw new BadRequestError("Please provide a sellerID")
     }
-    // const seller = await Seller.findOne({ deleted: false, _id: sellerID })
-    // if (!seller) {
-    //     throw new NotFoundError("sellerID does not match any record")
-    // }
+    const seller = await Seller.findOne({ deleted: false, _id: sellerID })
+    if (!seller) {
+        throw new NotFoundError("sellerID does not match any record")
+    }
     if (!BVN) {
         throw new BadRequestError("Required field `BVN` is missing")
     }
     if (!type) {
         throw new BadRequestError("Required field `accountType` is missing")
-    }
-    if (!email) {
-        throw new BadRequestError("Required field `email` is missing")
     }
     if (!number) {
         throw new BadRequestError("Required field `accountNumber` is missing")
@@ -302,18 +303,18 @@ const addBankAccount = async (req, res) => {
     }
     const code = bankDetails[0].code
     //Verify provided bank Info using pay-stack
-    const bankValid = await isBankAccountValid({ account_number: number, bank_code: code, name, email, type })
+    const bankValid = await isBankAccountValid({ account_number: number, bank_code: code, name, email: seller.email, type })
     if (!bankValid) {
         throw new BadRequestError("Bank information provided is not valid")
     }
     // Create paystack subaccount
     const business_name = name
-    const subaccountResponse = await createASubaccount({ bank_code: code, business_name, account_number: number, email: email })
+    const subaccountResponse = await createASubaccount({ bank_code: code, business_name, account_number: number, email: seller.email })
     if (!subaccountResponse.status) {
         throw new BadRequestError("Could not create a subaccount with provided information")
     }
 
-    var newAccount = new BankAccount({ BVN, number, bankName, code, type, verificationStatus: true, person: sellerID, email, accountName: name })
+    var newAccount = new BankAccount({ BVN, number, bankName, code, type, verificationStatus: true, person: sellerID, email: seller.email, accountName: name })
 
 
     newAccount.subaccount = subaccountResponse.data.subaccount_code
@@ -381,15 +382,6 @@ const getAllSellerBanks = async (req, res) => {
     const allBankInfo = await BankAccount.find({ person: sellerID, deleted })
     res.status(StatusCodes.OK).json({ result: allBankInfo, message: "Successfully returned bank accounts", success: true })
 }
-
-
-
-/*
-
-Seller Address manipulation
-
-*/
-
 
 
 
