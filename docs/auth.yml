@@ -3,7 +3,7 @@ paths:
         post:
             tags: [Authentication and Authorization]
             summary: Login user with email and password
-            description: Returns access tokens as request body and creates refresh token in cookies
+            description: Returns access tokens as request body and creates cookies data.
             requestBody:
                 required: true
                 content:
@@ -24,7 +24,7 @@ paths:
         get:
             tags:
                 - Authentication and Authorization
-            summary: Obtains new access token before present token expires
+            summary: Obtains new access token before present token expires. Returns Unauthenticated error if no valid cookie is found
             description: Returns a new access token for user. Cookies are used to verify user.
             responses:
                 200:
@@ -46,7 +46,7 @@ paths:
             tags:
                 - Authentication and Authorization
             summary: Logout any user
-            description: Logs out user and revokes deletes cookies in response
+            description: Logs out user and  deletes cookies in response
             responses:
                 200:
                     description: Ok
@@ -63,7 +63,7 @@ paths:
             tags:
                 - Authentication and Authorization
             summary: Change user password
-            description: Allows authorized user to modify password
+            description: Allows authorized user to set new password. Should be called after initiate reset was successful.
             requestBody:
                 required: true
                 content:
@@ -83,7 +83,7 @@ paths:
                                     schema:
                                         type: string
                                     required: true
-                                    enum: [user, seller, staff, admin]
+                                    enum: [user, seller, staff]
                                 otp:
                                     type: string
                                     required: true
@@ -137,24 +137,25 @@ paths:
             tags:
                 - Authentication and Authorization
             summary: Update email for users
-            description: Update email for users who have previously verified their email
+            description: Update email for users who have previously verified their email. Should be called only if user is logged in.
             requestBody:
                 required: true
                 content:
                     application/json:
-                schema:
-                    type: object
-                    required: [email, role, userID]
-                    properties:
-                        email:
-                            schema:
-                                type: string
-                        role:
-                            schema:
-                                type: string
-                            enum: [user, seller, staff, admin]
-                        userID:
-                            schema: string
+                        schema:
+                            type: object
+                            required: [email, role, userID]
+                            properties:
+                                email:
+                                    schema:
+                                        type: string
+                                role:
+                                    schema:
+                                        type: string
+                                    enum: [user, seller, staff, admin]
+                                userID:
+                                    schema:
+                                        type: string
             responses:
                 200:
                     description: Ok
@@ -179,24 +180,23 @@ paths:
             summary: Verify email address
             description: Verify email with OTP code
             requestBody:
-            required: true
-            content:
-            application/json:
-                schema:
-                    type: object
-                    required: [email, role, otp]
-                    properties:
-                        email:
-                            schema: string
-                        role:
-                            schema:
-                                type: string
-                            enum: [user, seller, staff, admin]
-                        otp:
-                            schema:
-                                type: string
-                        userID:
-                            schema: string
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [email, role, otp]
+                            properties:
+                                email:
+                                    type: string
+                                role:
+                                    type:
+                                        type: string
+                                    enum: [user, seller, staff, admin]
+                                otp:
+                                    type: string
+                                userID:
+                                    type: string
 
         responses:
             200:
