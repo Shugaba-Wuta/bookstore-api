@@ -180,54 +180,6 @@ paths:
                     description: Server error
                     content:
                         $ref: "#/components/responses/error/content"
-    "/api/v1/user/{userID}/documents":
-        delete:
-            tags: [Users]
-            summary: Delete avatar
-            description: Delete uploaded avatar on a user account
-            parameters:
-                - $ref: "#/components/parameters/idParam"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                pictures:
-                                    $ref: "#/components/resources/fileRequestBody"
-                                documents:
-                                    $ref: "#/components/resources/fileRequestBody"
-                                avatar:
-                                    $ref: "#/components/resources/fileRequestBody/items"
-            responses:
-                200:
-                    description: Ok
-                400:
-                    description: Bad Request
-                    content:
-                        $ref: "#/components/responses/error/content"
-                401:
-                    description: Unauthorized
-                    content:
-                        $ref: "#/components/responses/error/content"
-                403:
-                    description: Forbidden / Unauthorized
-                    content:
-                        $ref: "#/components/responses/error/content"
-                404:
-                    description: Not Found
-                    content:
-                        $ref: "#/components/responses/error/content"
-                409:
-                    description: Conflict
-                    content:
-                        $ref: "#/components/responses/error/content"
-                500:
-                    description: Server error
-                    content:
-                        $ref: "#/components/responses/error/content"
-
 components:
     schemas:
         User:
