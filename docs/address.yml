@@ -1,0 +1,185 @@
+paths:
+    "/api/v1/address/{userID}":
+        get:
+            tags: [Address]
+            summary: Get all addresses of a seller/user.
+            description: Returns all undeleted address of user/seller with matching id
+            responses:
+                200:
+                    description: Ok
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden / Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+
+        post:
+            tags: [Address]
+            summary: Create a new address for user/seller
+            description: Creates a new address for user/seller. Can set as default by making `setDefault` = `true`
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                required:
+                                    [
+                                        unit,
+                                        street,
+                                        city,
+                                        LGA,
+                                        state,
+                                        zipCode,
+                                        country,
+                                        role,
+                                    ]
+                                unit:
+                                    type: string
+                                street:
+                                    type: string
+                                city:
+                                    type: string
+                                LGA:
+                                    type: string
+                                state:
+                                    type: string
+                                zipCode:
+                                    type: string
+                                country:
+                                    type: string
+                                role:
+                                    type: string
+                                setDefault:
+                                    type: boolean
+                                    default: true
+            responses:
+                200:
+                    description: Ok
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden / Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+
+        patch:
+            tags: [Address]
+            summary: update an existing address
+            description: Update a given address
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                required: [role, addressID]
+                                unit:
+                                    type: string
+                                street:
+                                    type: string
+                                city:
+                                    type: string
+                                LGA:
+                                    type: string
+                                state:
+                                    type: string
+                                zipCode:
+                                    type: string
+                                country:
+                                    type: string
+                                role:
+                                    type: string
+                                setDefault:
+                                    type: boolean
+                                    default: true
+                                addressID:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden / Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+        delete:
+            tags: [Address]
+            summary:
+            description:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                addressID:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                201:
+                    description: Creates a new record
+                400:
+                    description: Bad Request
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden / Unauthorized
+                404:
+                    description: Not Found
+                409:
+                    description: Conflict
+                500:
+                    description: Server error
+components:
+    schema:
+        Address:
+            type: object
+            properties:
+                _id:
+                    type: string
+                unit:
+                    type: string
+                street:
+                    type: string
+                city:
+                    type: string
+                LGA:
+                    type: string
+                state:
+                    type: string
+                zipCode:
+                    type: string
+                country:
+                    type: string
+                default:
+                    type: string
+                personSchema:
+                    type: string

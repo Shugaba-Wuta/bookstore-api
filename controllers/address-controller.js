@@ -7,11 +7,13 @@ const { StatusCodes } = require("http-status-codes")
 
 const addAddress = async (req, res) => {
     const { personID } = req.params
-    const { unit, street, city, LGA, state, zipCode, country = "Nigeria", role } = req.body
+    const { unit, street, city, LGA, state, zipCode, country = "Nigeria", role, setDefault = false } = req.body
     const personSchemaType = role ? String(role[0]).toUpperCase() + String(role).slice(1).toLowerCase() : null
-
     if (!personID) {
         throw new BadRequestError("personID is a required field")
+    }
+    if (setDefault) {
+        await Address.updateMany({ personSchemaType, personID, default: true }, { default: false })
     }
     const newAddress = await new Address({ unit, street, city, LGA, state, zipCode, personSchemaType, person: personID, country }).save()
 
