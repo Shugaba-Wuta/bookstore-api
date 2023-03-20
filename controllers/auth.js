@@ -94,7 +94,7 @@ const login = async (req, res) => {
     const resBody = { accessToken: token, userID: payload.user.userID, verifiedEmail: person.verifiedEmail }
 
     if (role === "seller")
-        resBody.resBody.verified = person.verified
+        resBody.verified = person.verified
     return res.status(StatusCodes.OK).json(resBody)
 }
 

@@ -11,11 +11,9 @@ const ReviewSchema = mongoose.Schema(
     title: {
       type: String,
       trim: true,
-      // required: [true, 'Please provide review title'],
     },
     comment: {
       type: String,
-      // required: [true, 'Please provide review text'],
     },
     person: {
       type: mongoose.Types.ObjectId,
