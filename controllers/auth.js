@@ -91,8 +91,11 @@ const login = async (req, res) => {
     const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
     res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true })
 
+    const resBody = { accessToken: token, userID: payload.user.userID, verifiedEmail: person.verifiedEmail }
 
-    return res.status(StatusCodes.OK).json({ accessToken: token, userID: payload.user.userID })
+    if (role === "seller")
+        resBody.accessToken.verified = person.verified
+    return res.status(StatusCodes.OK).json(resBody)
 }
 
 const newTokenFromRefresh = async (req, res) => {
