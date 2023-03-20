@@ -58,7 +58,7 @@ const login = async (req, res) => {
         //TODO #10 Log occurrence where personModel !== oldPayload.
         await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
         //Update cart personID with with the authenticated userID
-        await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null }, { personID: person._id, personSchema: personModel })
+        await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null, active: true }, { personID: person._id, personSchema: personModel })
         payload = {
             user: {
                 userID: String(person._id),

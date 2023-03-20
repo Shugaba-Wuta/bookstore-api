@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes")
-const { Order, Book } = require("../models")
+const { Order, Book, Cart } = require("../models")
 const crypto = require("crypto")
 
 const SUCCESSFUL_CHARGE = "charge.success"
@@ -22,6 +22,8 @@ const paystackPaymentWebhook = async (req, res) => {
             item.transactionSuccessful = true
             await Book.updateOne({ _id: item.productID }, { quantity: { $dec: item.quantity } })
         }
+        //Make cart an archive {record active: false}
+        await Cart.findOneAndUpdate({ _id: order.cartID }, { active: false })
 
         await order.save()
     } else {
