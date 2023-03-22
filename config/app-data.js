@@ -14,7 +14,7 @@ const DEFAULT_SELLER_PERMISSION = ["seller:read", "seller:write", "purchase", "u
 const SUPER_ROLES = ["admin", "staff"]
 const DEFAULT_COMMISSION = 15
 const DEFAULT_TAX = 10
-const ALLOWED_HOST = ["http://localhost:3000", "https://localhost:3000", "https://bookstore.com.ng", "https://www.bookstore.com.ng", "https://test.bookstore.com.ng"]
+const ALLOWED_HOST = ["http://localhost:3000", "https://localhost:3000", "https://bookstore.com.ng", "https://www.bookstore.com.ng", "https://test.bookstore.com.ng", "https://cataloguesmart-spc.netlify.app"]
 
 
 

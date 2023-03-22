@@ -25,7 +25,6 @@ const assignSessionID = async (req, res, next) => {
     payload = isTokenValid(token)
 
   } catch (err) {
-    console.log(err)
     if (authHeader && authHeader.startsWith('Bearer')) {
       throw new CustomError.BadRequestError(err)
     }
@@ -34,11 +33,11 @@ const assignSessionID = async (req, res, next) => {
       IP: req.ip,
     }).save()
     payload = { user: { sessionID: String(newSession._id), userID: null, role: newSession.userModel.toLowerCase(), fullName: null, permissions: [] } }
-    const cookieToken = await createToken(payload, "refresh")
-    const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
-    res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true,  sameSite: "none"   })
-
-
+    if (!req.signedCookies.cookieToken) {
+      const cookieToken = await createToken(payload, "refresh")
+      const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
+      res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, secured: true, sameSite: "none" })
+    }
 
   }
   req.user = {
