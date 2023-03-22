@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
 const bcrypt = require("bcryptjs")
-// const { nigerianCommercialBanks } = require("../config/app-data")
-// const BANK_NAMES = nigerianCommercialBanks.map((item) => {
+// const { NIGERIAN_COMMERCIAL_BANKS } = require("../config/app-data")
+// const BANK_NAMES = NIGERIAN_COMMERCIAL_BANKS.map((item) => {
 //     return item.name
 // })
 

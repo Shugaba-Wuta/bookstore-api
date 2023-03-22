@@ -1,7 +1,7 @@
 "use strict"
 const { faker } = require("@faker-js/faker")
 const { Seller, Book } = require("../models")
-const { bookCategory } = require("../config/app-data")
+const { BOOK_CATEGORY } = require("../config/app-data")
 
 
 
@@ -33,7 +33,7 @@ const createBook = async (limit) => {
                 book.images = [{ url: book.images }]
                 book.publisher = book.publisher ? book.publisher : faker.company.name()
                 book.description = book.description || faker.commerce.productDescription()
-                book.category = book.category || bookCategory[Math.ceil(Math.random() * bookCategory.length - 2)]
+                book.category = book.category || BOOK_CATEGORY[Math.ceil(Math.random() * BOOK_CATEGORY.length - 2)]
                 book.format = [book.format]
                 book.name = book.name || "I SHOULD BE DELETED"
                 book.price = (Math.random() * 10000).toFixed(2)

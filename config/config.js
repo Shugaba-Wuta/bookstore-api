@@ -12,6 +12,7 @@ const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 const swaggerUI = require("swagger-ui-express")
 const { limitHandler } = require("../utils/generic-utils")
+const { ALLOWED_HOST } = require("./app-data")
 
 
 //Database
@@ -55,7 +56,12 @@ app.set('trust proxy', 1);
 // );
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: ALLOWED_HOST,
+    credentials: true,
+    methods: "GET,PATCH,POST,DELETE",
+    exposedHeaders: ["set-cookie"],
+}));
 app.use(xss());
 app.use(morgan("tiny"))
 app.use(mongoSanitize());

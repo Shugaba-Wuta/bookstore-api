@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const mongooseHidden = require("mongoose-hidden")()
 
 const productBaseSchema = require("./productSchemaBase")
-const { bookCategory } = require("../config/app-data")
+const { BOOK_CATEGORY } = require("../config/app-data")
 const { BadRequestError } = require("../errors")
 
 const bookCoverType = ["Paperback", "Hardback", "Others"]
@@ -55,7 +55,7 @@ const BookSchema = new mongoose.Schema({
 
     category: {
         type: String,
-        enum: { values: bookCategory, message: `Please provide a category from any of the following: ${bookCategory}` },
+        enum: { values: BOOK_CATEGORY, message: `Please provide a category from any of the following: ${BOOK_CATEGORY}` },
         required: [true, "Please provide a category for for your book"],
         trim: true,
     },

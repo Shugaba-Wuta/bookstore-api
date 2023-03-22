@@ -126,6 +126,9 @@ const newTokenFromRefresh = async (req, res) => {
 }
 const logout = async (req, res) => {
     res.clearCookie("cookieToken")
+    if (!req.user.userID) {
+        throw new UnauthenticatedError("User not logged in")
+    }
     res.status(StatusCodes.OK).json({ message: "logged out successful", success: true, })
 }
 

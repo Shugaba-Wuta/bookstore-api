@@ -8,7 +8,7 @@ const { RESULT_LIMIT, SUPER_ROLES } = require("../config/app-data")
 const { USER_FORBIDDEN_FIELDS: FORBIDDEN_FIELDS } = require("../config/app-data")
 const { uploadFileToS3 } = require("../utils/generic-utils")
 const { isBankAccountValid, createASubaccount } = require("../utils/paystack-utils")
-const { nigerianCommercialBanks } = require("../config/app-data")
+const { NIGERIAN_COMMERCIAL_BANKS } = require("../config/app-data")
 
 
 const getAllSellers = async (req, res) => {
@@ -295,7 +295,7 @@ const addBankAccount = async (req, res) => {
     }
 
 
-    const bankDetails = nigerianCommercialBanks.filter(item => {
+    const bankDetails = NIGERIAN_COMMERCIAL_BANKS.filter(item => {
         return item.name === bankName
     })
     if (!bankDetails.length) {

@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { deleted: true, deletedOn: true, verificationStatus: true, personSchema: true } })
 
-const { nigerianCommercialBanks } = require("../config/app-data")
-const BANK_NAMES = nigerianCommercialBanks.map((item) => {
+const { NIGERIAN_COMMERCIAL_BANKS } = require("../config/app-data")
+const BANK_NAMES = NIGERIAN_COMMERCIAL_BANKS.map((item) => {
     return item.name
 })
 const accountType = ["personal", "business"]
