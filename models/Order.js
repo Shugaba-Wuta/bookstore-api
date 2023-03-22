@@ -130,7 +130,6 @@ orderSchema.virtual("meta").get(async function () {
     //Add the quantity and productID to productQuantity
     productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
   }
-  // console.log("splitPayDetails", splitPayDetails)
   return { splitPayDetails, productQuantity, orderID: String(this._id) }
 
 })
@@ -139,8 +138,6 @@ orderSchema.pre("validate", async function (next) {
   const orderItemsID = new Set(this.orderItems.map(item => { return String(item.productID._id) }))
   cart.products.forEach((item) => {
     if (!orderItemsID.has(String(item.productID))) {
-      console.log(item.productID, String(item.productID))
-      console.log(orderItemsID)
       this.orderItems.push({ ...item, createdAt: Date.now(), updatedAt: Date.now() })
       orderItemsID.add(String(item.productID))
     }

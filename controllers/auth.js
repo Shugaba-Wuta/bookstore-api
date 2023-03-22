@@ -94,7 +94,7 @@ const login = async (req, res) => {
     const resBody = { accessToken: token, userID: payload.user.userID, verifiedEmail: person.verifiedEmail }
 
     if (role === "seller")
-        resBody.resBody.verified = person.verified
+        resBody.verified = person.verified
     return res.status(StatusCodes.OK).json(resBody)
 }
 
@@ -215,7 +215,6 @@ const changeEmail = async (req, res) => {
     await sendEmail({
         recipients: [person.email], subject: "Change Email Token", template: "email-change", context: { title: "Change email", code: tokenCode, duration: (MAX_OTP_TIME_IN_SECONDS * TIME_TOLERANCE_FOR_OTP) / 60, email: person.email }
     })
-    console.log(personID)
 
     return res.status(StatusCodes.OK).json({ message: `OTP has been sent to ${person.email}`, result: null, success: true })
 
@@ -252,7 +251,6 @@ const verifyEmailWithOTP = async (req, res) => {
             title: "Email change successful", email: person.email, emailChangeTime: String(new Date())
         }
     })
-    console.log(personID)
 
     return res.status(StatusCodes.OK).json({ message: "Email has been verified", success: true, result: null })
 }
