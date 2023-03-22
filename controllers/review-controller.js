@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-const { Review } = require("../models")
-
-const createAReview = async (req, res) => {
-    const { orderID, productID } = req.body
-
-}
-const updateReview = async (req, res) => {
-
-}
-const deleteReview = async (req, res) => {
-
-}
-const getReviews = async (req, res) => {
-
-}
-const getReview = async (req, res) => {
-=======
 const { StatusCodes } = require("http-status-codes")
 const { BadRequestError, NotFoundError } = require("../errors")
 const { Review } = require("../models")
@@ -121,7 +103,6 @@ const getReview = async (req, res) => {
         throw new NotFoundError("review not found")
     }
     res.status(StatusCodes.OK).json({ message: "fetched a review", result: review, success: true })
->>>>>>> review
 
 }
 
