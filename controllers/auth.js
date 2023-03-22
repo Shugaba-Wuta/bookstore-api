@@ -113,7 +113,7 @@ const newTokenFromRefresh = async (req, res) => {
     }
     if (!token) {
         res.clearCookie("cookieToken")
-        throw new UnauthenticatedError("Please log in")
+        throw new UnauthenticatedError("Login required")
     }
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
     const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role, permissions: payload.user.permissions } }
@@ -122,7 +122,7 @@ const newTokenFromRefresh = async (req, res) => {
         return res.json({ token: newToken })
     }
     res.clearCookie("cookieToken")
-    throw new UnauthenticatedError("Please login to refresh access tokens")
+    throw new UnauthenticatedError("Login required")
 }
 const logout = async (req, res) => {
     res.clearCookie("cookieToken")
