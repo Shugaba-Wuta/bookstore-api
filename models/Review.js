@@ -2,11 +2,20 @@ const mongoose = require('mongoose');
 
 const ReviewSchema = mongoose.Schema(
   {
-    rating: {
+    itemRating: {
       type: Number,
       min: 1,
       max: 5,
-      required: [true, 'Please provide rating'],
+      required: [true, 'Please provide itemRating'],
+    },
+    sellerRating: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
+    seller: {
+      type: mongoose.Types.ObjectId,
+      ref: "Seller"
     },
     title: {
       type: String,
@@ -26,13 +35,12 @@ const ReviewSchema = mongoose.Schema(
       required: true
     },
     product: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: 'Book',
       required: true,
-    },
-    verified: {
-      type: Boolean,
-      default: false
+    }, order: {
+      type: mongoose.Types.ObjectId,
+      ref: "Order"
     },
     deleted: {
       type: Boolean,
@@ -44,6 +52,14 @@ const ReviewSchema = mongoose.Schema(
     verifiedBuyer: {
       type: Boolean,
       default: false
+    },
+    pictures: [{
+      url: String,
+      uploadedAt: Date
+
+    }], session: {
+      type: mongoose.Types.ObjectId,
+      required: true
     }
   },
   {
@@ -53,19 +69,45 @@ const ReviewSchema = mongoose.Schema(
   }
 );
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
+ReviewSchema.pre("validate", async function checkVerifiedBuyerReview(next) {
+  if (this.order) {
+    //Verify order contains productID
+    const order = await this.model("Order").findOne({
+      transactionSuccessful: true,
+      _id: this.order,
+      person: this.person,
+      orderItems: { $elemMatch: { productID: this.product } }
+    })
+    if (order) {
+      this.verifiedBuyer = true
+    }
+  }
+  return next()
+})
 
-ReviewSchema.statics.calculateAverageRating = async function (productId) {
+ReviewSchema.methods.updateSellerRating = async function () {
+  if (this.verifiedBuyer && this.seller && this.sellerRating) {
+    let sellerRating = { verifiedRatings: {} }
+    sellerRating.verifiedRatings[String(this._id)] = this.sellerRating
+    this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
+      { $set: { ...sellerRating } })
+  }
+
+}
+
+ReviewSchema.statics.calculateAverageItemRating = async function (productId) {
   const result = await this.aggregate([
     {
       $match: {
         product: productId,
-        deleted: false
+        deleted: false,
+        verifiedBuyer: true
       }
     },
     {
       $group: {
         _id: null,
-        averageRating: { $avg: '$rating' },
+        averageRating: { $avg: '$itemRating' },
         numOfReviews: { $sum: 1 },
       },
     },
@@ -75,8 +117,8 @@ ReviewSchema.statics.calculateAverageRating = async function (productId) {
     await this.model('Book').findOneAndUpdate(
       { _id: productId },
       {
-        averageRating: Math.ceil(result[0]?.averageRating || 0),
-        numOfReviews: result[0]?.numOfReviews || 0,
+        averageRating: result[0]?.averageRating || 0,
+        numberOfVerifiedReviews: result[0]?.numOfReviews || 0,
       }
     );
   } catch (error) {
@@ -85,11 +127,11 @@ ReviewSchema.statics.calculateAverageRating = async function (productId) {
 };
 
 ReviewSchema.post('save', async function () {
-  await this.constructor.calculateAverageRating(this.product);
+  await this.constructor.calculateAverageItemRating(this.product);
 });
 
 ReviewSchema.post('remove', async function () {
-  await this.constructor.calculateAverageRating(this.product);
+  await this.constructor.calculateAverageItemRating(this.product);
 });
 
 module.exports = mongoose.model('Review', ReviewSchema);

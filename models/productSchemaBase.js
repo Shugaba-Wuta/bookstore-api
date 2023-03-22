@@ -82,6 +82,14 @@ const productBaseSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0
+    }, averageRating: {
+      type: Number,
+      min: 0,
+      max: 5
+    },
+    numberOfVerifiedReviews: {
+      type: Number,
+      min: 0
     }
   },
   {
@@ -97,8 +105,6 @@ productBaseSchema.virtual('reviews', {
   foreignField: 'product',
   justOne: false,
 });
-
-
 
 
 
