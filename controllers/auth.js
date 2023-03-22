@@ -113,7 +113,7 @@ const newTokenFromRefresh = async (req, res) => {
     }
     if (!token) {
         res.clearCookie("cookieToken")
-        throw new UnauthenticatedError("Please log in")
+        throw new UnauthenticatedError("Login required")
     }
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
     const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role, permissions: payload.user.permissions } }
@@ -122,7 +122,7 @@ const newTokenFromRefresh = async (req, res) => {
         return res.json({ token: newToken })
     }
     res.clearCookie("cookieToken")
-    throw new UnauthenticatedError("Please login to refresh access tokens")
+    throw new UnauthenticatedError("Login required")
 }
 const logout = async (req, res) => {
     res.clearCookie("cookieToken")
@@ -215,7 +215,6 @@ const changeEmail = async (req, res) => {
     await sendEmail({
         recipients: [person.email], subject: "Change Email Token", template: "email-change", context: { title: "Change email", code: tokenCode, duration: (MAX_OTP_TIME_IN_SECONDS * TIME_TOLERANCE_FOR_OTP) / 60, email: person.email }
     })
-    console.log(personID)
 
     return res.status(StatusCodes.OK).json({ message: `OTP has been sent to ${person.email}`, result: null, success: true })
 
@@ -252,7 +251,6 @@ const verifyEmailWithOTP = async (req, res) => {
             title: "Email change successful", email: person.email, emailChangeTime: String(new Date())
         }
     })
-    console.log(personID)
 
     return res.status(StatusCodes.OK).json({ message: "Email has been verified", success: true, result: null })
 }

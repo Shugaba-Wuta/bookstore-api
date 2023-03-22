@@ -25,7 +25,7 @@ const assignSessionID = async (req, res, next) => {
     payload = isTokenValid(token)
 
   } catch (err) {
-    console.log(`\n\n${err}\n\n`)
+    console.log(err)
     if (authHeader && authHeader.startsWith('Bearer')) {
       throw new CustomError.BadRequestError(err)
     }
@@ -96,6 +96,10 @@ const authorizeRoles = (...roles) => {
     next();
   };
 };
+const removeAuthCookie = async (req, res, next) => {
+  res.clearCookie("cookieToken")
+  return next()
+}
 const isPersonAuthorized = async (req, res, next) => {
   const tokenUserID = req.user.userID
   const userParamID = req.params.sellerID || req.body.sellerID || req.body.seller || req.params.userID || req.body.userID || req.body.personID
@@ -119,4 +123,4 @@ const allowOrigin = (origin) => {
 }
 
 
-module.exports = { authenticateUser, authorizeRoles, assignSessionID, isPersonAuthorized, allowOrigin };
+module.exports = { authenticateUser, authorizeRoles, assignSessionID, isPersonAuthorized, allowOrigin, removeAuthCookie };
