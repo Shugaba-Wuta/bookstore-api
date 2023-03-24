@@ -85,6 +85,9 @@ const sellerSchema = new mongoose.Schema({
         trim: true,
         default: DEFAULT_SELLER_PERMISSION,
         hide: true
+    },
+    verifiedRatings: {
+        type: Object
     }
 
 },

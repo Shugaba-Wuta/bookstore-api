@@ -1,9 +1,9 @@
 "use strict"
 const { StatusCodes } = require("http-status-codes")
-const { User, Review, } = require("../models")
+const { User, } = require("../models")
 const crypto = require("crypto")
 const path = require("path")
-const { BadRequestError, NotFoundError, UnauthorizedError, Conflict } = require("../errors")
+const { BadRequestError, NotFoundError, Conflict } = require("../errors")
 const mongoose = require("mongoose")
 const RESULT_LIMIT = 50
 const FORBIDDEN_FIELDS = ["__v", "password", "createdAt", "updatedAt", "kind", "deletedOn", "deleted", "permissions"]
@@ -133,91 +133,9 @@ const removeUser = async (req, res) => {
 }
 
 
-/*
-The following section contains the CRUD operation for reviews made by the user.
-*/
-
-
-
-const getAllReviewBySingleUser = async (req, res) => {
-    const { userID } = req.params
-    if (!userID) {
-        throw new BadRequestError("Please provide a valid user ID")
-    }
-    // const userInDB = User.find({})
-    const reviewsInDB = await Review.find({ user: userID, deleted: false }).select("title rating product")
-    res.status(StatusCodes.OK).json({ success: true, message: "All reviews by a single user", result: reviewsInDB })
-}
-
-const updateASingleReviewBySingleUser = async (req, res) => {
-    const { reviewID } = req.params
-    if (!reviewID) {
-        throw new BadRequestError("Please provide a user ID ")
-    }
-    const { rating, title, comment } = req.body
-    const updateParam = {}
-    if (rating) {
-        updateParam.rating = Number(rating)
-    }
-    if (title) {
-        updateParam.title = title
-    }
-    if (comment) {
-        updateParam.comment = comment
-    }
-
-
-    const reviewInDB = await Review.findByIdAndUpdate(reviewID, updateParam, { new: true, lean: true, runValidators: true })
-
-    res.status(StatusCodes.OK).json({ message: "Review was updated successfully", success: true, result: [reviewInDB] })
-}
-
-const reviewProduct = async (res, req) => {
-    const { userID } = req.params
-    const { rating, title, comment, product } = req.body
-    const userInDB = await User.findOne({ _id: userID, deleted: false })
-    if (!userInDB) {
-        throw new UnauthorizedError("User is not authorized to make request")
-    }
-    const registerParam = {}
-    if (rating) {
-        registerParam.rating = Number(rating)
-    }
-    if (title) {
-        registerParam.title = title
-    }
-    if (comment) {
-        registerParam.comment = comment
-    }
-    if (userID) {
-        registerParam.user = userID
-    }
-    if (product) {
-        registerParam.product = product
-    }
-    registerParam.verified = userInDB.verified || false
-    const newReview = Review.create(registerParam)
-    res.status(StatusCodes.CREATED).json({ message: "Review created successfully", success: true, result: [newReview] })
-}
-const getASingleReviewByUser = async (req, res) => {
-    const { reviewID, userID } = req.params
-    const queryObject = { id: reviewID, user: userID }
-
-
-    const reviewInDB = await Review.findOne(queryObject).select("-verified")
-    if (!reviewInDB) {
-        throw new BadRequestError("Review does not exist")
-    }
-
-    return res.status(StatusCodes.OK).json({ message: "Fetched review", success: true, result: [reviewInDB] })
-}
-const deleteASingleReview = async (req, res) => {
-    const { reviewID, userID } = req.params
-    await Review.findOneAndUpdate({ _id: reviewID, user: userID }, { deleted: true })
-    res.status(StatusCodes.OK).json({ message: "Deleted review successfully", success: true, result: [] })
-}
 
 
 
 
-module.exports = { getAllUsers, registerUser, getSingleUser, updateUser, removeUser, getAllReviewBySingleUser, updateASingleReviewBySingleUser, reviewProduct, getASingleReviewByUser, deleteASingleReview }
+
+module.exports = { getAllUsers, registerUser, getSingleUser, updateUser, removeUser }

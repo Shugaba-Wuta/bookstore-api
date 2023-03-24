@@ -3,7 +3,7 @@
 const express = require("express")
 const guard = require("express-jwt-permissions")()
 
-const { getAllBooks, getSingleBook, removeBook, registerBook, updateBook, getAllReviewsOnBook } = require("../controllers/book-controller")
+const { getAllBooks, getSingleBook, removeBook, registerBook, updateBook, } = require("../controllers/book-controller")
 const { isPersonAuthorized } = require("../middleware/auth middleware")
 
 
@@ -26,6 +26,5 @@ router.patch("/:bookID", [guard.check([["seller:read", "seller:write"], ["seller
 
 router.delete("/:bookID", [guard.check([["seller:read", "seller:write"], ["seller"]]), isPersonAuthorized], removeBook)
 
-router.get("/:bookID/reviews", getAllReviewsOnBook)
 
 module.exports = router

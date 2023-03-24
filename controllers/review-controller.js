@@ -3,12 +3,13 @@ const { BadRequestError, NotFoundError } = require("../errors")
 const { Review } = require("../models")
 const { uploadFileToS3 } = require("../utils/generic-utils")
 const { SUPER_ROLES } = require("../config/app-data")
+const { RESULT_LIMIT } = require("../config/app-data")
 const path = require("path")
 const crypto = require("crypto")
 
 const createAReview = async (req, res) => {
-    const { order, productID: product, userID: person, role, itemRating, title, comment, sellerRating } = req.body
-    const { pictures } = req.files
+    const { orderID: order, productID: product, userID: person, role = "user", itemRating, title, comment, sellerRating } = req.body
+    const { pictures } = req.files || {}
 
     const personSchema = String(role)[0].toUpperCase() + String(role).substring(1).toLowerCase()
     const requiredFields = { personSchema, product, person, itemRating }
@@ -43,12 +44,15 @@ const createAReview = async (req, res) => {
 }
 
 const updateReview = async (req, res) => {
-    const { reviewID } = req.body
-    const { comment, title, itemRating, sellerRating } = req.body
+    const { reviewID } = req.params
+    const { comment, title, itemRating, sellerRating, userID } = req.body
     if (!reviewID) {
         throw new BadRequestError("required parameter reviewID is missing")
     }
-    const review = await Review.findOne({ _id: reviewID, deleted: false })
+    if (!userID) {
+        throw new BadRequestError("required parameter userID is missing")
+    }
+    const review = await Review.findOne({ _id: reviewID, deleted: false, person: userID })
     if (!review) {
         throw new NotFoundError("review does not exist")
     }
@@ -65,18 +69,64 @@ const updateReview = async (req, res) => {
 
 }
 const deleteReview = async (req, res) => {
-    const { reviewID } = req.body
+    const { userID } = req.body
+    const { reviewID } = req.params
     if (!reviewID) {
         throw new BadRequestError("missing required field: reviewID")
     }
-    const review = await Review.findOneAndUpdate({ _id: reviewID, deleted: false }, { deleted: false })
+    if (!userID) {
+        throw new BadRequestError("required parameter userID is missing")
+    }
+    const review = await Review.findOneAndUpdate({ _id: reviewID, deleted: false, person: userID }, { deleted: true })
     if (!review) {
         throw new NotFoundError("review is not found")
     }
     return res.status(StatusCodes.OK).json({ message: "delete review successful", result: null, success: true })
 }
+const getBookReviews = async (req, res) => {
+    var { deleted } = req.query
+    const { productID, query, sort, verifiedBuyer } = req.query
+    const queryParams = {}
+    if (productID) {
+        queryParams.product = productID
+    }
+    if (query) {
+        queryParams.$text = { $search: query }
+        console.log(queryParams)
+    }
+    if (verifiedBuyer) {
+        queryParams.verifiedBuyer = verifiedBuyer
+    }
+    if (!SUPER_ROLES.includes(req.user.role)) {
+        deleted = false
+    }
+    queryParams.deleted = deleted
+    const reviewsQuery = Review.find(queryParams)
+    var sortParam
+    if (sort && sort.toLowerCase().trim() !== 'relevant') {
+        //itemRating,
+        sortParam = sort
+    } else if (query) {
+        sortParam = { score: { $meta: "textScore" } }
+    }
+    reviewsQuery.sort(sortParam ?? { createdAt: 1 })
+    console.log(sortParam)
 
-const getReviews = async (req, res) => {
+    //Add limit and skip
+    const productLimit = Number(req.query.limit)
+    const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1
+    const limit = (productLimit <= RESULT_LIMIT && productLimit > 0) ? productLimit : RESULT_LIMIT
+    const skip = (page - 1) * limit
+    reviewsQuery.limit(limit).skip(skip)
+
+
+
+    const reviews = await reviewsQuery
+
+    return res.status(StatusCodes.OK).json({ result: reviews, message: "fetched reviews", success: true })
+}
+
+const getUserReviews = async (req, res) => {
     var { deleted } = req.query
     const { userID: person } = req.params
 
@@ -88,7 +138,7 @@ const getReviews = async (req, res) => {
     res.status(StatusCodes.OK).json({ result: reviews, message: "Successfully returned reviews", success: true })
 
 }
-const getReview = async (req, res) => {
+const getUserReview = async (req, res) => {
     const { reviewID } = req.params
     var { deleted } = req.query
     if (!SUPER_ROLES.includes(req.user.role)) {
@@ -108,4 +158,4 @@ const getReview = async (req, res) => {
 
 
 
-module.exports = { createAReview, updateReview, deleteReview, getReview, getReviews }
+module.exports = { createAReview, updateReview, deleteReview, getUserReview, getUserReviews, getBookReviews }

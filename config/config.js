@@ -29,6 +29,7 @@ const cartRouter = require("../routes/cart-route")
 const orderRouter = require("../routes/order-route")
 const addressRouter = require("../routes/address-route")
 const webhookRouter = require("../routes/webhook-route")
+const reviewRouter = require("../routes/review-route")
 
 
 
@@ -84,6 +85,7 @@ app.use("/api/v1/sellers", sellerRouter)
 app.use("/api/v1/carts", cartRouter)
 app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/address", addressRouter)
+app.use("/api/v1/reviews", reviewRouter)
 
 
 //Low-level middlewares

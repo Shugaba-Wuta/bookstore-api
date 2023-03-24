@@ -131,15 +131,17 @@ BookSchema.index(
         authors: "text",
         name: "text",
         description: "text",
-        tags: "text"
+        tags: "text",
+        publisher: "text"
     },
     {
         weights: {
             authors: 35,
             subtitle: 25,
-            tags: 20,
-            description: 10,
-            name: 25
+            tags: 35,
+            description: 15,
+            name: 25,
+            publisher: 10
 
         }
     }

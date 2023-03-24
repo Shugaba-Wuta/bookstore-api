@@ -216,31 +216,4 @@ const removeBook = async (req, res) => {
     })
 }
 
-
-
-
-
-
-/*
-CRUD OPERATIONS FOR REVIEWS ACCESSED BASED ON BOOK_ID
-*/
-
-const getAllReviewsOnBook = async (req, res) => {
-    const { bookID } = req.params
-
-
-
-}
-
-const getAReviewOnBook = async (req, res) => {
-
-}
-
-const createAReviewOnBook = async (req, res) => {
-
-}
-
-
-
-
-module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook, getAReviewOnBook, getAllReviewsOnBook, createAReviewOnBook }
+module.exports = { getAllBooks, getSingleBook, registerBook, removeBook, updateBook, }

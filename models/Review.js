@@ -26,10 +26,10 @@ const ReviewSchema = mongoose.Schema(
     },
     person: {
       type: mongoose.Types.ObjectId,
-      ref: "personSchemaType",
+      ref: "personSchema",
       required: [true, "Please provide the person's ID"]
     },
-    personSchemaType: {
+    personSchema: {
       type: String,
       enum: ["Seller", "User"],
       required: true
@@ -38,7 +38,8 @@ const ReviewSchema = mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: 'Book',
       required: true,
-    }, order: {
+    },
+    order: {
       type: mongoose.Types.ObjectId,
       ref: "Order"
     },
@@ -68,8 +69,22 @@ const ReviewSchema = mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
-ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
-ReviewSchema.pre("validate", async function checkVerifiedBuyerReview(next) {
+ReviewSchema.index({ product: 1, user: 1, order: 1 }, { unique: true });
+ReviewSchema.index(
+  {
+    title: "text",
+    comment: "text",
+    itemRating: "text"
+  },
+  {
+    weights: {
+      itemRating: 10,
+      comment: 2,
+      title: 5
+    }
+  }
+)
+ReviewSchema.pre(["validate", "save"], async function checkVerifiedBuyerReview(next) {
   if (this.order) {
     //Verify order contains productID
     const order = await this.model("Order").findOne({
@@ -84,14 +99,28 @@ ReviewSchema.pre("validate", async function checkVerifiedBuyerReview(next) {
   }
   return next()
 })
+ReviewSchema.pre(["validate", "save"], async function getSellerID(next) {
+  //
+  const book = await this.model("Book").findOne({ _id: this.product })
+  if (book) {
+    this.seller = book.seller
+    console.log("SELLER FROM BOOK")
+
+  }
+
+
+  return next()
+})
 
 ReviewSchema.methods.updateSellerRating = async function () {
   if (this.verifiedBuyer && this.seller && this.sellerRating) {
     let sellerRating = { verifiedRatings: {} }
     sellerRating.verifiedRatings[String(this._id)] = this.sellerRating
-    this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
+    const _ = await this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
       { $set: { ...sellerRating } })
+    console.log(_)
   }
+
 
 }
 
@@ -128,6 +157,7 @@ ReviewSchema.statics.calculateAverageItemRating = async function (productId) {
 
 ReviewSchema.post('save', async function () {
   await this.constructor.calculateAverageItemRating(this.product);
+  await this.updateSellerRating()
 });
 
 ReviewSchema.post('remove', async function () {
