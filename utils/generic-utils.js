@@ -23,6 +23,7 @@ const uploadFileToS3 = async (files, bucket = process.env.AWS_GEN_S3_BUCKET) => 
         } catch (err) {
             //log
             console.log(err)
+            throw err
 
         }
     }

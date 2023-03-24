@@ -3,7 +3,7 @@ const { StatusCodes } = require("http-status-codes")
 const crypto = require("crypto")
 const path = require("path")
 const { Seller, Document, BankAccount } = require("../models")
-const { Conflict, NotFoundError, BadRequestError } = require("../errors")
+const { Conflict, NotFoundError, BadRequestError, CustomAPIError } = require("../errors")
 const { RESULT_LIMIT, SUPER_ROLES } = require("../config/app-data")
 const { USER_FORBIDDEN_FIELDS: FORBIDDEN_FIELDS } = require("../config/app-data")
 const { uploadFileToS3 } = require("../utils/generic-utils")
@@ -204,6 +204,9 @@ const addDocsToSeller = async (req, res) => {
             const newOther = await new Document({ category: "others", ...url, personSchema: "Seller", person }).save()
             newDocs.push(newOther)
         }
+    }
+    if (!newDocs.length) {
+        throw new CustomAPIError(JSON.stringify({ pictures, others, govtIssuedID, description: "Items received as uploaded files pictures, others, govtIssuedID...\n" }))
     }
 
     res.status(StatusCodes.CREATED).json({ result: newDocs, message: "Successfully uploaded documents", success: true })
