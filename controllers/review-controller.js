@@ -85,7 +85,7 @@ const deleteReview = async (req, res) => {
 }
 const getBookReviews = async (req, res) => {
     var { deleted } = req.query
-    const { productID, query, sort, verifiedBuyer } = req.query
+    const { productID, query, sort, verifiedBuyerOnly: verifiedBuyer } = req.query
     const queryParams = {}
     if (productID) {
         queryParams.product = productID

@@ -1,0 +1,373 @@
+paths:
+    "/api/v1/reviews":
+        get:
+            tags: [Reviews]
+            summary: Get all reviews on books
+            description: Find reviews that match given conditions of request. Includes ability to search for `comment` `title` and to sort by fields.
+            parameters:
+                - in: query
+                  name: productID
+                  description: Required `id` of product to be reviewed
+                  type: string
+                  required: true
+                - in: query
+                  name: query
+                  description: a field for the query string.
+                  type: string
+                - in: query
+                  name: sort
+                  description: Provide field to sort result in ascending order.
+                  type: string
+                - in: query
+                  name: verifiedBuyerOnly
+                  description: Returns only reviews verifiedBuyer is true
+                  type: boolean
+                  default: false
+                - in: query
+                  name: page
+                  description: Expected page to return
+                  type: string
+                  min: 1
+                - in: query
+                  name: limit
+                  description: Expected number of results to return
+                  min: 1
+                  max: 50
+                  type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        post:
+            tags: [Reviews]
+            summary: Create a review for a seller/ book.
+            description: Add a review for a book and a seller. The sellerRating affects seller rating if the review is for a verified purchase.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                orderID:
+                                    type: string
+                                productID:
+                                    type: string
+                                userID:
+                                    type: string
+                                role:
+                                    type: string
+                                title:
+                                    type: string
+                                comment:
+                                    type: string
+                                sellerRating:
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+    "/api/v1/reviews/:reviewID":
+        patch:
+            parameters:
+                - in: path
+                  name: reviewID
+            tags: [Reviews]
+            summary: Modify an existing review
+            description: Make changes to certain fields of an existing reviews
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                comment:
+                                    type: string
+                                title:
+                                    type: string
+                                itemRating:
+                                    type: string
+                                sellerRating:
+                                    type: string
+                                userID:
+                                    type: string
+                                    required: true
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        get:
+            tags: [Reviews]
+            parameters:
+                - in: path
+                  name: reviewID
+                - in: query
+                  name: deleted
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+        delete:
+            tags: [Reviews]
+            parameters:
+                summary: Delete a review
+                description: Marks a review unaccessible to users and sellers
+                parameters:
+                    - in: path
+                      name: reviewID
+            requestBody:
+                content:
+                    application/json:
+                        required: true
+                        schema:
+                            type: object
+                            properties:
+                                userID:
+                                    required: true
+                                    type: string
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+    "/api/v1/reviews/user/:userID":
+        get:
+            parameters:
+                - in: path
+                  name: userID
+                  description: Matches `id` of the reviews to be returned
+            tags: [Reviews]
+            summary: Get all reviews by a single user.
+            description: Returns all reviews done by a user
+
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        $ref: "#/components/responses/success/content"
+                400:
+                    description: Bad Request
+                    content:
+                        $ref: "#/components/responses/error/content"
+                401:
+                    description: Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                403:
+                    description: Forbidden / Unauthorized
+                    content:
+                        $ref: "#/components/responses/error/content"
+                404:
+                    description: Not Found
+                    content:
+                        $ref: "#/components/responses/error/content"
+                409:
+                    description: Conflict
+                    content:
+                        $ref: "#/components/responses/error/content"
+                500:
+                    description: Server error
+                    content:
+                        $ref: "#/components/responses/error/content"
+
+components:
+    schemas:
+        Review:
+            type: object
+            properties:
+                _id:
+                    type: string
+                itemRating:
+                    type: integer
+                    max: 5
+                sellerRating:
+                    type: integer
+                    max: 5
+                seller:
+                    type: string
+                title:
+                    type: string
+                comment:
+                    type: string
+                person:
+                    type: string
+                personSchema:
+                    type: string
+                product:
+                    type: string
+                order:
+                    type: string
+                deleted:
+                    type: string
+                deletedOn:
+                    type: string
+                verifiedBuyer:
+                    type: string
+                pictures:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            uploadedAt:
+                                type: string
+                            url:
+                                type: string
+
+    responses:
+        success:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                            success:
+                                default: true
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Review"
+                            error:
+                                type: boolean
+                                default: false
+
+        error:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                default: false
+                            message:
+                                type: string
+                            error:
+                                type: boolean
+                                default: true
