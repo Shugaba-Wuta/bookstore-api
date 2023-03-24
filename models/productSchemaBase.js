@@ -104,6 +104,7 @@ productBaseSchema.virtual('reviews', {
   localField: '_id',
   foreignField: 'product',
   justOne: false,
+  match: { deleted: false }
 });
 
 
