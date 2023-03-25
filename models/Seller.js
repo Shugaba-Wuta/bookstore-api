@@ -87,7 +87,8 @@ const sellerSchema = new mongoose.Schema({
         hide: true
     },
     verifiedRatings: {
-        type: Object
+        type: Object,
+        hide: true
     }
 
 },
@@ -119,6 +120,15 @@ sellerSchema.virtual("books", {
     ref: "Book",
     foreignField: "seller",
     localField: "_id"
+})
+sellerSchema.virtual("averageRating").get(function () {
+    //Get all verifiedRatings  from verified purchase. Calculate their average.
+    const ratings = Object.values(this.verifiedRatings)
+    if (ratings.length) {
+        return { rating: ratings.reduce((a, b) => a + b, 0) / ratings.length, reviewers: ratings.length }
+    }
+    return null
+
 })
 sellerSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
