@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 const { DEFAULT_COMMISSION, DEFAULT_TAX } = require("../config/app-data")
-const { BadRequestError } = require("../errors")
+const { BadRequestError, Conflict } = require("../errors")
 const scope = ["Purchase", "Book"]
-const COUPON_TYPES = ["flat", "percentage"]
+const { COUPON_TYPES } = require("../config/app-data")
 
 
 
@@ -78,6 +78,39 @@ couponSchema.virtual("orders", {
     foreignField: "coupons",
     ref: "Order"
 })
+couponSchema.static("createCouponCode", function () {
+    return Math.random().toString(36).substring(3, 12).toUpperCase()
+})
+couponSchema.pre("validate", function changePersonSchemaToTitleCase(next) {
+    if (this.personSchema)
+        this.personSchema = String(this.personSchema)[0].toUpperCase() + String(this.personSchema).slice(1).toLowerCase()
+    next()
+})
+couponSchema.pre("validate", function ensureRoleMatchScope(next) {
+    //Ensure that seller cannot create coupon for Order
+    if ((this.personSchema !== "Staff") && (this.scope === "Purchase")) {
+        throw new Conflict(this.personSchema + " cannot create coupon of scope Purchase")
+    }
+    return next()
+})
+couponSchema.pre("validate", function ensureValueMatchType() {
+    if (!this[this.type])
+        throw new Conflict("Coupon must have value for" + this.type)
+})
+couponSchema.pre("validate", async function ensureUserOwnsResource(next) {
+    if (this.personSchema !== "Staff") {
+        //A seller can only create one coupon for one item
+        if (this.items.length > 1) {
+            throw new BadRequestError("This account cannot create coupon for multiple items")
+        }
+        let book = await this.model("Book").find({ seller: this.createdBy, _id: this.items[0], deleted: false })
+        if (!book) {
+            throw new Conflict("Account does not own this product")
+        }
+    }
+    return next()
+})
+
 couponSchema.pre("validate", function () {
     if ((!this.percentage && !this.flat) || (this.percentage && this.percentage)) {
         throw new BadRequestError(`coupon must be either of the following: ${COUPON_TYPES}`)
