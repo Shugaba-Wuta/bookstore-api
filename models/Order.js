@@ -86,7 +86,8 @@ const orderSchema = new mongoose.Schema({
   },
   prevRef: { type: [String] },
   deleted: { type: Boolean, default: false },
-  deletedOn: { type: Date }
+  deletedOn: { type: Date },
+  orderError: [{ type: String }]
 },
   {
     timestamps: true,
@@ -122,18 +123,24 @@ orderSchema.virtual("meta").get(async function () {
     //Check if the path: orderItems.productID has been populated
     await this.populate("orderItems.productID")
   }
+  const thisDoc = this
   for await (const item of this.orderItems) {
     //Get default account detail for seller
-    const { subaccount } = await this.model("BankAccount").findOne({ deleted: false, default: true, person: String(item.productID.seller) })
+    const defaultAccount = await this.model("BankAccount").findOne({ deleted: false, default: true, person: String(item.productID.seller) })
+    if (!defaultAccount) {
+      thisDoc.orderError.push(`Seller of ${item.productID.seller} must have a default account`)
+      await thisDoc.save()
+      continue
+    }
 
-    splitPayDetails.push({ subaccount, share: (item.finalPrice).toFixed(2) * 100 })
+    splitPayDetails.push({ subaccount: defaultAccount.subaccount, share: (item.finalPrice).toFixed(2) * 100 })
     //Add the quantity and productID to productQuantity
     productQuantity.push({ productID: String(item.productID._id), quantity: item.quantity })
   }
   return { splitPayDetails, productQuantity, orderID: String(this._id) }
 
 })
-orderSchema.pre("validate", async function (next) {
+orderSchema.pre("validate", async function populateOrderItemsFromCart(next) {
   const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID }).lean()
   const orderItemsID = new Set(this.orderItems.map(item => { return String(item.productID._id) }))
   cart.products.forEach((item) => {
@@ -142,8 +149,6 @@ orderSchema.pre("validate", async function (next) {
       orderItemsID.add(String(item.productID))
     }
   })
-
-
   return next()
 })
 

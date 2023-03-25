@@ -96,11 +96,10 @@ cartSchema.methods.applyCoupon = async function (couponID, value, type, productI
             if (item.productID._id == productID)
                 item.couponValue += couponValue
         })
-
     }
 }
 
-cartSchema.pre(["validate", "update"], async function ensureFinalPrice(next) {
+cartSchema.pre(["validate", "update", "save"], async function ensureFinalPrice(next) {
     if (!await this.populated("products.productID")) {
         await this.populate("products.productID")
     }
@@ -117,7 +116,7 @@ cartSchema.pre(["validate", "update"], async function ensureFinalPrice(next) {
 })
 cartSchema.pre("validate", async function mergeCart(next) {
 
-    /* Middleware ensures that all items in the cart have unique productID */
+    /* Middleware ensures that all items in the cart have unique productID  */
     // if (!await this.populated("products.productID")) {
     //     await this.populate("products.productID")
     // }
@@ -175,6 +174,23 @@ cartSchema.pre("save", async function deleteEmptyCarts() {
     if (this.products.length < 1) {
         await this.deleteOne({ _id: this._id })
     }
+})
+cartSchema.static("filterDeletedProd", async function (cartID) {
+    const cart = await this.findOne({ _id: cartID }).populate("products.productID")
+    const deletedID = []
+
+    cart.products.forEach((prod) => {
+        if (prod.productID.deleted) {
+            deletedID.push(String(prod._id))
+        }
+    })
+    cart.depopulate("products.productID")
+    deletedID.forEach(id => {
+        cart.products.pull(id)
+    })
+    await cart.save()
+
+    return await cart.populate("products.productID")
 })
 
 

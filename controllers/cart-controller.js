@@ -93,7 +93,13 @@ const updateCartItem = async (req, res) => {
             existingCart.applyCoupon(couponID, value, type, product.productID)
         }
     }
-
+    const itemsExists = existingCart.products.filter(item => {
+        return item.quantity > 0
+    })
+    if (!itemsExists.length) {
+        await Cart.findByIdAndDelete(String(existingCart._id))
+        return res.status(StatusCodes.OK).json({ success: true, message: "Cart has been deleted", result: null })
+    }
     let result = await existingCart.save()
     await result.populate("products.productID")
     res.status(StatusCodes.OK).json({ result: result, msg: "Successfully decreased quantity by 1", success: true })
@@ -112,9 +118,12 @@ const viewAllCarts = async (req, res) => {
 
     if (!SUPER_ROLES.includes(req.user.role)) {
         active = true
-        allCarts = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
-
-        return res.status(StatusCodes.OK).json({ result: allCarts, msg: "Successfully returned active user carts", success: true })
+        let cart = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] })//.populate("products.productID")
+        if (!cart) {
+            return res.status(StatusCodes.OK).json({ result: null, msg: "No item in cart yet", success: true })
+        }
+        cart = await Cart.filterDeletedProd(String(cart._id))
+        return res.status(StatusCodes.OK).json({ result: cart, msg: "Successfully returned active user carts", success: true })
     }
 
 
@@ -128,16 +137,24 @@ const removeAnItemFromActiveCart = async (req, res) => {
     if (!productID) {
         throw new BadRequestError("`productID` is a required parameter")
     }
-    let cart = await Cart.findOne({ $or: [{ active: true, personID, "products.productID": { $in: [productID] } }, { active: true, sessionID, "products.productID": { $in: [productID] } }] })
-    if (!cart) {
+    let cartUpdateInfo = await Cart.updateOne({
+        $or:
+            [{
+                active: true, personID, "products.productID":
+                    { $in: [productID] }
+            },
+            {
+                active: true, sessionID, "products.productID":
+                    { $in: [productID] }
+            }]
+    }, {
+        $pull: { products: { productID } }
+    })
+    if (!cartUpdateInfo.modifiedCount) {
         throw new NotFoundError(`User has no active cart with productID: ${productID}`)
     }
-    cart.products = cart.products.filter((prod) => {
-        return String(prod.productID) !== productID
-    })
-    await cart.save()
 
-    res.status(StatusCodes.OK).json({ result: cart, success: true, message: "Successfully removed product from cart" })
+    res.status(StatusCodes.OK).json({ result: null, success: true, message: "Successfully removed product from cart" })
 }
 
 

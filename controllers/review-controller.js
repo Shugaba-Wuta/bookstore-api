@@ -92,7 +92,6 @@ const getBookReviews = async (req, res) => {
     }
     if (query) {
         queryParams.$text = { $search: query }
-        console.log(queryParams)
     }
     if (verifiedBuyer) {
         queryParams.verifiedBuyer = verifiedBuyer
@@ -110,7 +109,6 @@ const getBookReviews = async (req, res) => {
         sortParam = { score: { $meta: "textScore" } }
     }
     reviewsQuery.sort(sortParam ?? { createdAt: 1 })
-    console.log(sortParam)
 
     //Add limit and skip
     const productLimit = Number(req.query.limit)

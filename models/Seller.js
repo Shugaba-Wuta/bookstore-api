@@ -9,7 +9,6 @@ const bcrypt = require("bcryptjs")
 
 const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { password: true, deleted: true, deletedOn: true } })
 const GENDER = ["M", "F", null]
-const { DEFAULT_SELLER_PERMISSION } = require("../config/app-data")
 
 
 const sellerSchema = new mongoose.Schema({
@@ -80,12 +79,6 @@ const sellerSchema = new mongoose.Schema({
         type: Number,
         min: 9999999999
     },
-    permissions: {
-        type: [String],
-        trim: true,
-        default: DEFAULT_SELLER_PERMISSION,
-        hide: true
-    },
     verifiedRatings: {
         type: Object,
         hide: true
@@ -123,7 +116,7 @@ sellerSchema.virtual("books", {
 })
 sellerSchema.virtual("averageRating").get(function () {
     //Get all verifiedRatings  from verified purchase. Calculate their average.
-    const ratings = Object.values(this.verifiedRatings)
+    const ratings = Object.values(this.verifiedRatings || [])
     if (ratings.length) {
         return { rating: ratings.reduce((a, b) => a + b, 0) / ratings.length, reviewers: ratings.length }
     }

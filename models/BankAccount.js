@@ -81,19 +81,7 @@ const bankInfoSchema = new mongoose.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 })
-bankInfoSchema.pre("save", async function ensureOnlyOneDefaultBankAccount(next) {
-    const samePerson = await this.model("BankAccount").find({ person: this.person, personSchemaType: this.personSchemaType }).lean()
-    let numberOfDefaults = 0
-    samePerson.forEach(bankInfo => {
-        if (numberOfDefaults > 0 && bankInfo.default) {
-            bankInfo.default = false
-        } else if (numberOfDefaults === 0) {
-            numberOfDefaults += 1
 
-        }
-    })
-    next()
-})
 
 
 

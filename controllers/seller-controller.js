@@ -322,6 +322,7 @@ const addBankAccount = async (req, res) => {
 
     newAccount.subaccount = subaccountResponse.data.subaccount_code
 
+    await BankAccount.updateMany({ person: sellerID, default: true }, { default: false })
     newAccount = await newAccount.save()
     return res.status(StatusCodes.CREATED).json({ success: true, result: newAccount, message: "Successfully created bank info" })
 }

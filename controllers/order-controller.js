@@ -23,10 +23,9 @@ const createOrder = async (req, res) => {
     if (!personID) {
         throw new BadRequestError("Required parameter: 'personID' is missing")
     }
-    const cart = await Cart.findOne({
-        _id: cartID, active: true, personID
-    }).populate("products.productID")
-    if (!cart) {
+    const cart = await Cart.filterDeletedProd(cartID)
+
+    if (!cart || !cart.active || cart.personID != personID) {
         throw new NotFoundError("Cart does not exist")
     }
 
@@ -42,14 +41,16 @@ const createOrder = async (req, res) => {
     let order = await Order.findOne({ cartID, personID }).populate({ path: "orderItems.productID", select: productPopulateSelect })
 
     if (order) {
-        throw new BadRequestError("Order already exists, consider updating order")
+        const newOrder = await order.save()
+        return res.status(StatusCodes.OK).json({
+            message: "Order created", result: newOrder, success: true
+        })
     }
     //Ensure deliveryAddress or default address.
     const address = user.addresses.filter((address) => {
         return address.default
     })[0] //Get the element at index 0||undefined
     const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId(), deliveryAddress: address }).save()
-
     //Verify and apply coupon
     if (couponCode) {
         const { couponID, value, type } = await getCouponDetail({ code: couponCode, scope: "Purchase" }) || {}
@@ -170,6 +171,12 @@ const initiatePay = async (req, res) => {
         }
         order.prevRef.push(order.ref)
     }
+    //Check if order has errors
+    // STRICTLY FOR DEVELOPMENT PURPOSES
+    if (order.error.length) {
+        throw new Conflict("Orders cannot be completed. Check `order.error` for errors")
+    }
+
     order.ref = new mongoose.Types.ObjectId()
     //Order has not successfully been paid for. (Re-)initiate the order where necessary.
     const metaInfo = await order.meta //get most recent meta data from Order virtuals.
