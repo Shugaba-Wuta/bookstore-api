@@ -103,9 +103,14 @@ couponSchema.pre("validate", async function ensureUserOwnsResource(next) {
         if (this.items.length > 1) {
             throw new BadRequestError("This account cannot create coupon for multiple items")
         }
-        let book = await this.model("Book").find({ seller: this.createdBy, _id: this.items[0], deleted: false })
+        let book = await this.model("Book").findOne({ seller: this.createdBy, _id: this.items[0], deleted: false })
         if (!book) {
             throw new Conflict("Account does not own this product")
+        }
+    } else {
+        let books = await this.model("Book").find({ _id: { $in: this.items }, deleted: false })
+        if (books.length !== this.items.length) {
+            throw new BadRequestError("all items must match a product")
         }
     }
     return next()
