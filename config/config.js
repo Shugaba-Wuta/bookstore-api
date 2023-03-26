@@ -30,6 +30,7 @@ const orderRouter = require("../routes/order-route")
 const addressRouter = require("../routes/address-route")
 const webhookRouter = require("../routes/webhook-route")
 const reviewRouter = require("../routes/review-route")
+const couponRouter = require("../routes/coupons-route")
 
 
 
@@ -86,6 +87,7 @@ app.use("/api/v1/carts", cartRouter)
 app.use("/api/v1/orders", orderRouter)
 app.use("/api/v1/address", addressRouter)
 app.use("/api/v1/reviews", reviewRouter)
+app.use("/api/v1/coupons", couponRouter)
 
 
 //Low-level middlewares
