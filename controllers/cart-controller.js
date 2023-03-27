@@ -105,7 +105,8 @@ const updateCartItem = async (req, res) => {
 
 
 const viewAllCarts = async (req, res) => {
-    const { userID: personID, sessionID } = req.user
+    const { sessionID } = req.user
+    const { userID: personID } = req.params
     let { active = true } = req.query
     let allCarts
 
