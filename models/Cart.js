@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const { BadRequestError } = require("../errors")
+const { BadRequestError, Conflict } = require("../errors")
 const mongooseHidden = require("mongoose-hidden")()
 
 const cartItem = new mongoose.Schema({
@@ -171,11 +171,9 @@ cartSchema.pre("validate", function removeZeroQuantityProducts(next) {
     })
     return next()
 })
-cartSchema.post("save", function deleteEmptyCarts() {
+cartSchema.pre("save", async function deleteEmptyCarts() {
     if (this.products.length < 1) {
-        this.deleteOne({ _id: this._id })
-        throw new mongoose.Error("cart must not be empty")
-
+        await this.deleteOne({ _id: this._id })
     }
 })
 
