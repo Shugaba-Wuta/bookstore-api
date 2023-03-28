@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const { BadRequestError, Conflict } = require("../errors")
+const { BadRequestError } = require("../errors")
 const mongooseHidden = require("mongoose-hidden")()
 
 const cartItem = new mongoose.Schema({
