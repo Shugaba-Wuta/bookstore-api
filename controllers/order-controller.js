@@ -41,9 +41,9 @@ const createOrder = async (req, res) => {
 
     let order = await Order.findOne({ cartID, personID }).populate({ path: "orderItems.productID", select: productPopulateSelect })
 
-    if (order) {
-        throw new BadRequestError("Order already exists, consider updating order")
-    }
+    // if (order) {
+    //     throw new BadRequestError("Order already exists, consider updating order")
+    // }
     //Ensure deliveryAddress or default address.
     const address = user.addresses.filter((address) => {
         return address.default
