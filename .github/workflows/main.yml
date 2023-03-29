@@ -1,0 +1,10 @@
+name: make-all-cookies-secured-on-remote
+run-name: ${{ github.actor }} is learning GitHub Actions
+on: [push]
+jobs:
+  change-cookie-to-secure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sed -i "s/secure: false/secure: true/g" ../../controllers/auth.js
+      - run: sed -i "s/secure: false/secure: true/g" '../../middleware/auth middleware.js'
