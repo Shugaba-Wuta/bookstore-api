@@ -128,16 +128,24 @@ const removeAnItemFromActiveCart = async (req, res) => {
     if (!productID) {
         throw new BadRequestError("`productID` is a required parameter")
     }
-    let cart = await Cart.findOne({ $or: [{ active: true, personID, "products.productID": { $in: [productID] } }, { active: true, sessionID, "products.productID": { $in: [productID] } }] })
-    if (!cart) {
+    let cartUpdateInfo = await Cart.updateOne({
+        $or:
+            [{
+                active: true, personID, "products.productID":
+                    { $in: [productID] }
+            },
+            {
+                active: true, sessionID, "products.productID":
+                    { $in: [productID] }
+            }]
+    }, {
+        $pull: { products: { productID } }
+    })
+    if (!cartUpdateInfo.modifiedCount) {
         throw new NotFoundError(`User has no active cart with productID: ${productID}`)
     }
-    cart.products = cart.products.filter((prod) => {
-        return String(prod.productID) !== productID
-    })
-    await cart.save()
 
-    res.status(StatusCodes.OK).json({ result: cart, success: true, message: "Successfully removed product from cart" })
+    res.status(StatusCodes.OK).json({ result: null, success: true, message: "Successfully removed product from cart" })
 }
 
 
