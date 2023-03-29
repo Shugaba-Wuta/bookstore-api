@@ -176,6 +176,23 @@ cartSchema.pre("save", async function deleteEmptyCarts() {
         await this.deleteOne({ _id: this._id })
     }
 })
+cartSchema.static("filterDeletedProd", async function (cartID) {
+    const cart = await this.findOne({ _id: cartID }).populate("products.productID")
+    const deletedID = []
+
+    cart.products.forEach((prod) => {
+        if (prod.productID.deleted) {
+            deletedID.push(String(prod._id))
+        }
+    })
+    cart.depopulate("products.productID")
+    deletedID.forEach(id => {
+        cart.products.pull(id)
+    })
+    await cart.save()
+
+    return await cart.populate("products.productID")
+})
 
 
 cartSchema.plugin(mongooseHidden)

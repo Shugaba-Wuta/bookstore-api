@@ -112,7 +112,11 @@ const viewAllCarts = async (req, res) => {
 
     if (!SUPER_ROLES.includes(req.user.role)) {
         active = true
-        allCarts = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] }).populate("products.productID")
+        allCarts = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] })//.populate("products.productID")
+        allCarts.products.pull()
+        if (allCarts) {
+            allCarts = await Cart.filterDeletedProd(String(allCarts._id))
+        }
 
         return res.status(StatusCodes.OK).json({ result: allCarts, msg: "Successfully returned active user carts", success: true })
     }
