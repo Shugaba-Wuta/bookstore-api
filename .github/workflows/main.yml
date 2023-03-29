@@ -5,6 +5,5 @@ jobs:
   change-cookie-to-secure:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: sed -i "s/secure: false/secure: true/g" ../../controllers/auth.js
-      - run: sed -i "s/secure: false/secure: true/g" '../../middleware/auth middleware.js'
+      - uses: actions/checkout@v3 
+      - run: ../../scripts/make-cookies-secure.sh
