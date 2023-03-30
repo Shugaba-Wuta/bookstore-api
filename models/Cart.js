@@ -100,11 +100,12 @@ cartSchema.methods.applyCoupon = async function (couponID, value, type, productI
     }
 }
 
-cartSchema.pre(["validate", "update"], async function ensureFinalPrice(next) {
+cartSchema.pre(["validate", "update", "save"], async function ensureFinalPrice(next) {
     if (!await this.populated("products.productID")) {
         await this.populate("products.productID")
     }
     this.products.forEach((product) => {
+        console.log("products: ",)
         const discountAmount = product.quantity * product.productID.price * (product.productID.discount) / 100
         const totalCost = (product.productID.price + product.productID.shippingFee) * product.quantity
         product.finalPrice = (totalCost - discountAmount - product.couponValue).toFixed(2)
