@@ -117,7 +117,7 @@ cartSchema.pre(["validate", "update"], async function ensureFinalPrice(next) {
 })
 cartSchema.pre("validate", async function mergeCart(next) {
 
-    /* Middleware ensures that all items in the cart have unique productID */
+    /* Middleware ensures that all items in the cart have unique productID  */
     // if (!await this.populated("products.productID")) {
     //     await this.populate("products.productID")
     // }
