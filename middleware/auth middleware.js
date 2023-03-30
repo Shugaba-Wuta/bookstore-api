@@ -36,7 +36,7 @@ const assignSessionID = async (req, res, next) => {
     if (!req.signedCookies.cookieToken) {
       const cookieToken = await createToken(payload, "refresh")
       const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
-      res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: false, overwrite: true })
+      res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: true, overwrite: true })
     }
 
   }
