@@ -1,6 +1,7 @@
 const express = require("express")
 // const guard = require("express-jwt-permissions")()
 const { initiatePay, getOrders, getOrder, updateOrder, createOrder, getSellerOrders, orderUpdateStatus, getTransactionDetail } = require("../controllers/order-controller")
+const { isPersonAuthorized } = require("../middleware/auth middleware")
 
 
 
@@ -11,13 +12,13 @@ const router = express.Router()
 
 
 router.route("/user/:userID")
-    .get(getOrders).post(createOrder)
+    .get(isPersonAuthorized, getOrders).post(isPersonAuthorized, createOrder)
 
-router.route("/:orderID").get(getOrder).patch(updateOrder)
+router.route("/:orderID").get(getOrder).patch(isPersonAuthorized, updateOrder)
 
-router.post("/:orderID/initiatePayment", initiatePay)
-router.post("/seller/update", orderUpdateStatus)
-router.post("/seller/view", getSellerOrders)
+router.post("/:orderID/initiatePayment", isPersonAuthorized, initiatePay)
+router.post("/seller/update", isPersonAuthorized, orderUpdateStatus)
+router.post("/seller/view", isPersonAuthorized, getSellerOrders)
 router.post("/payment/details", getTransactionDetail)
 
 

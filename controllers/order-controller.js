@@ -23,10 +23,9 @@ const createOrder = async (req, res) => {
     if (!personID) {
         throw new BadRequestError("Required parameter: 'personID' is missing")
     }
-    const cart = await Cart.findOne({
-        _id: cartID, active: true, personID
-    }).populate("products.productID")
-    if (!cart) {
+    const cart = await Cart.filterDeletedProd(cartID)
+
+    if (!cart || !cart.active || cart.personID != personID) {
         throw new NotFoundError("Cart does not exist")
     }
 
@@ -41,9 +40,12 @@ const createOrder = async (req, res) => {
 
     let order = await Order.findOne({ cartID, personID }).populate({ path: "orderItems.productID", select: productPopulateSelect })
 
-    // if (order) {
-    //     throw new BadRequestError("Order already exists, consider updating order")
-    // }
+    if (order) {
+        const newOrder = await order.save()
+        return res.status(StatusCodes.OK).json({
+            message: "Order created", result: newOrder, success: true
+        })
+    }
     //Ensure deliveryAddress or default address.
     const address = user.addresses.filter((address) => {
         return address.default
