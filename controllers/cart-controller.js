@@ -113,7 +113,6 @@ const viewAllCarts = async (req, res) => {
     if (!SUPER_ROLES.includes(req.user.role)) {
         active = true
         allCarts = await Cart.findOne({ $or: [{ personID, active }, { sessionID, active }] })//.populate("products.productID")
-        allCarts.products.pull()
         if (allCarts) {
             allCarts = await Cart.filterDeletedProd(String(allCarts._id))
         }

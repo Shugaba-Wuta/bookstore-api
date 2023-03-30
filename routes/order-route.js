@@ -4,10 +4,6 @@ const { initiatePay, getOrders, getOrder, updateOrder, createOrder, getSellerOrd
 const { isPersonAuthorized } = require("../middleware/auth middleware")
 
 
-
-
-
-
 const router = express.Router()
 
 
