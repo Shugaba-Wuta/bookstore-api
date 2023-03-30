@@ -15,7 +15,7 @@ const assignSessionID = async (req, res, next) => {
     console.log("Bearer")
     token = authHeader.split(' ')[1];
   }
-  // check cookies
+  // check cookies  
   else if (req.signedCookies.cookieToken) {
     token = req.signedCookies.cookieToken;
   }
