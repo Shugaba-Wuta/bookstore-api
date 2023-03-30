@@ -86,7 +86,7 @@ const getASingleSeller = async (req, res) => {
         throw new BadRequestError(`Please provide a valid sellerID `)
     }
     const dbSeller = await Seller.findOne({ _id: sellerID, deleted: false })
-        .select(FORBIDDEN_FIELDS).populate(["addresses", "bankAccounts", "documents"])
+    //.select(FORBIDDEN_FIELDS).populate(["addresses", "bankAccounts", "documents"])
     if (!dbSeller) {
         throw new NotFoundError(`No user with ID: ${sellerID}`)
     }
