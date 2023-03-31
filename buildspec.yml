@@ -3,13 +3,13 @@ phases:
     pre_build:
         commands:
             - echo "Entered the pre-build phase"
+            - ./scripts/make-cookies-secure.sh
+            - echo "make-cookies-secure ran"
             - npm install
-            - npm update
     build:
         commands:
             - echo "Entered the build phase"
             - npm start
-
     post_build:
         commands:
             - echo "Entered the post-build phase"
