@@ -116,7 +116,7 @@ sellerSchema.virtual("books", {
 })
 sellerSchema.virtual("averageRating").get(function () {
     //Get all verifiedRatings  from verified purchase. Calculate their average.
-    const ratings = Object.values(this.verifiedRatings)
+    const ratings = Object.values(this.verifiedRatings || [])
     if (ratings.length) {
         return { rating: ratings.reduce((a, b) => a + b, 0) / ratings.length, reviewers: ratings.length }
     }
