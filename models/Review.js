@@ -118,7 +118,6 @@ ReviewSchema.methods.updateSellerRating = async function () {
     sellerRating.verifiedRatings[String(this._id)] = this.sellerRating
     const _ = await this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
       { $set: { ...sellerRating } })
-    console.log(_)
   }
 
 

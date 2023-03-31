@@ -96,7 +96,6 @@ cartSchema.methods.applyCoupon = async function (couponID, value, type, productI
             if (item.productID._id == productID)
                 item.couponValue += couponValue
         })
-
     }
 }
 

@@ -98,7 +98,6 @@ const updateCartItem = async (req, res) => {
     })
     if (!itemsExists.length) {
         await Cart.findByIdAndDelete(String(existingCart._id))
-        console.log(itemsExists.length)
         return res.status(StatusCodes.OK).json({ success: true, message: "Cart has been deleted", result: null })
     }
     let result = await existingCart.save()
