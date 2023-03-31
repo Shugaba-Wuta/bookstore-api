@@ -2,7 +2,7 @@
 const { Book } = require("../models")
 const { BadRequestError, NotFoundError } = require("../errors")
 const { StatusCodes } = require("http-status-codes")
-const { PRODUCT_FORBIDDEN_FIELDS } = require("../config/app-data")
+const { PRODUCT_FORBIDDEN_FIELDS, SUPER_ROLES } = require("../config/app-data")
 const { RESULT_LIMIT } = require("../config/app-data")
 const { uploadFileToS3 } = require("../utils/generic-utils")
 const crypto = require("crypto")
@@ -139,13 +139,15 @@ const getSingleBook = async (req, res) => {
     if (!bookInDB) {
         throw new NotFoundError("bookID does not point to any resource")
     } else {
-        bookInDB.views += 1
-        await bookInDB.save()
+        if (!SUPER_ROLES.includes(req.user.role) || req.user.role !== String(bookInDB.seller)) {
+            bookInDB.views += 1
+            await Book.updateOne({ _id: bookID }, { $inc: { views: 1 } })
+        }
     }
     return res.status(StatusCodes.OK).json({
         message: "Fetched a single book",
         success: true,
-        result: [bookInDB]
+        result: bookInDB
     })
 }
 
