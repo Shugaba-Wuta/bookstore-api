@@ -86,7 +86,8 @@ const orderSchema = new mongoose.Schema({
   },
   prevRef: { type: [String] },
   deleted: { type: Boolean, default: false },
-  deletedOn: { type: Date }
+  deletedOn: { type: Date },
+  orderError: [{ type: String }]
 },
   {
     timestamps: true,
@@ -122,11 +123,14 @@ orderSchema.virtual("meta").get(async function () {
     //Check if the path: orderItems.productID has been populated
     await this.populate("orderItems.productID")
   }
+  const thisDoc = this
   for await (const item of this.orderItems) {
     //Get default account detail for seller
     const defaultAccount = await this.model("BankAccount").findOne({ deleted: false, default: true, person: String(item.productID.seller) })
     if (!defaultAccount) {
-      throw new Conflict("Seller must have a default account")
+      thisDoc.orderError.push(`Seller of ${item.productID.seller} must have a default account`)
+      await thisDoc.save()
+      continue
     }
 
     splitPayDetails.push({ subaccount: defaultAccount.subaccount, share: (item.finalPrice).toFixed(2) * 100 })

@@ -51,7 +51,6 @@ const createOrder = async (req, res) => {
         return address.default
     })[0] //Get the element at index 0||undefined
     const newOrder = await new Order({ sessionID, cartID, personSchema: cart.personSchema, personID, ref: mongoose.Types.ObjectId(), deliveryAddress: address }).save()
-
     //Verify and apply coupon
     if (couponCode) {
         const { couponID, value, type } = await getCouponDetail({ code: couponCode, scope: "Purchase" }) || {}
@@ -172,6 +171,12 @@ const initiatePay = async (req, res) => {
         }
         order.prevRef.push(order.ref)
     }
+    //Check if order has errors
+    // STRICTLY FOR DEVELOPMENT PURPOSES
+    if (order.error.length) {
+        throw new Conflict("Orders cannot be completed. Check `order.error` for errors")
+    }
+
     order.ref = new mongoose.Types.ObjectId()
     //Order has not successfully been paid for. (Re-)initiate the order where necessary.
     const metaInfo = await order.meta //get most recent meta data from Order virtuals.
