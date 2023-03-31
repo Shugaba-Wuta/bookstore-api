@@ -65,7 +65,6 @@ const login = async (req, res) => {
                 fullName: person.fullName,
                 role: person.role,
                 sessionID: oldPayload.sessionID,
-                permissions: person.permissions
             }
         }
 
@@ -80,7 +79,6 @@ const login = async (req, res) => {
                 userID: String(person._id),
                 role: person.role,
                 sessionID: session._id,
-                permissions: person.permissions
             }
         }
     }
@@ -116,7 +114,7 @@ const newTokenFromRefresh = async (req, res) => {
         throw new UnauthenticatedError("Login required")
     }
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
-    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role, permissions: payload.user.permissions } }
+    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role } }
     if (payload && payload.user.userID) {
         const newToken = await createToken(user)
         return res.json({ token: newToken })

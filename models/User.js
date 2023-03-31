@@ -5,7 +5,6 @@ const mongooseHidden = require("mongoose-hidden")({ defaultHidden: { password: t
 
 
 const GENDER = ["M", "F", null]
-const { DEFAULT_USER_PERMISSION } = require("../config/app-data")
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -62,11 +61,7 @@ const userSchema = new mongoose.Schema({
     default: "user",
     trim: true
   },
-  permissions: {
-    type: [String],
-    trim: true,
-    default: DEFAULT_USER_PERMISSION,
-  },
+
   deleted: {
     type: Boolean,
     default: false,

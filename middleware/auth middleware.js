@@ -15,7 +15,7 @@ const assignSessionID = async (req, res, next) => {
     console.log("Bearer")
     token = authHeader.split(' ')[1];
   }
-  // check cookies  
+  // check cookies
   else if (req.signedCookies.cookieToken) {
     token = req.signedCookies.cookieToken;
   }
@@ -32,7 +32,7 @@ const assignSessionID = async (req, res, next) => {
       userAgent: req.get('user-agent'),
       IP: req.ip,
     }).save()
-    payload = { user: { sessionID: String(newSession._id), userID: null, role: newSession.userModel.toLowerCase(), fullName: null, permissions: [] } }
+    payload = { user: { sessionID: String(newSession._id), userID: null, role: newSession.userModel.toLowerCase(), fullName: null } }
     if (!req.signedCookies.cookieToken) {
       const cookieToken = await createToken(payload, "refresh")
       const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
@@ -45,7 +45,6 @@ const assignSessionID = async (req, res, next) => {
     role: payload.user.role,
     fullName: payload.user.fullName,
     sessionID: payload.user.sessionID,
-    permissions: payload.user.permissions
   };
   console.log("Session ID: ", payload.user.sessionID)
   next()
@@ -67,13 +66,12 @@ const authenticateUser = async (req, res, next) => {
   try {
     var payload = isTokenValid(token);
 
-    // Attach the user and his permissions to the req object
+    // Attach the user to the req object
     req.user = {
       userID: payload.user.userID,
       role: payload.user.role,
       fullName: payload.user.fullName,
       sessionID: payload.user.sessionID,
-      permissions: payload.user.permissions
     };
 
   } catch (error) {

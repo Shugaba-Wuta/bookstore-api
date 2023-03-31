@@ -81,19 +81,18 @@ const registerNewSeller = async (req, res) => {
             })
 }
 const getASingleSeller = async (req, res) => {
-    return res.status(StatusCodes.OK).json({ message: "fetched Seller", status: true, result: "dbSeller" })
-    // const { sellerID } = req.params
-    // if (!sellerID) {
-    //     throw new BadRequestError(`Please provide a valid sellerID `)
-    // }
-    // const dbSeller = await Seller.findOne({ _id: sellerID, deleted: false })
-    // //.select(FORBIDDEN_FIELDS).populate(["addresses", "bankAccounts", "documents"])
-    // if (!dbSeller) {
-    //     throw new NotFoundError(`No user with ID: ${sellerID}`)
-    // }
+    const { sellerID } = req.params
+    if (!sellerID) {
+        throw new BadRequestError(`Please provide a valid sellerID `)
+    }
+    const dbSeller = await Seller.findOne({ _id: sellerID, deleted: false })
+    //.select(FORBIDDEN_FIELDS).populate(["addresses", "bankAccounts", "documents"])
+    if (!dbSeller) {
+        throw new NotFoundError(`No user with ID: ${sellerID}`)
+    }
 
 
-    // return res.status(StatusCodes.OK).json({ message: "fetched Seller", status: true, result: [dbSeller] })
+    return res.status(StatusCodes.OK).json({ message: "fetched Seller", status: true, result: [dbSeller] })
 }
 const updateASeller = async (req, res) => {
     //get sellerID from request parameter aka url

@@ -1,5 +1,4 @@
 const express = require("express")
-// const guard = require("express-jwt-permissions")()
 const { initiatePay, getOrders, getOrder, updateOrder, createOrder, getSellerOrders, orderUpdateStatus, getTransactionDetail } = require("../controllers/order-controller")
 const { isPersonAuthorized } = require("../middleware/auth middleware")
 
