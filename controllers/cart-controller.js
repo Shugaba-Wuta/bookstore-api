@@ -93,7 +93,14 @@ const updateCartItem = async (req, res) => {
             existingCart.applyCoupon(couponID, value, type, product.productID)
         }
     }
-
+    const itemsExists = existingCart.products.filter(item => {
+        return item.quantity > 0
+    })
+    if (!itemsExists.length) {
+        await Cart.findByIdAndDelete(String(existingCart._id))
+        console.log(itemsExists.length)
+        return res.status(StatusCodes.OK).json({ success: true, message: "Cart has been deleted", result: null })
+    }
     let result = await existingCart.save()
     await result.populate("products.productID")
     res.status(StatusCodes.OK).json({ result: result, msg: "Successfully decreased quantity by 1", success: true })

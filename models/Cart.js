@@ -105,7 +105,6 @@ cartSchema.pre(["validate", "update", "save"], async function ensureFinalPrice(n
         await this.populate("products.productID")
     }
     this.products.forEach((product) => {
-        console.log("products: ",)
         const discountAmount = product.quantity * product.productID.price * (product.productID.discount) / 100
         const totalCost = (product.productID.price + product.productID.shippingFee) * product.quantity
         product.finalPrice = (totalCost - discountAmount - product.couponValue).toFixed(2)
