@@ -41,10 +41,11 @@ const createOrder = async (req, res) => {
     let order = await Order.findOne({ cartID, personID }).populate({ path: "orderItems.productID", select: productPopulateSelect })
 
     if (order) {
-        const newOrder = await order.save()
-        return res.status(StatusCodes.OK).json({
-            message: "Order created", result: newOrder, success: true
-        })
+        await Order.findByIdAndDelete(String(order._id))
+        // const newOrder = await order.save()
+        // return res.status(StatusCodes.OK).json({
+        //     message: "Order created", result: newOrder, success: true
+        // })
     }
     //Ensure deliveryAddress or default address.
     const address = user.addresses.filter((address) => {
@@ -173,8 +174,8 @@ const initiatePay = async (req, res) => {
     }
     //Check if order has errors
     // STRICTLY FOR DEVELOPMENT PURPOSES
-    if (order.error.length) {
-        throw new Conflict("Orders cannot be completed. Check `order.error` for errors")
+    if (order.orderError.length) {
+        throw new Conflict("Orders cannot be completed because of the following errors: " + order.orderError.join(", "))
     }
 
     order.ref = new mongoose.Types.ObjectId()

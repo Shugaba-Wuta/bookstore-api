@@ -140,7 +140,7 @@ orderSchema.virtual("meta").get(async function () {
   return { splitPayDetails, productQuantity, orderID: String(this._id) }
 
 })
-orderSchema.pre("validate", async function populateOrderItemsFromCart(next) {
+orderSchema.pre(["validate"], async function populateOrderItemsFromCart(next) {
   const cart = await this.model("Cart").findOne({ _id: this.cartID, person: this.personID }).lean()
   const orderItemsID = new Set(this.orderItems.map(item => { return String(item.productID._id) }))
   cart.products.forEach((item) => {
