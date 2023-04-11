@@ -53,7 +53,7 @@ const login = async (req, res) => {
     const oldPayload = req.user
     let payload
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
-    if (oldPayload) {
+    if (oldPayload && String(person._id) === oldPayload.userID) {
         const personModel = role[0].toUpperCase() + role.slice(1)
         //TODO #10 Log occurrence where personModel !== oldPayload.
         await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
@@ -61,10 +61,7 @@ const login = async (req, res) => {
         await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null, active: true }, { personID: person._id, personSchema: personModel })
         payload = {
             user: {
-                userID: String(person._id),
-                fullName: person.fullName,
-                role: person.role,
-                sessionID: oldPayload.sessionID,
+                ...oldPayload
             }
         }
 
@@ -97,7 +94,6 @@ const login = async (req, res) => {
 }
 
 const newTokenFromRefresh = async (req, res) => {
-
     //Look for token (bearer or refresh)
     // check header
     let token
@@ -114,7 +110,7 @@ const newTokenFromRefresh = async (req, res) => {
         throw new UnauthenticatedError("Login required")
     }
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY)
-    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role } }
+    const user = { user: { name: payload.user.fullName, userID: payload.user.userID, role: payload.user.role, sessionID: payload.user.sessionID } }
     if (payload && payload.user.userID) {
         const newToken = await createToken(user)
         return res.json({ token: newToken })

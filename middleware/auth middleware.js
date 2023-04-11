@@ -28,6 +28,9 @@ const assignSessionID = async (req, res, next) => {
     if (authHeader && authHeader.startsWith('Bearer')) {
       throw new CustomError.BadRequestError(err)
     }
+    if (token && err) {
+      throw new CustomError.BadRequestError(err)
+    }
     const newSession = await new Session({
       userAgent: req.get('user-agent'),
       IP: req.ip,
