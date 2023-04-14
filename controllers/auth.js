@@ -119,7 +119,7 @@ const newTokenFromRefresh = async (req, res) => {
     throw new UnauthenticatedError("Login required")
 }
 const logout = async (req, res) => {
-    res.clearCookie("cookieToken")
+    res.clearCookie("cookieToken", { signed: true, httpOnly: true, sameSite: "none", secure: process.env.NODE_ENV === "development" ? true : false, overwrite: true })
     if (!req.user.userID) {
         throw new UnauthenticatedError("User not logged in")
     }
