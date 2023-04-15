@@ -78,7 +78,7 @@ const getAllBooks = async (req, res) => {
     let findQuery = Book.find(findParams)
 
     if (fields) {
-        let finalQueryFields = {}
+        let finalQueryFields = { seller: 1 }
         fields.split(",").forEach(field => {
             field = field.trim()
             if (!(Object.keys(PRODUCT_FORBIDDEN_FIELDS).includes(field))) {
@@ -129,6 +129,7 @@ const getSingleBook = async (req, res) => {
                 return !(Object.keys(PRODUCT_FORBIDDEN_FIELDS).includes(field))
             })
         if (finalQueryFields.length > 0) {
+            finalQueryFields = [...finalQueryFields, "seller"]
             findQuery.select(finalQueryFields.reduce((a, v) => ({ ...a, [v]: 1 }), {}))
         }
     } else {
@@ -138,11 +139,13 @@ const getSingleBook = async (req, res) => {
     const bookInDB = await findQuery
     if (!bookInDB) {
         throw new NotFoundError("bookID does not point to any resource")
-    } else {
-        if (!SUPER_ROLES.includes(req.user.role) || req.user.role !== String(bookInDB.seller)) {
-            bookInDB.views += 1
-            await Book.updateOne({ _id: bookID }, { $inc: { views: 1 } })
-        }
+    }
+    //Increment book views if and only if it is not viewed by admin user of the book.
+    if (!SUPER_ROLES.includes(req.user.role) && (req.user.userID !== String(bookInDB.seller))) {
+        console.log("I can inc views", "role: ", req.user.role, "| sellerID: ", bookInDB.seller)
+        console.log(req.user)
+        await Book.updateOne({ _id: bookID }, { $inc: { views: 1 } })
+
     }
     return res.status(StatusCodes.OK).json({
         message: "Fetched a single book",
