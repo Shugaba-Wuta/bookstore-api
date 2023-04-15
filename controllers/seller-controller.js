@@ -378,10 +378,13 @@ const deleteBankInfo = async (req, res) => {
 
 const getAllSellerBanks = async (req, res) => {
     const { sellerID } = req.params
-    const { deleted } = req.body
+    var { deleted = false } = req.query
 
     if (!sellerID) {
         throw new BadRequestError("sellerID is a required field")
+    }
+    if (!SUPER_ROLES.includes(req.user.role)) {
+        deleted = false
     }
     const allBankInfo = await BankAccount.find({ person: sellerID, deleted })
     res.status(StatusCodes.OK).json({ result: allBankInfo, message: "Successfully returned bank accounts", success: true })
