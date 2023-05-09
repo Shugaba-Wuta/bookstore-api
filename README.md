@@ -30,7 +30,8 @@ Start the server
 
 ```bash
   npm run dev
-```
+``` 
+Go to `localhost:{PORT_NUMBER}/api/v1/docs` to view documentation on local server.
 
 ## Tech Stack
 
