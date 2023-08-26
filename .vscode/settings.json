@@ -1,0 +1,23 @@
+{
+    "cSpell.words": [
+        "bankaccounts",
+        "Ecobank",
+        "IBTC",
+        "issn",
+        "Jaiz",
+        "LGBTQ",
+        "oayas",
+        "oayastech",
+        "paystack",
+        "Providus",
+        "Stanbic",
+        "subaccount",
+        "virtuals",
+        "Wema",
+        "Wuta"
+    ] ,
+    "eslint.enable": true,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "live"
+    ],
+}
