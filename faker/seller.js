@@ -32,6 +32,6 @@ const addSellersToDB = (async (number) => {
     }
     console.log(`Added ${number} to DB`)
 
-})(5)
+})(25)
 
 module.exports = addSellersToDB

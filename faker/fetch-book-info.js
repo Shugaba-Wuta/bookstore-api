@@ -13,7 +13,7 @@ const writer = function (book) {
             throw err
         }
         fs.fstat(fd, function (err, stats) {
-            var pos
+            var pos, json_load
             if (err) throw err
             if (stats.size > 2) {
                 json_load = new Buffer("," + book, "utf-8")
@@ -23,7 +23,8 @@ const writer = function (book) {
                 pos = 0
             }
 
-            fs.write(fd, json_load, 0, json_load.length, pos, function (err, written, buffer) {
+            // eslint-disable-next-line no-unused-vars
+            fs.write(fd, json_load, 0, json_load.length, pos, function (err, _written, _buffer) {
                 if (err) throw err
                 fs.close(fd, function () { })
             })
@@ -31,13 +32,14 @@ const writer = function (book) {
     })
 }
 
-const getBookInfoAndSave = async function (book, index) {
+// eslint-disable-next-line no-unused-vars
+const getBookInfoAndSave = async function (book, _index) {
     try {
         //retrieve book info
         const config = { headers: { keepAlive: true } }
         var response = (await axios.get(URL + book.ISBN13, config))
         if (!response.data.items) {
-            console.log(index, " Empty items response")
+            // console.log(index, " Empty items response")
             return null
         }
         response = response.data.items[0]
@@ -60,7 +62,7 @@ const getBookInfoAndSave = async function (book, index) {
         return book
 
     } catch (err) {
-        console.log(index, " API fetch error")
+        // console.log(index, " API fetch error")
         return null
     }
 

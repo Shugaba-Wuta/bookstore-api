@@ -18,7 +18,7 @@ const createBook = async (limit) => {
     getSellerIDList().then(async sellerList => {
         const dbBooks = []
         let index = 0
-        for await (let book of allBooks) {
+        for await (let book of allBooks.slice(await Book.find().countDocuments() + 1)) {
             if (index <= limit) {
                 index += 1
                 book.dimension = {
@@ -43,7 +43,7 @@ const createBook = async (limit) => {
                 break
             }
         }
-        await Book.insertMany(dbBooks)
+        await Book.create(dbBooks)
 
     })
 
@@ -53,6 +53,6 @@ const createBook = async (limit) => {
 
 const addBooksToDB = (async (number) => {
     createBook(number)
-})(50)
+})(500)
 
 module.exports = addBooksToDB
