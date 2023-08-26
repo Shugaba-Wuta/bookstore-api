@@ -13,15 +13,17 @@ const uploadFileToS3 = async (files, bucket = process.env.AWS_GEN_S3_BUCKET) => 
 
     for await (const file of files) {
         try {
+            let name = file.name
+            name = "public/" + name.replaceAll(/-/g, "/")
             await s3Client.send(new PutObjectCommand({
                 Bucket: bucket,
-                Key: file.name,
-                Body: file.data
+                Key: name,
+                Body: file.data,
+                ContentType: file.mimetype
             }))
-            publicUrl = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${file.name}`
+            publicUrl = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${name}`
             urls.push({ url: publicUrl, uploadedAt: Date.now() })
         } catch (err) {
-            //log
             console.log(err)
             throw err
 
@@ -80,8 +82,30 @@ const addOrDecreaseProductQuantity = async (productQuantity = [], operation = "i
 
 
 }
+const formMongoURI = () => {
+    const MONGO_USER = process.env.MONGO_USER || ""
+    const MONGO_PASSWORD = process.env.MONGO_PASSWORD || ""
+    const MONGO_IP = process.env.MONGO_IP || ""
+    const MONGO_PORT = process.env.MONGO_PORT || ""
+    const MONGO_PATH = process.env.MONGO_PATH || ""
+
+
+    var MONGO_URL
+
+    if (!MONGO_PORT) {
+        MONGO_URL = `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_IP}${MONGO_PATH}`
+    }
+    else if (MONGO_PORT) {
+        MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_IP}:${MONGO_PORT}${MONGO_PATH}?retryWrites=true&w=majority`
+    }
+    MONGO_URL = MONGO_URL.replace(/\s/, "").replace(":@", "")
+    if (MONGO_PASSWORD && !MONGO_USER || !MONGO_PASSWORD && MONGO_USER) {
+        throw new Error("MONGO_PASSWORD and MONGO_USER variables not set")
+    }
+    return MONGO_URL
+}
 
 
 
 
-module.exports = { uploadFileToS3, limitHandler, deleteFilesFromS3, addOrDecreaseProductQuantity }
+module.exports = { uploadFileToS3, limitHandler, deleteFilesFromS3, addOrDecreaseProductQuantity, formMongoURI }

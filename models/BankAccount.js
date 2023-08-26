@@ -75,6 +75,10 @@ const bankInfoSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    accountName: {
+        type: String,
+        required: [true, "accountName is required"]
+    }
 
 }, {
     timestamps: true,

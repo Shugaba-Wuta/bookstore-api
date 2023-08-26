@@ -58,7 +58,7 @@ const getAllUsers = async (req, res) => {
 const registerUser = async (req, res) => {
     // User sign up endpoint.
     const { firstName, lastName, middleName, email, password } = req.body
-    const dbUser = await User.findOne({ email: email.toLowerCase() })
+    const dbUser = await User.findOne({ email: email.trim().toLowerCase() })
     if (dbUser) {
         throw new Conflict("email already exists.You may consider logging in")
     }
@@ -101,8 +101,8 @@ const updateUser = async (req, res) => {
             throw new BadRequestError("Avatar must be a single file")
         }
         const docs = avatarArray.map(doc => {
-            var name = [imagePath, crypto.randomBytes(12).toString("hex"), path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex"), path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrl = await uploadFileToS3(docs)
         if (publicUrl.length > 0) {

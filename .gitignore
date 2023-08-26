@@ -108,4 +108,3 @@ request-sample/
 *uploads/
 *.csv
 secret*.json
-.vscode

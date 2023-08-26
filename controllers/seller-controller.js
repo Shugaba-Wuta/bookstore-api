@@ -123,8 +123,8 @@ const updateASeller = async (req, res) => {
         }
         const docs = avatarArray.map(doc => {
             const imagePath = ["uploads", "seller", sellerID].join("-")
-            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrl = await uploadFileToS3(docs)
         if (publicUrl.length) {
@@ -169,8 +169,8 @@ const addDocsToSeller = async (req, res) => {
     if (govtIssuedID) {
         const govtIssuedIDArray = (govtIssuedID instanceof Array) ? govtIssuedID : [govtIssuedID]
         const docs = govtIssuedIDArray.map(doc => {
-            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrls = await uploadFileToS3(docs)
         if (publicUrls.length) {
@@ -184,8 +184,8 @@ const addDocsToSeller = async (req, res) => {
     if (pictures) {
         const picturesArray = (pictures instanceof Array) ? pictures : [pictures]
         let docs = picturesArray.map(doc => {
-            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrls = await uploadFileToS3(docs)
         for await (const url of publicUrls) {
@@ -196,8 +196,8 @@ const addDocsToSeller = async (req, res) => {
     if (others) {
         const othersArray = (others instanceof Array) ? others : [others]
         let docs = othersArray.map(doc => {
-            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrls = await uploadFileToS3(docs)
         for await (const url of publicUrls) {

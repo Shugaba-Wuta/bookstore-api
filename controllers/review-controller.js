@@ -29,8 +29,8 @@ const createAReview = async (req, res) => {
         const picturesArray = (pictures instanceof Array) ? pictures : [pictures]
         const docs = picturesArray.map(doc => {
             const imagePath = ["uploads", "reviews", product, person].join("-")
-            var name = [imagePath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [imagePath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         })
         let publicUrl = await uploadFileToS3(docs)
         if (publicUrl.length) {

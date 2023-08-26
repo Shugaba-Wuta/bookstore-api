@@ -6,7 +6,7 @@ const { User, Session, Staff, Seller, TOTP, Cart } = require("../models")
 const { StatusCodes } = require("http-status-codes")
 const { createToken } = require("../utils/auth")
 const { sendEmail } = require("../mailing/utils")
-const { MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP } = require("../config/app-data")
+const { MAX_OTP_TIME_IN_SECONDS, TIME_TOLERANCE_FOR_OTP, DEVELOPMENT_ENV } = require("../config/app-data")
 const RESET_PASSWORD = "RESET PASSWORD"
 const RESET_EMAIL = "RESET EMAIL"
 
@@ -55,7 +55,6 @@ const login = async (req, res) => {
     //if token exists, update the Session schema of the token to include userID, otherwise create a new session
     if (oldPayload && String(person._id) === oldPayload.userID) {
         const personModel = role[0].toUpperCase() + role.slice(1)
-        //TODO #10 Log occurrence where personModel !== oldPayload.
         await Session.findOneAndUpdate({ _id: oldPayload.sessionID }, { user: person._id, userModel: personModel, role })
         //Update cart personID with with the authenticated userID
         await Cart.updateMany({ sessionID: oldPayload.sessionID, personID: null, active: true }, { personID: person._id, personSchema: personModel })
@@ -84,7 +83,7 @@ const login = async (req, res) => {
     const token = await createToken(payload)
     const cookieToken = await createToken(payload, "refresh")
     const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60 * 1000 // set to expire in 3 days by default.
-    res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: false, overwrite: true })
+    res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: process.env.NODE_ENV === DEVELOPMENT_ENV ? false : true, overwrite: true })
 
     const resBody = { accessToken: token, userID: payload.user.userID, verifiedEmail: person.verifiedEmail }
 
@@ -119,7 +118,7 @@ const newTokenFromRefresh = async (req, res) => {
     throw new UnauthenticatedError("Login required")
 }
 const logout = async (req, res) => {
-    res.clearCookie("cookieToken", { signed: true, httpOnly: true, sameSite: "none", secure: process.env.NODE_ENV === "development" ? true : false, overwrite: true })
+    res.clearCookie("cookieToken", { signed: true, httpOnly: true, sameSite: "none", secure: process.env.NODE_ENV === DEVELOPMENT_ENV ? false : true, overwrite: true })
     if (!req.user.userID) {
         throw new UnauthenticatedError("User not logged in")
     }

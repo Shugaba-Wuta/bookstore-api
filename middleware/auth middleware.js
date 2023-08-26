@@ -4,7 +4,7 @@ const ms = require("ms")
 
 const { UnauthorizedError } = require("../errors")
 const { isTokenValid, createToken } = require('../utils/auth');
-const { SUPER_ROLES } = require("../config/app-data")
+const { SUPER_ROLES, DEVELOPMENT_ENV } = require("../config/app-data")
 
 const assignSessionID = async (req, res, next) => {
   let token;
@@ -39,7 +39,7 @@ const assignSessionID = async (req, res, next) => {
     if (!req.signedCookies.cookieToken) {
       const cookieToken = await createToken(payload, "refresh")
       const cookieDuration = ms(process.env.COOKIE_REFRESH_DURATION) || 3 * 24 * 60 * 60
-      res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: false, overwrite: true })
+      res.cookie("cookieToken", cookieToken, { maxAge: cookieDuration, signed: true, httpOnly: true, sameSite: "none", secure: process.env.NODE_ENV === DEVELOPMENT_ENV ? false : true, overwrite: true })
     }
 
   }

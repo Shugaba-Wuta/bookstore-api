@@ -142,8 +142,6 @@ const getSingleBook = async (req, res) => {
     }
     //Increment book views if and only if it is not viewed by admin user of the book.
     if (!SUPER_ROLES.includes(req.user.role) && (req.user.userID !== String(bookInDB.seller))) {
-        console.log("I can inc views", "role: ", req.user.role, "| sellerID: ", bookInDB.seller)
-        console.log(req.user)
         await Book.updateOne({ _id: bookID }, { $inc: { views: 1 } })
 
     }
@@ -160,8 +158,8 @@ const registerBook = async (req, res) => {
     const imagesArray = (images instanceof Array) ? images : [images]
     if (images) {
         const docs = imagesArray.map(doc => {
-            var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [bookPath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
         });
         var publicUrls = await uploadFileToS3(docs)
         Object.keys(NON_EDITABLE_FIELDS).forEach(field => {
@@ -189,8 +187,8 @@ const updateBook = async (req, res) => {
         let bookPath = ["uploads", "sellers", req.user.userID].join("-")
         const imagesArray = (images instanceof Array) ? images : [images]
         const docs = imagesArray.map(doc => {
-            var name = [bookPath, crypto.randomBytes(12).toString("hex") + path.extname(doc.name)].join("-")
-            return { name, data: doc.data }
+            var name = [bookPath, crypto.randomBytes(6).toString("hex") + path.extname(doc.name)].join("-")
+            return { name, data: doc.data, mimetype: doc.mimetype }
 
         });
         let publicUrls = await uploadFileToS3(docs)

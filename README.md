@@ -1,4 +1,12 @@
-# Bookstore API
+
+# Book E-commerce API
+
+A RESTful API created using Node & Express-JS
+
+
+## Documentation
+
+[Documentation](https://books9ja.com/api/v1/docs)
 
 
 ## Environment Variables
@@ -11,7 +19,7 @@ To run this project, you will need to fill appropriate values for .env.sample fi
 Clone the project
 
 ```bash
-  git clone https://github.com/shugaba-wuta/bookstore-api.git
+  git clone https://github.com/oaystech/bookstore-api.git
 ```
 
 Go to the project directory
@@ -30,9 +38,10 @@ Start the server
 
 ```bash
   npm run dev
-``` 
-Go to `localhost:{PORT_NUMBER}/api/v1/docs` to view documentation on local server.
+```
+
 
 ## Tech Stack
 
 **Server:** Node, Express, MongooseJS, Swagger-UI
+

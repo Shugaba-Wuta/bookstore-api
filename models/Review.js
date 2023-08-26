@@ -104,8 +104,6 @@ ReviewSchema.pre(["validate", "save"], async function getSellerID(next) {
   const book = await this.model("Book").findOne({ _id: this.product })
   if (book) {
     this.seller = book.seller
-    console.log("SELLER FROM BOOK")
-
   }
 
 
@@ -116,7 +114,7 @@ ReviewSchema.methods.updateSellerRating = async function () {
   if (this.verifiedBuyer && this.seller && this.sellerRating) {
     let sellerRating = { verifiedRatings: {} }
     sellerRating.verifiedRatings[String(this._id)] = this.sellerRating
-    const _ = await this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
+    await this.model("Seller").findOneAndUpdate({ _id: this.seller, deleted: false },
       { $set: { ...sellerRating } })
   }
 

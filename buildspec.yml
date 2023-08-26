@@ -7,8 +7,6 @@ phases:
     build:
         commands:
             - echo "Entered the build phase"
-            - ./scripts/make-cookies-secure.sh
-            - echo "make-cookies-secure ran "
     post_build:
         commands:
             - echo "Entered the post-build phase"

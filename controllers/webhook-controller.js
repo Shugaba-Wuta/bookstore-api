@@ -1,7 +1,6 @@
 const { StatusCodes } = require("http-status-codes")
 const { Order, Book, Cart } = require("../models")
 const crypto = require("crypto")
-const { CustomAPIError } = require("../errors")
 
 const SUCCESSFUL_CHARGE = "charge.success"
 
